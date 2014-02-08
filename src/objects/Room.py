@@ -1,3 +1,5 @@
+##Authored by Brendan Moriarty (github:Moriartyb)
+
 class Room(object):
     ##
     # Passes in objects to be placed within the room.
@@ -14,13 +16,20 @@ class Room(object):
         self.furniture = furniture  # key is a tuple coordinate(?), value is object to be placed in room.
         self.doors = doors
 
-    def addFurniture(self):
-        
     def spawnObjects(self):
+        """
+        Spawns all objects that are currently in the furniture dictionary
+        """
         for obj in self.furniture:
             placeFurniture(self.furniture[obj],obj[0],obj[1]
 
     def placeFurniture(furn, x, y):
+        """
+        Adds the furniture object to the dictionary and places it at a given coordinate
+        """
+        if(furn not in furniture):
+            furniture[(x,y)] = furn
+        
         pass
     def randomizeFurnitureLocations():
         pass
