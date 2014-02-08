@@ -1,5 +1,5 @@
 ##Authored by Brendan Moriarty (github:Moriartyb)
-
+import random
 class Room(object):
     ##
     # Passes in objects to be placed within the room.
@@ -31,14 +31,25 @@ class Room(object):
             furniture[(x,y)] = furn
 
         pass
-    def randomizeCoord(self):
+    def randomizeCoord(self, oldX, oldY):
         """
         generates a new coordinate, checks if it is already in the dictionary, 
         if not removes key and adds new key value pair with new coordinates
         """
 
+        oldCoord = (oldX, oldY)
+
+        x = random.randint(0, self.width)
+        y = random.randint(0, self.length)
+        newCoord = (x,y)
+        if(newCoord not in self.furniture):
+            self.furniture[newCoord] = self.furniture[oldCoord]
+            self.furniture.pop(oldCoord,None)
+        else:
+            randomizeCoord(oldX,oldY) # If the room was ever full this would totally break.... probably a bad idea
         pass
     def removeFurniture(furn, x, y):
+
         pass
 
 
