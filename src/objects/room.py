@@ -1,17 +1,16 @@
 ##Authored by Brendan Moriarty (github:Moriartyb)
 import random
-
 class Room(object):
     ##
     # Passes in objects to be placed within the room.
     ##
     def __init__(self, furniture={}):
-    """
-    Initializes a room object with the following attributes
-    Keyword arguments:
-    furniture -- a dictionary of furniture objects to be placed in the room
-               with a tuple key of coordinates for where it should be placed
-    """
+        """
+        Initializes a room object with the following attributes
+        Keyword arguments:
+        furniture -- a dictionary of furniture objects to be placed in the room
+        with a tuple key of coordinates for where it should be placed
+        """
 
         self.furniture = furniture  # key is a tuple coordinate(?), value is object to be placed in room.
 
@@ -51,8 +50,6 @@ class Room(object):
 
         pass
 
-
-        
 if __name__ == "__main__":
     room1104 = Room({(0,0),object})
     print room1104.furniture
