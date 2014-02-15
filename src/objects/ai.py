@@ -2,7 +2,7 @@ from config.handle_constants import retrieveConstants
 from unittest import TestCase, main
 
 
-class ai:
+class AI:
     # optimization = 0
     # stability = 0
     # complexity = 0
@@ -30,15 +30,16 @@ class ai:
 
 class TestAI(TestCase):
     def setUp(self):
-        self.ai = ai()
+        self.ai = AI()
 
     def test_init(self):
         defaults = retrieveConstants('aiDefaults')
-        self.assertEqual(self.optimization, defaults['optimization'])
-        self.assertEqual(self.stability, defaults['stability'])
-        self.assertEqual(self.complexity, defaults['complexity'])
-        self.assertEqual(self.theory, defaults['theory'])
-        self.assertEqual(self.implementation, defaults['implementation'])
+        self.assertIsNotNone(defaults)
+        self.assertEqual(self.ai.optimization, defaults['optimization'])
+        self.assertEqual(self.ai.stability, defaults['stability'])
+        self.assertEqual(self.ai.complexity, defaults['complexity'])
+        self.assertEqual(self.ai.theory, defaults['theory'])
+        self.assertEqual(self.ai.implementation, defaults['implementation'])
         pass
 
     def test_2(self):

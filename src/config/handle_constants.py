@@ -1,8 +1,11 @@
 from unittest import TestCase, main
-import json
+from json import loads
+from os import path
 
 constantsLoaded = False
 constants = {}
+
+directory = path.dirname(__file__)
 
 
 def retrieveConstants(key):
@@ -13,9 +16,9 @@ def retrieveConstants(key):
         except KeyError:
             return None
     try:
-        with open('constants.json', 'r') as constantsFile:
+        with open(directory + '/' + 'constants.json', 'r') as constantsFile:
             jsonConstantsString = constantsFile.read()
-        constants = json.loads(jsonConstantsString)
+        constants = loads(jsonConstantsString)
     except IOError as e:
         print "IOError: " + str(e)
     try:

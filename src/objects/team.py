@@ -1,5 +1,5 @@
 from unittest import TestCase, main
-from ai import ai
+from ai import AI
 
 
 class Team(object):
@@ -17,7 +17,7 @@ class Team(object):
         self.numMembers = len(members)
         self.teamNum = Team.teamCount
         Team.teamCount += 1
-        self.AI = ai()
+        self.ai = AI()
 
 
 class TestTeam(TestCase):
