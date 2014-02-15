@@ -10,12 +10,16 @@
 import SocketServer
 import sys
 import json
-from threading import Timer
+import select
+from threading import Timer, Lock
 
 turnObjects = None
 validTurns = 0
-maxPlayers = 0
+maxPlayers = 4
 currPlayers = 0
+maxDataSize = 1024
+timeLimit = 30
+turnLock = Lock()
 
 ##
 #   This class holds onto objects needed to run the game
@@ -29,9 +33,9 @@ class MMRunServer():
         maxPlayers = numPlayers
         turnObjects = [None for i in range(0, numPlayers)]
         server = MMServer(("localhost", 8080), TCPHandler)
-        # terminate with Ctrl-C
-        timer = Timer(1, self.timeup)
+        timer = Timer(timeLimit, self.timeup)
         timer.start()
+        # terminate with Ctrl-C
         try:
             server.serve_forever()
         except KeyboardInterrupt:
@@ -49,21 +53,35 @@ class TCPHandler(SocketServer.BaseRequestHandler):
         global currPlayers
         if(maxPlayers == currPlayers):
             return
-        currPlayers+=1
+        myPlayer = currPlayers
+        currPlayers += 1
+        self.request.setblocking(0)
         while 1:
-            data = self.request.recv(1024)
-            if not data:
+            ready = select.select([self.request], [], [], timeLimit)
+            data = '{}'
+            if ready[0]:
+                data = self.request.recv(maxDataSize)
+            if data == None:
                 break
-            print data
 
+            turnLock.acquire()
+            if validTurns != maxPlayers:
+                turnObjects[myPlayer] = data
+                validTurns += 1
+                if validTurns == maxPlayers:
+                    pass #send data to engine
+            turnLock.release()
+
+
+##
+#   Simple TCP server
 class MMServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     # Ctrl-C will cleanly kill all spawned threads
     daemon_threads = True
     # much faster rebinding
     allow_reuse_address = True
-    connectedClients = 0
     def __init__(self, server_address, RequestHandlerClass):
         SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
 if __name__ == "__main__":
-    runner = MMRunServer(1)
+    runner = MMRunServer(2)
