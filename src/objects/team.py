@@ -20,7 +20,7 @@ class Team(object):
         self.AI = ai()
 
 
-class TestPerson(TestCase):
+class TestTeam(TestCase):
     def setUp(self):
         pass
 
@@ -29,6 +29,7 @@ class TestPerson(TestCase):
 
     def test_2(self):
         pass
+
 if __name__ == "__main__":
     EightBL = Team("teamName", ["Hello", "Goodbye"])
     print EightBL.teamName

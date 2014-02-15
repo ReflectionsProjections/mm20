@@ -1,4 +1,5 @@
 from config.handle_constants import retrieveConstants
+from unittest import TestCase, main
 
 
 class ai:
@@ -11,89 +12,37 @@ class ai:
 
     def __init__(self):
         defaults = retrieveConstants('aiDefaults')
-        self.optimization = opt
-        self.stability = stab
-        self.complexity = comp
-        self.strategy = strat
-        self.theory = theo
-        self.implementation = impl
+        self.optimization = defaults['optimization']
+        self.stability = defaults['stability']
+        self.complexity = defaults['complexity']
+        self.theory = defaults['theory']
+        self.implementation = defaults['implementation']
 
-    def upOpt(self, opt):
-        self.optimization += opt
-    def upStab(self, stab):
-        self.stability += stab
-    def upComp(self, comp):
-        self.complexity += comp
-    def upStrat(self, strat):
-        self.strategy += strat
-    def upTheo(self, theo):
-        self.theory += theo
-    def upImpl(self, impl):
-        self.implementation += impl
+    def incrementAttribute(self, attribute, ammount):
+        self.__dict__[attribute] += ammount
 
-    def downOpt(self, opt):
-        self.optimization -= opt
-    def downStab(self, stab):
-        self.stability -= stab
-    def downComp(self, comp):
-        self.complexity -= comp
-    def downStrat(self, strat):
-        self.strategy -= strat
-    def downTheo(self, theo):
-        self.theory -= theo
-    def downImpl(self, impl):
-        self.implementation -= impl
+    def decrementAttribute(self, attribute, ammount):
+        self.__dict__[attribute] -= ammount
 
-    def setOpt(self, opt):
-        self.optimization = opt
-    def setStab(self, stab):
-        self.stability = stab
-    def setComp(self, comp):
-        self.complexity = comp
-    def setStrat(self, strat):
-        self.strategy = strat
-    def setTheo(self, theo):
-        self.theory = theo
-    def setImpl(self, impl):
-        self.implementation = impl
+    def setAttribute(self, attribute, ammount):
+        self.__dict__[attribute] = ammount
+
+
+class TestAI(TestCase):
+    def setUp(self):
+        self.ai = ai()
+
+    def test_init(self):
+        defaults = retrieveConstants('aiDefaults')
+        self.assertEqual(self.optimization, defaults['optimization'])
+        self.assertEqual(self.stability, defaults['stability'])
+        self.assertEqual(self.complexity, defaults['complexity'])
+        self.assertEqual(self.theory, defaults['theory'])
+        self.assertEqual(self.implementation, defaults['implementation'])
+        pass
+
+    def test_2(self):
+        pass
 
 if __name__ == '__main__':
-    test = ai(10,20,30,40,50,60)
-    # test.upOpt(1)
-    # test.upStab(1)
-    # test.upComp(1)
-    # test.upStrat(1)
-    # test.upTheo(1)
-    # test.upImpl(1)
-    # print test.optimization
-    # print test.stability
-    # print test.complexity
-    # print test.strategy
-    # print test.theory
-    # print test.implementation
-
-    # test.downOpt(1)
-    # test.downStab(1)
-    # test.downComp(1)
-    # test.downStrat(1)
-    # test.downTheo(1)
-    # test.downImpl(1)
-    # print test.optimization
-    # print test.stability
-    # print test.complexity
-    # print test.strategy
-    # print test.theory
-    # print test.implementation
-
-    # test.setOpt(1)
-    # test.setStab(1)
-    # test.setComp(1)
-    # test.setStrat(1)
-    # test.setTheo(1)
-    # test.setImpl(1)
-    print test.optimization
-    print test.stability
-    print test.complexity
-    print test.strategy
-    print test.theory
-    print test.implementation
+    main()
