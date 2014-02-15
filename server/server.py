@@ -17,7 +17,13 @@ validTurns = 0
 maxPlayers = 0
 currPlayers = 0
 
+##
+#   This class holds onto objects needed to run the game
 class MMRunServer():
+
+    ##
+    #   Constructor.
+    #   @param numPlayers number of players to enter the game
     def __init__(self, numPlayers):
         global maxPlayers
         maxPlayers = numPlayers
@@ -36,7 +42,8 @@ class MMRunServer():
         print "TIME'S UP"
 
 
-
+##
+#   Handles requests
 class TCPHandler(SocketServer.BaseRequestHandler):
     def handle(self):
         global currPlayers
