@@ -1,21 +1,35 @@
-class Team(object):
+from unittest import TestCase, main
+from ai import ai
 
-    #Attributes
-    # teamName = ""
-    # color = ""
-    # members = []
-    # numMembers = 0
+
+class Team(object):
+    # Attributes:
+    #   teamName = ""
+    #   color = ""
+    #   members = []
+    #   numMembers = 0
     teamCount = 0
 
-    def __init__(self,teamName,members):
+    def __init__(self, teamName, members):
         self.teamName = teamName
+        self.color = ""
         self.members = members
         self.numMembers = len(members)
         self.teamNum = Team.teamCount
         Team.teamCount += 1
+        self.AI = ai()
 
 
-#Test
+class TestTeam(TestCase):
+    def setUp(self):
+        pass
+
+    def test_(self):
+        pass
+
+    def test_2(self):
+        pass
+
 if __name__ == "__main__":
     EightBL = Team("teamName", ["Hello", "Goodbye"])
     print EightBL.teamName
@@ -28,3 +42,5 @@ if __name__ == "__main__":
     print NineBL.members[0]
     print NineBL.numMembers
     print NineBL.teamNum
+
+    main()
