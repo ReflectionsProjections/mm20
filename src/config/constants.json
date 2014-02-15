@@ -1,0 +1,10 @@
+{
+    "aiDefaults":
+    {
+        "optimization": 0,
+        "stability": 0,
+        "complexity": 0,
+        "theory": 0,
+        "implementation": 0
+    }
+}

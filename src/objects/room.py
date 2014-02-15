@@ -31,7 +31,7 @@ class Room(object):
         pass
     def randomizeCoord(self, oldX, oldY):
         """
-        generates a new coordinate, checks if it is already in the dictionary, 
+        generates a new coordinate, checks if it is already in the dictionary,
         if not removes key and adds new key value pair with new coordinates
         """
 
@@ -53,5 +53,8 @@ class Room(object):
 if __name__ == "__main__":
     room1104 = Room({(0,0),object})
     print room1104.furniture
+
+    room2405 = Room({(2,4), object})
+    print room2405.furniture
 
 
