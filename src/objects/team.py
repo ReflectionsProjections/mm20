@@ -1,4 +1,4 @@
-class team(object):
+class Team(object):
 
     #Attributes
     # teamName = ""
@@ -17,13 +17,13 @@ class team(object):
 
 #Test
 if __name__ == "__main__":
-    EightBL = team("teamName", ["Hello", "Goodbye"])
+    EightBL = Team("teamName", ["Hello", "Goodbye"])
     print EightBL.teamName
     print EightBL.members[0]
     print EightBL.numMembers
     print EightBL.teamNum
 
-    NineBL = team("fdjaklfasjlkfajlfk", ["What?", "jfkdaljfla"])
+    NineBL = Team("fdjaklfasjlkfajlfk", ["What?", "jfkdaljfla"])
     print NineBL.teamName
     print NineBL.members[0]
     print NineBL.numMembers
