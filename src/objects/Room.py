@@ -1,5 +1,6 @@
 ##Authored by Brendan Moriarty (github:Moriartyb)
 import random
+
 class Room(object):
     ##
     # Passes in objects to be placed within the room.
@@ -19,7 +20,7 @@ class Room(object):
         Spawns all objects that are currently in the furniture dictionary
         """
         for obj in self.furniture:
-            placeFurniture(self.furniture[obj],obj[0],obj[1]
+            placeFurniture(self.furniture[obj],obj[0],obj[1])
 
     def placeFurniture(furn, x, y):
         """
@@ -50,6 +51,8 @@ class Room(object):
 
         pass
 
+
+        
 if __name__ == "__main__":
     room1104 = Room({(0,0),object})
     print room1104.furniture
