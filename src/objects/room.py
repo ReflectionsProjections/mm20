@@ -5,12 +5,12 @@ class Room(object):
     # Passes in objects to be placed within the room.
     ##
     def __init__(self, furniture={}):
-    """
-    Initializes a room object with the following attributes
-    Keyword arguments:
-    furniture -- a dictionary of furniture objects to be placed in the room
-               with a tuple key of coordinates for where it should be placed
-    """
+        """
+        Initializes a room object with the following attributes
+        Keyword arguments:
+        furniture -- a dictionary of furniture objects to be placed in the room
+        with a tuple key of coordinates for where it should be placed
+        """
 
         self.furniture = furniture  # key is a tuple coordinate(?), value is object to be placed in room.
 
@@ -19,7 +19,7 @@ class Room(object):
         Spawns all objects that are currently in the furniture dictionary
         """
         for obj in self.furniture:
-            placeFurniture(self.furniture[obj],obj[0],obj[1]
+            placeFurniture(self.furniture[obj],obj[0],obj[1])
 
     def placeFurniture(furn, x, y):
         """
@@ -31,7 +31,7 @@ class Room(object):
         pass
     def randomizeCoord(self, oldX, oldY):
         """
-        generates a new coordinate, checks if it is already in the dictionary, 
+        generates a new coordinate, checks if it is already in the dictionary,
         if not removes key and adds new key value pair with new coordinates
         """
 
@@ -53,5 +53,8 @@ class Room(object):
 if __name__ == "__main__":
     room1104 = Room({(0,0),object})
     print room1104.furniture
+
+    room2405 = Room({(2,4), object})
+    print room2405.furniture
 
 

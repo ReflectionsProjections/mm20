@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
 
-class Food:
+class Food(object):
     def __init__(self, name, container, amount):
         self.name = name
         self.container = container
@@ -9,7 +9,8 @@ class Food:
 
     def consume(self, person):
         amountConsumed = person.consumeFood(self)
-        self.amount -= amountConsumed
+        
+        self.amount = self.amount - amountConsumed
 
 
 class TestFood(TestCase):
