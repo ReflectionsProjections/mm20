@@ -49,3 +49,7 @@ tramp
 
 *.tmp
 *.orig
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
