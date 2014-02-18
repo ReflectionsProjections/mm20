@@ -54,3 +54,7 @@ tramp
 html
 latex
 .doc
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
