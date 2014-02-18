@@ -49,3 +49,8 @@ tramp
 
 *.tmp
 *.orig
+
+#Doxygen
+html
+latex
+.doc
