@@ -11,5 +11,47 @@
 	{
 		"VERSION": 0.0,
 		"NAME": "Meta-Mania"
-	}
+	},
+    "rooms":
+    {
+        "lab":
+        {
+            "key": "255.255.255",
+            "edges": ["hallway"],
+            "furntiture":
+            [
+                {
+                    "name": "computers",
+                    "actionPossible": "code",
+                    "container": "desk"
+                }
+            ]
+        },
+        "hallway":
+        {
+            "key": "125.125.125",
+            "edges": ["lab", "messHall"],
+            "furntiture":
+            [
+                {
+                    "name": "waterFountain",
+                    "actionPossible": "consume",
+                    "container": "floor"
+                }
+            ]
+        },
+        "messHall":
+        {
+            "key": "255.0.0",
+            "edges": "hallway",
+            "furntiture":
+            [
+                {
+                    "name": "sugar",
+                    "actionPossible": "consume",
+                    "container": "table"
+                }
+            ]
+        }
+    }
 }
