@@ -11,7 +11,6 @@ import sys
 import json
 import select
 import socket
-from threading import Timer, Lock
 
 timeLimit = 30
 maxDataSize = 1024
