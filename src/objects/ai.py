@@ -18,14 +18,14 @@ class AI:
         self.theory = defaults['theory']
         self.implementation = defaults['implementation']
 
-    def incrementAttribute(self, attribute, ammount):
-        self.__dict__[attribute] += ammount
+    def incrementAttribute(self, attribute, amount):
+        self.__dict__[attribute] += amount
 
-    def decrementAttribute(self, attribute, ammount):
-        self.__dict__[attribute] -= ammount
+    def decrementAttribute(self, attribute, amount):
+        self.__dict__[attribute] -= amount
 
-    def setAttribute(self, attribute, ammount):
-        self.__dict__[attribute] = ammount
+    def setAttribute(self, attribute, amount):
+        self.__dict__[attribute] = amount
 
 
 class TestAI(TestCase):
