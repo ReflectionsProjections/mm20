@@ -1,4 +1,4 @@
-from config.handle_constants import retrieveConstants
+from ..config.handle_constants import retrieveConstants
 from exception import KeyError
 
 

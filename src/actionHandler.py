@@ -1,10 +1,14 @@
 from config.handle_constants import retrieveConstants
 # from unittest import TestCase, main
-from action import Action
+from objects.action import Action
 
 actionBuffer = {}
 actionDispatch = {}
 
+_game = none
+
+def set_game(game):
+    _game = game 
 
 def response(status_code, **kwargs):
     kwargs["status"] = status_code
