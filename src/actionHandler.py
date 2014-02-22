@@ -46,8 +46,8 @@ actionDispatch['eatFood'] = _eatFood
 
 
 def _sleep(*args, **kwargs):
-    if player in kwargs and arguments in kwargs:
-        return kwargs[player].sleep(k[arguments]) 
+    if player in kwargs and hours in kwargs:
+        return kwargs[player].sleep(k[hours]) 
         # implement sleep function in team_member
         # arguments are whatever args in sleep function
     else:
