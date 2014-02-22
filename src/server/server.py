@@ -3,7 +3,7 @@
 #   It opens up the connection for each client on separate threads, so that it always knows which player it is communicating with,
 #   and then sends turn information to the engine. It waits some small amount of time for a turn before assuming that none was sent.
 #   It waits indefinitely for the engine to finish processing a turn, so it will never close if the engine crashes.
-#   Upon receiving the turn data from the engine, it will ignore any messages sent while the turn was being processed, 
+#   Upon receiving the turn data from the engine, it will ignore any messages sent while the turn was being processed,
 #   and send a message back to the player to take their next turn.
 #   If a connection is dropped, that player automatically 'forfeits'
 #   When the game ends, the server should send a final status to all players and then shut down gracefully.
@@ -19,7 +19,6 @@ maxPlayers = 4
 currPlayers = 0
 maxDataSize = 1024
 timeLimit = 30
-turnLock = Lock()
 
 ##
 #   This class holds onto objects needed to run the game
@@ -45,7 +44,6 @@ class MMRunServer():
     def timeup(self):
         print "TIME'S UP"
 
-
 ##
 #   Handles requests
 class TCPHandler(SocketServer.BaseRequestHandler):
@@ -63,20 +61,10 @@ class TCPHandler(SocketServer.BaseRequestHandler):
                 data = self.request.recv(maxDataSize)
             if data == None:
                 break
-
-            turnLock.acquire()
-            if validTurns != maxPlayers:
-                turnObjects[myPlayer] = data
-                validTurns += 1
-                if validTurns == maxPlayers:
-                    pass #send data to engine
-            turnLock.release()
-
-
 ##
 #   Simple TCP server
-class MMServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-    # Ctrl-C will cleanly kill all spawned threads
+class MMServer(SocketServer.TCPServer):
+    # Ctrl-C will kill spawned threads
     daemon_threads = True
     # much faster rebinding
     allow_reuse_address = True
