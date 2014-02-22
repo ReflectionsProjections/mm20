@@ -11,6 +11,7 @@ import sys
 import select
 import socket
 import time
+import json
 from parser import sendTurn
 
 timeLimit = 30
@@ -69,8 +70,18 @@ class MMServer():
                     turnObjects[player] = data
                     validTurns = validTurns+1
             if validTurns == self.maxPlayers:
-                #send data to engine and send new turn info to the players
+                #Parse json
+                jsonObjects = [None for i in turnObjects]
+                for i in range(0, self.maxPlayers):
+                    try:
+                        jsonObjects[i] = json.loads(i)
+                    except:
+                        jsonObjects[i] = json.loads('{}')
+
+                #TODO: Send turns to engine
                 data = sendTurn(turnObjects)
+
+                #TODO: Return data to send back to the clients
                 for i in range(0, self.maxPlayers):
                     playerConnections[i].send(data[i])
 
@@ -86,4 +97,4 @@ class MMServer():
 
 if __name__ == "__main__":
     serv = MMServer(2, "map.png", "log.txt")
-    serv.run(8080)
+    serv.run(8088)
