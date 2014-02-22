@@ -12,7 +12,7 @@
 		"VERSION": 0.0,
 		"NAME": "Meta-Mania"
 	},
-    "rooms":
+    "rooms":// This is a PROTOTYPE
     {
         "lab":
         {
@@ -53,5 +53,12 @@
                 }
             ]
         }
-    }
+    },
+    "actions" :
+    [
+        "movePlayer",
+        "eatFood",
+        "code",
+        "sleep"
+    ]
 }
