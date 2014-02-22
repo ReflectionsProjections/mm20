@@ -17,17 +17,27 @@ timeLimit = 30
 maxDataSize = 1024
 
 class MMServer():
-    def __init__(self, numPlayers):
+    ##
+    #   Constructs the server
+    #   @param numPlayers number of players entering the game
+    #   @param map location of the map file
+    #   @param log location of the log file
+    def __init__(self, numPlayers, map, log):
         self.maxPlayers = numPlayers
+        self.map = map
+        self.log = log
 
-    def run(self):
+    ##
+    #   Runs the game
+    #   @param port the port number to wait on
+    def run(self, port):
         #create an INET, STREAMing socket
         serversocket = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
         #Set reuse address so that we don't have to wait before running again
         serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        #bind the socket localhost port 8080
-        serversocket.bind(('localhost', 8080))
+        #bind the socket to localhost and the port
+        serversocket.bind(('localhost', port))
         #become a server socket
         serversocket.listen(self.maxPlayers)
         playerConnections = [None for i in range(0, self.maxPlayers)]
@@ -75,5 +85,5 @@ class MMServer():
                 currTime = time.time()
 
 if __name__ == "__main__":
-    serv = MMServer(2)
-    serv.run()
+    serv = MMServer(2, "map.png", "log.txt")
+    serv.run(8080)
