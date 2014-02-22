@@ -1,0 +1,7 @@
+Legend for Siebel Basement  (For consideration)
+
+Yellow - Lounge areas
+Blue - Main labs for hackers
+Red - Conference rooms
+Gray - Windowed areas in front of the labs (like the basement labs)
+Brown - Storage rooms
