@@ -27,13 +27,13 @@ class MMServer():
         #Set reuse address so that we don't have to wait before running again
         serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         #bind the socket localhost port 8080
-        serversocket.bind(('localhost', 8088))
+        serversocket.bind(('localhost', 8080))
         #become a server socket
         serversocket.listen(self.maxPlayers)
         playerConnections = [None for i in range(0, self.maxPlayers)]
         turnObjects = [None for i in range(0, self.maxPlayers)]
         validTurns = 0
-        #Accept connections from correct tnumber of players
+        #Accept connections from correct number of players
         for i in range(0, self.maxPlayers):
             (clientsocket, address) = serversocket.accept()
             playerConnections[i] = clientsocket
