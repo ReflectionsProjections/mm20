@@ -8,10 +8,10 @@
 #   If a connection is dropped, that player automatically 'forfeits'
 #   When the game ends, the server should send a final status to all players and then shut down gracefully.
 import sys
-import json
 import select
 import socket
 import time
+from parser import sendTurn
 
 timeLimit = 30
 maxDataSize = 1024
@@ -27,7 +27,7 @@ class MMServer():
         #Set reuse address so that we don't have to wait before running again
         serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         #bind the socket localhost port 8080
-        serversocket.bind(('localhost', 8080))
+        serversocket.bind(('localhost', 8088))
         #become a server socket
         serversocket.listen(self.maxPlayers)
         playerConnections = [None for i in range(0, self.maxPlayers)]
@@ -59,7 +59,11 @@ class MMServer():
                     turnObjects[player] = data
                     validTurns = validTurns+1
             if validTurns == self.maxPlayers:
-                #TODO: send data to engine
+                #send data to engine and send new turn info to the players
+                data = sendTurn(turnObjects)
+                for i in range(0, self.maxPlayers):
+                    playerConnections[i].send(data[i])
+
                 #clear turn objects
                 validTurns = 0
                 for i in range(0, self.maxPlayers):
