@@ -11,7 +11,6 @@ import sys
 import json
 import select
 import socket
-from threading import Timer, Lock
 import time
 
 timeLimit = 30
