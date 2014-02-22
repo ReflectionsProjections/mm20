@@ -26,28 +26,49 @@ def gatherActions(action, *args, **kwargs):
 def handleAction(action):
     """action handler"""
     if action in actionDispatch:
-        return actionDispatch[action](action.args, action.kwargs)
+        return actionDispatch[action.key](action.args, action.kwargs)
     else:
         return response(404, message="invalid call")
 
 
 def _movePlayer(*args, **kwargs):
-    return _TODO
+    if room in kwargs and player in kwargs:
+        return kwargs[player].move(k[room])
+    else:
+        return _INVALID
+    # return _TODO
 actionDispatch['movePlayer'] = _movePlayer
 
 
 def _eatFood(*args, **kwargs):
-    return _TODO
+    if foodTable in kwargs and player in kwargs:
+        return kwargs[player].eat(kwargs[foodTable])
+    else:
+        return _INVALID
+    # return _TODO
 actionDispatch['eatFood'] = _eatFood
 
 
 def _sleep(*args, **kwargs):
-    return _TODO
+    if player in kwargs and hours in kwargs:
+        return kwargs[player].sleep(k[hours]) 
+        # implement sleep function in team_member
+        # arguments are whatever args in sleep function
+    else:
+        return _INVALID
+
+    # return _TODO
 actionDispatch['sleep'] = _sleep
 
 
 def _code(*args, **kwargs):
-    return _TODO
+    if player in kwargs and arguments in kwargs:
+        return kwargs[player].code(k[arguments])
+        # implement code function
+        # arguments are whatever args in code function
+    else:
+        return _INVALID
+    # return _TODO
 actionDispatch['code'] = _code
 
 

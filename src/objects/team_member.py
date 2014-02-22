@@ -27,6 +27,20 @@ class TeamMember(object):
         self.energy += foodTable.food.energyValue
         foodTable.amount -= 1
 
+    def sleep(hours):
+        """
+        Adjusts player's energy based on how long they sleep for
+        """
+        self.energy += (hours * 15)
+
+    def code(ai):
+        """
+        Adjusts ai's stats. should probably accept some argument that
+        says which stats to adjust and in what way
+        """
+        print "not yet implemented"
+    
+
 
 #this is how you can do simple tests
 if __name__ == "__main__":
