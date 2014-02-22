@@ -7,81 +7,40 @@
 #   and send a message back to the player to take their next turn.
 #   If a connection is dropped, that player automatically 'forfeits'
 #   When the game ends, the server should send a final status to all players and then shut down gracefully.
-import SocketServer
 import sys
 import json
 import select
+import socket
 from threading import Timer, Lock
 
-turnObjects = None
-validTurns = 0
-maxPlayers = 4
-currPlayers = 0
-maxDataSize = 1024
 timeLimit = 30
-turnLock = Lock()
+maxDataSize = 1024
 
-##
-#   This class holds onto objects needed to run the game
-class MMRunServer():
-
-    ##
-    #   Constructor.
-    #   @param numPlayers number of players to enter the game
+class MMServer():
     def __init__(self, numPlayers):
-        global maxPlayers
-        maxPlayers = numPlayers
-        turnObjects = [None for i in range(0, numPlayers)]
-        server = MMServer(("localhost", 8080), TCPHandler)
-        timer = Timer(timeLimit, self.timeup)
-        timer.start()
-        # terminate with Ctrl-C
-        try:
-            server.serve_forever()
-        except KeyboardInterrupt:
-            sys.exit(0)
-        timer = Timer(1, self.timeup)
-        timer.start()
-    def timeup(self):
-        print "TIME'S UP"
+        self.maxPlayers = numPlayers
 
-
-##
-#   Handles requests
-class TCPHandler(SocketServer.BaseRequestHandler):
-    def handle(self):
-        global currPlayers
-        if(maxPlayers == currPlayers):
-            return
-        myPlayer = currPlayers
-        currPlayers += 1
-        self.request.setblocking(0)
+    def run(self):
+        #create an INET, STREAMing socket
+        serversocket = socket.socket(
+            socket.AF_INET, socket.SOCK_STREAM)
+        #bind the socket to a public host,
+        # and a well-known port
+        serversocket.bind(('localhost', 8080))
+        #become a server socket
+        serversocket.listen(5)
+        playerConnections = [None for i in range(0, self.maxPlayers)]
+        turnObjects = [None for i in range(0, self.maxPlayers)]
+        for i in range(0, self.maxPlayers):
+            (clientsocket, address) = serversocket.accept()
+            playerConnections[i] = clientsocket
         while 1:
-            ready = select.select([self.request], [], [], timeLimit)
+            ready = select.select(playerConnections, [], [], timeLimit)
             data = '{}'
-            if ready[0]:
-                data = self.request.recv(maxDataSize)
-            if data == None:
-                break
-
-            turnLock.acquire()
-            if validTurns != maxPlayers:
-                turnObjects[myPlayer] = data
-                validTurns += 1
-                if validTurns == maxPlayers:
-                    pass #send data to engine
-            turnLock.release()
-
-
-##
-#   Simple TCP server
-class MMServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
-    # Ctrl-C will cleanly kill all spawned threads
-    daemon_threads = True
-    # much faster rebinding
-    allow_reuse_address = True
-    def __init__(self, server_address, RequestHandlerClass):
-        SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
+            for connection in ready[0]:
+                data = connection.recv(maxDataSize)
+            print data
 
 if __name__ == "__main__":
-    runner = MMRunServer(2)
+    serv = MMServer(2)
+    serv.run()
