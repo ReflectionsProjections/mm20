@@ -46,9 +46,17 @@ class Room(object):
         else:
             randomizeCoord(oldX,oldY) # If the room was ever full this would totally break.... probably a bad idea
         pass
-    def removeFurniture(furn, x, y):
 
+
+    def removeFurniture(furn, x, y):
+        """
+        Finds a piece of furniture in the dictionary and deletes it. Is this how this should be implemented?
+        """
+        
+        if(furn in furniture):
+            del furniture[(x,y)]
         pass
+        
 
 if __name__ == "__main__":
     room1104 = Room({(0,0),object})
