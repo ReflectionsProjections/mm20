@@ -83,7 +83,10 @@ class MMServer():
 
                 #TODO: Return data to send back to the clients
                 for i in range(0, self.maxPlayers):
-                    playerConnections[i].send(data[i])
+                    try:
+                        playerConnections[i].send(data[i])
+                    except:
+                        pass
 
                 #clear turn objects
                 validTurns = 0
