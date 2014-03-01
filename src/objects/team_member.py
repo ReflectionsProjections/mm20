@@ -1,5 +1,7 @@
 class TeamMember(object):
 
+    _INVALID = "Invalid Request"
+
     def __init__(self, name, archetype, location):
         """
         Initializes a team member object with name, archetype, and coordinates
@@ -33,13 +35,12 @@ class TeamMember(object):
         """
         self.energy += (hours * 15)
 
-    def code(ai):
+    def code(team, attribute):
         """
-        Adjusts ai's stats. should probably accept some argument that
-        says which stats to adjust and in what way
+        Adjusts the team's ai's stats. should probably accept some argument
+        that says which stats to adjust and in what way
         """
-        print "not yet implemented"
-    
+        team.ai.attribute += 10
 
 
 #this is how you can do simple tests
