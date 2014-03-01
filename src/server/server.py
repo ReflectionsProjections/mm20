@@ -13,7 +13,7 @@ import socket
 import time
 import json
 
-timeLimit = 30
+timeLimit = 1
 maxDataSize = 1024
 
 class MMServer():
@@ -61,13 +61,14 @@ class MMServer():
                     if turnObjects[i] is None:
                         turnObjects[i] = '{}'
                         validTurns = validTurns + 1
-            for connection in ready[0]:
-                #Receive data
-                data = connection.recv(maxDataSize)
-                player = lookupPlayer[connection]
-                if turnObjects[player] is None:
-                    turnObjects[player] = data
-                    validTurns = validTurns+1
+            else:
+                for connection in ready[0]:
+                    #Receive data
+                    data = connection.recv(maxDataSize)
+                    player = lookupPlayer[connection]
+                    if turnObjects[player] is None:
+                        turnObjects[player] = data
+                        validTurns = validTurns+1
             if validTurns == self.maxPlayers:
                 #Parse json
                 jsonObjects = [None for i in turnObjects]
