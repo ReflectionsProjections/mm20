@@ -1,4 +1,3 @@
-#! /usr/bin/env python2
 import pygame
 import sys
 import os
@@ -33,10 +32,12 @@ def main():
 
 def draw():
     image = pygame.image.load("siebel-basement-map.bmp").convert()
+    image = pygame.transform.scale(image,(SCREEN_WIDTH, SCREEN_HEIGHT))
     ScreenSurface.blit(image, (0, 0))
 
 
 pygame.init()
 setup()
-main()
+if __name__ == "__main__":
+    main()
 
