@@ -1,6 +1,6 @@
-from config.handleConstants import retrieveConstants
+from config.handle_constants import retrieveConstants
 # from unittest import TestCase, main
-from objects.clientAction import Action
+from objects.client_action import Action
 
 actionBuffer = {}
 actionDispatch = {}
