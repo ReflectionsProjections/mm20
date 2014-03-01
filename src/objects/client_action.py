@@ -1,6 +1,5 @@
 from config.handleConstants import retrieveConstants
 from unittest import TestCase, main
-#from exception import KeyError
 
 
 class Action:
@@ -17,15 +16,9 @@ class Action:
 Action.actions = retrieveConstants("actions")
 
 
-class TestaActions(TestCase):
-    def testReadFile(self):
-        # Asserts that the retrieveConstants function does not fail via an error
-        constants = retrieveConstants('aiDefaults')
-        self.assertIsNotNone(constants)
-
-    def testReturnNoneOnInvalidKey(self):
-        constants = retrieveConstants('ThisIsNotAValidKey')
-        self.assertIsNone(constants)
+class TestaClientActions(TestCase):
+    def testUnavailableAction(self):
+        self.assertRaises(KeyError, Action, 'notDefined', {'move': 'banjos'})
 
 if __name__ == "__main__":
     main()

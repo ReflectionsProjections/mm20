@@ -64,8 +64,8 @@ actionDispatch['sleep'] = _sleep
 
 
 def _code(*args, **kwargs):
-    if player in kwargs and arguments in kwargs:
-        return kwargs[player].code(k[arguments])
+    if 'player' in kwargs and 'arguments' in kwargs:
+        return kwargs['player'].code(kwargs['arguments'])
         # implement code function
         # arguments are whatever args in code function
     else:
@@ -88,3 +88,8 @@ def _serverInfo(*args, **kwargs):
     constants = retrieveConstants('generalInfo')
     return response(200, version=constants.VERSION, name=constants.NAME)
 actionDispatch['serverInfo'] = _serverInfo
+
+
+class TestaActionHandler(TestCase):
+    def (self):
+        pass
