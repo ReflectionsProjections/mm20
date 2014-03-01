@@ -18,11 +18,11 @@ class AI:
         self.theory = defaults['theory']
         self.implementation = defaults['implementation']
 
-    def incrementAttribute(self, attribute, amount):
+    """Changes an attribute given the amount
+        positive number passed to increment
+        negative number passed to decrement"""
+    def changeAttribute(self, attribute, amount):
         self.__dict__[attribute] += amount
-
-    def decrementAttribute(self, attribute, amount):
-        self.__dict__[attribute] -= amount
 
     def setAttribute(self, attribute, amount):
         self.__dict__[attribute] = amount
