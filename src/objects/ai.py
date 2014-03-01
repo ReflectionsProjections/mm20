@@ -42,19 +42,21 @@ class TestAI(TestCase):
         pass
 
     def test_2(self):
+        defaults = retrieveConstants('aiDefaults')
+        self.assertIsNotNone(defaults)
         self.ai.changeAttribute('optimization', 5)
         self.assertEqual(self.ai.optimization, defaults['optimization'] + 5)
         self.ai.changeAttribute('stability', -9000)
         self.assertEqual(self.ai.stability, 0)
         self.assertEqual(
-            self.changeAttribute('bunnies', 500),
+            self.ai.setAttribute('bunnies', 500),
             "invalid attribute")
         pass
 
-    def test_3(self):
-        self.ai.setAttribute('complexity', 300)
-        self.assertEqual(self.ai.complexity, 300)
-        pass
+    # def test_3(self):
+    #     self.ai.setAttribute('complexity', 300)
+    #     self.assertEqual(self.ai.complexity, 300)
+    #     pass
 
 if __name__ == '__main__':
     main()
