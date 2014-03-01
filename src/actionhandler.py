@@ -8,7 +8,7 @@ actionDispatch = {}
 _game = none
 
 def set_game(game):
-    _game = game 
+    _game = game
 
 def response(status_code, **kwargs):
     kwargs["status"] = status_code
@@ -51,7 +51,7 @@ actionDispatch['eatFood'] = _eatFood
 
 def _sleep(*args, **kwargs):
     if player in kwargs and hours in kwargs:
-        return kwargs[player].sleep(k[hours]) 
+        return kwargs[player].sleep(k[hours])
         # implement sleep function in team_member
         # arguments are whatever args in sleep function
     else:
@@ -62,8 +62,8 @@ actionDispatch['sleep'] = _sleep
 
 
 def _code(*args, **kwargs):
-    if player in kwargs and arguments in kwargs:
-        return kwargs[player].code(k[arguments])
+    if player in kwargs and team in kwargs and attribute in kwargs:
+        return kwargs[player].code(k[team], k[attribute])
         # implement code function
         # arguments are whatever args in code function
     else:
