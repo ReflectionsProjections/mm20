@@ -40,8 +40,8 @@ def sortActions(actionBuffer):
 def bufferAction(actionBuffer, action, *args, **kwargs):
     """Adds the action to a buffered list of actions so that it can be executed later.
     """
-    action = Action(action, args, kwargs)
-    actionBuffer[action.key] = action
+    action = Action(action, *args, **kwargs)
+    actionBuffer.append({action.key: action})
 
 
 def executeAction(game, action):
@@ -122,94 +122,95 @@ class TestaActionHandler(TestCase):
         """
         return
 
-    def respone(self):
+    def testRespone(self):
         """Test that the respone function formats the response correctly.
         """
         self.assertTrue(False)
 
-    def sortAction(self):
+    def testSortAction(self):
         """Test that the sortActions function correctly sorts the actions.
         """
-        psuedoBuffer = [
+        pseudoBuffer = [
             {'priority': 0, 'name': 'last'},
             {'priority': 10, 'name': 'first'},
             {'priority': 5, 'name': 'middle'}
         ]
-        Action.sortActions(psuedoBuffer)
-        self.assertEquals(psuedoBuffer[0].name, 'first')
-        self.assertEquals(psuedoBuffer[1].name, 'middle')
-        self.assertEquals(psuedoBuffer[2].name, 'last')
+        sortActions(pseudoBuffer)
+        self.assertEquals(pseudoBuffer[0]['name'], 'first')
+        self.assertEquals(pseudoBuffer[1]['name'], 'middle')
+        self.assertEquals(pseudoBuffer[2]['name'], 'last')
 
-    def bufferAction(self):
+    def testBufferAction(self):
         """Tests that the bufferAction function correctly adds an action to the buffer.
         """
-        psuedoBuffer = []
-        psuedoAction = {'priority': 0, 'name': 'exists'}
-        Action.bufferAction(psuedoBuffer, psuedoAction)
-        self.assertFalse(psuedoBuffer.empty())
-        self.assertEquals(psuedoBuffer[0].name, 'exists')
+        validActions = retrieveConstants("actions")
+        pseudoBuffer = []
+        pseudoAction = validActions[0]
+        bufferAction(pseudoBuffer, pseudoAction, target='pseudoTarget')
+        self.assertFalse(not pseudoBuffer)
+        self.assertEquals(pseudoBuffer[0], validActions[0])
 
-    def executeActionExists(self):
+    def testExecuteActionExists(self):
         """Tests that the execeuteAction function correctly executes the function given a valid function
         """
         self.assertTrue(False)
 
-    def executeActionNotExists(self):
+    def testExecuteActionNotExists(self):
         """Tests that the executeAction function correctly respons given an invalid action
         """
         self.assertTrue(False)
 
-    def _movePlayerValid(self):
+    def test_movePlayerValid(self):
         """Tests that the _movePlayer function returns the same thing as the player.move function given valid parameters.
         """
         self.assertTrue(False)
 
-    def _movePlayerInvalid(self):
+    def test_movePlayerInvalid(self):
         """Tests that the _movePlayer function returns _INVALID given invalid parameters
         """
         self.assertTrue(False)
 
-    def _eatFoodValid(self):
+    def test_eatFoodValid(self):
         """Tests that the _eatFood function returns the same thing as the player.eat function given valid parameters.
         """
         self.assertTrue(False)
 
-    def _eatFoodInvalid(self):
+    def test_eatFoodInvalid(self):
         """Tests that the _eatFood function returns _INVALID given invalid parameters
         """
         self.assertTrue(False)
 
-    def _sleepValid(self):
+    def test_sleepValid(self):
         """Tests that the _sleep function returns the same thing as the player.sleep function given valid parameters.
         """
         self.assertTrue(False)
 
-    def _sleepInvalid(self):
+    def test_sleepInvalid(self):
         """Tests that the _sleep function returns _INVALID given invalid parameters
         """
         self.assertTrue(False)
 
-    def _codeValid(self):
+    def test_codeValid(self):
         """Tests that the _code function returns the same thing as the player.code function given valid parameters.
         """
         self.assertTrue(False)
 
-    def _codeInvalid(self):
+    def test_codeInvalid(self):
         """Tests that the _code function returns _INVALID given invalid parameters
         """
         self.assertTrue(False)
 
-    def _getMap(self):
+    def test_getMap(self):
         """Tests that the _getMap function returns the same thing as the loggers mapToJson function
         """
         self.assertTrue(False)
 
-    def _serverInfo(self):
+    def test_serverInfo(self):
         """Tests that the _serverInfo function returns correct information on the server from constants.json
         """
         self.assertTrue(False)
 
-    def testhHandleTurn(self):
+    def testHandleTurn(self):
         """Test that handleTurn returns the correct list of responses.
         """
         self.assertTrue(True)
