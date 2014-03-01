@@ -11,7 +11,7 @@ class Action:
         self.action = action
         self.args = args
         self.kwargs = kwargs
-        self.key = self.kwargs.target
+        self.key = self.kwargs['target']
 
 Action.actions = retrieveConstants("actions")
 
