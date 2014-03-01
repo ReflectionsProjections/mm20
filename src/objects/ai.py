@@ -1,4 +1,4 @@
-from config.handle_constants import retrieveConstants
+from config.handleConstants import retrieveConstants
 from unittest import TestCase, main
 
 

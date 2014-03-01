@@ -1,14 +1,16 @@
-from config.handle_constants import retrieveConstants
+from config.handleConstants import retrieveConstants
 # from unittest import TestCase, main
-from objects.action import Action
+from objects.clientAction import Action
 
 actionBuffer = {}
 actionDispatch = {}
 
-_game = none
+_game = None
+
 
 def set_game(game):
-    _game = game 
+    _game = game
+
 
 def response(status_code, **kwargs):
     kwargs["status"] = status_code
@@ -32,8 +34,8 @@ def handleAction(action):
 
 
 def _movePlayer(*args, **kwargs):
-    if room in kwargs and player in kwargs:
-        return kwargs[player].move(k[room])
+    if 'room' in kwargs and 'player' in kwargs:
+        return kwargs['player'].move(kwargs['room'])
     else:
         return _INVALID
     # return _TODO
@@ -41,8 +43,8 @@ actionDispatch['movePlayer'] = _movePlayer
 
 
 def _eatFood(*args, **kwargs):
-    if foodTable in kwargs and player in kwargs:
-        return kwargs[player].eat(kwargs[foodTable])
+    if 'foodTable' in kwargs and 'player' in kwargs:
+        return kwargs['player'].eat(kwargs['foodTable'])
     else:
         return _INVALID
     # return _TODO
@@ -50,8 +52,8 @@ actionDispatch['eatFood'] = _eatFood
 
 
 def _sleep(*args, **kwargs):
-    if player in kwargs and hours in kwargs:
-        return kwargs[player].sleep(k[hours]) 
+    if 'player' in kwargs and 'hours' in kwargs:
+        return kwargs['player'].sleep(kwargs['hours'])
         # implement sleep function in team_member
         # arguments are whatever args in sleep function
     else:
