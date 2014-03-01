@@ -7,16 +7,6 @@ from unittest import TestCase, main
 actionBuffer = {}
 actionDispatch = {}
 
-_game = None
-
-
-def set_game(game):
-    """Takes in a game object to be used by the action handler.
-
-    There should be a better way to do this.
-    """
-    _game = game
-
 
 def response(status_code, **kwargs):
     """Creates a response formatted to be understood by the server.
@@ -35,42 +25,42 @@ def bufferAction(action, *args, **kwargs):
     actionBuffer[action.key] = action
 
 
-def executeAction(action):
+def executeAction(game, action):
     """Executes the given action.
     """
     if action in actionDispatch:
-        return actionDispatch[action.key](action.args, action.kwargs)
+        return actionDispatch[action.key](game, action.args, action.kwargs)
     else:
         return response(404, message="invalid call")
 
 
-def _movePlayer(*args, **kwargs):
+def _movePlayer(game, *args, **kwargs):
     """Attempts to move a player from one room to another
     """
     if 'room' in kwargs and 'player' in kwargs:
-        return _game.people[kwargs['player']].move(kwargs['room'])
+        return game.people[kwargs['player']].move(kwargs['room'])
     else:
         return _INVALID
     # return _TODO
 actionDispatch['movePlayer'] = _movePlayer
 
 
-def _eatFood(*args, **kwargs):
+def _eatFood(game, *args, **kwargs):
     """Attempts to have a player eat the food from FoodTable
     """
     if 'foodTable' in kwargs and 'player' in kwargs:
-        return _game.people[kwargs['player']].eat(kwargs['foodTable'])
+        return game.people[kwargs['player']].eat(kwargs['foodTable'])
     else:
         return _INVALID
     # return _TODO
 actionDispatch['eatFood'] = _eatFood
 
 
-def _sleep(*args, **kwargs):
+def _sleep(game, *args, **kwargs):
     """Attempts to tell a player to sleep
     """
     if 'player' in kwargs and 'hours' in kwargs:
-        return _game.people[kwargs['player']].sleep(kwargs['hours'])
+        return game.people[kwargs['player']].sleep(kwargs['hours'])
     else:
         return _INVALID
 
@@ -78,18 +68,18 @@ def _sleep(*args, **kwargs):
 actionDispatch['sleep'] = _sleep
 
 
-def _code(*args, **kwargs):
+def _code(game, *args, **kwargs):
     """Attempts to tell a player to code
     """
     if 'player' in kwargs and 'team' in kwargs and 'attribute' in kwargs:
-        return _game.people[kwargs['player']].code(kwargs['team'], kwargs['attribute'])
+        return game.people[kwargs['player']].code(kwargs['team'], kwargs['attribute'])
     else:
         return _INVALID
     # return _TODO
 actionDispatch['code'] = _code
 
 
-def _getMap(*args, **kwargs):
+def _getMap(game, *args, **kwargs):
     """Returns a json version of the current game maps
     """
     # This should be the same json interpretation that the logger uses.
@@ -97,14 +87,14 @@ def _getMap(*args, **kwargs):
 actionDispatch['getMap'] = _getMap
 
 
-def _info(*args, **kwargs):
+def _info(game, *args, **kwargs):
     """What does this do?
     """
     return _TODO
 actionDispatch['info'] = _info
 
 
-def _serverInfo(*args, **kwargs):
+def _serverInfo(game, *args, **kwargs):
     """Returns information about the server
     """
     constants = retrieveConstants('generalInfo')
