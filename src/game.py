@@ -9,9 +9,10 @@ class Game(object):
         """
         This is called once to init the server
         the map reader will return a list of rooms that have been
-        linked together as defined in the design doc. 
+        linked together as defined in the design doc.
         """
-        rooms = map_reader(file_url)
+        self.rooms = map_reader(file_url)
+        self.trun = 0
         
     def add_new_team():
         pass
