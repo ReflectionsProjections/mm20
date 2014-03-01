@@ -12,7 +12,13 @@ class Game(object):
         linked together as defined in the design doc.
         """
         self.rooms = map_reader(file_url)
-        self.trun = 0
+        self.turn = 0
         
     def add_new_team():
+        pass
+
+    def execute_turn():
+        pass
+
+    def queue_turn(action_list, player_id):
         pass
