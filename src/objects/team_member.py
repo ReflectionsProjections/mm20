@@ -40,7 +40,7 @@ class TeamMember(object):
         Adjusts the team's ai's stats. should probably accept some argument
         that says which stats to adjust and in what way
         """
-        team.ai.attribute += 10
+        team.ai.changeAttribute(attribute, 10)
 
 
 #this is how you can do simple tests
