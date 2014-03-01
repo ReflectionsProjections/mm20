@@ -18,6 +18,26 @@ _TODO = response(500, message="not yet implemented")
 _INVALID = response(404, message="invalid call")
 
 
+def handleTurn(game, listOfAction):
+    """Takes in a list of json actions taken by all of the clients and executes them.
+    """
+    # TODO
+    # go through the list, json loads the action and buffer it.
+    # sort the buffered actions by priority
+    # execute the buffered actions and store their responses in a dictionary
+    # return a the response dictionary to the server
+    return
+
+
+def sortActions():
+    """Sort the actions in the action buffer by their priority attribute
+    """
+    # TODO
+    # sort the actions in actionBuffer by priority, see the python
+    # built-in sort function
+    return
+
+
 def bufferAction(action, *args, **kwargs):
     """Adds the action to a buffered list of actions so that it can be executed later.
     """
