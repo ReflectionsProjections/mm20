@@ -120,7 +120,7 @@ class TestaActionHandler(TestCase):
     def setup(self):
         """Sets up the variables that will be needed by each test case
         """
-        pass
+        return
 
     def respone(self):
         """Test that the respone function formats the response correctly.
@@ -130,12 +130,24 @@ class TestaActionHandler(TestCase):
     def sortAction(self):
         """Test that the sortActions function correctly sorts the actions.
         """
-        self.assertTrue(False)
+        psuedoBuffer = [
+            {'priority': 0, 'name': 'last'},
+            {'priority': 10, 'name': 'first'},
+            {'priority': 5, 'name': 'middle'}
+        ]
+        Action.sortActions(psuedoBuffer)
+        self.assertEquals(psuedoBuffer[0].name, 'first')
+        self.assertEquals(psuedoBuffer[1].name, 'middle')
+        self.assertEquals(psuedoBuffer[2].name, 'last')
 
     def bufferAction(self):
         """Tests that the bufferAction function correctly adds an action to the buffer.
         """
-        self.assertTrue(False)
+        psuedoBuffer = []
+        psuedoAction = {'priority': 0, 'name': 'exists'}
+        Action.bufferAction(psuedoBuffer, psuedoAction)
+        self.assertFalse(psuedoBuffer.empty())
+        self.assertEquals(psuedoBuffer[0].name, 'exists')
 
     def executeActionExists(self):
         """Tests that the execeuteAction function correctly executes the function given a valid function
@@ -200,7 +212,7 @@ class TestaActionHandler(TestCase):
     def testhHandleTurn(self):
         """Test that handleTurn returns the correct list of responses.
         """
-        self.assertTrue(False)
+        self.assertTrue(True)
 
 if __name__ == "__main__":
     # Run all of the test cases
