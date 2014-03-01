@@ -12,19 +12,20 @@ import select
 import socket
 import time
 import json
+import game
 
-timeLimit = 1
+timeLimit = 10
 maxDataSize = 1024
 
 class MMServer():
     ##
     #   Constructs the server
     #   @param numPlayers number of players entering the game
-    #   @param map location of the map file
+    #   @param game Game object that holds the game state
     #   @param log location of the log file
-    def __init__(self, numPlayers, map, log):
+    def __init__(self, numPlayers, game, log):
         self.maxPlayers = numPlayers
-        self.map = map
+        self.game = game
         self.log = log
 
     ##
@@ -99,5 +100,5 @@ class MMServer():
                 currTime = time.time()
 
 if __name__ == "__main__":
-    serv = MMServer(2, "map.png", "log.txt")
+    serv = MMServer(2, game.Game("map.png"), "log.txt")
     serv.run(8088)
