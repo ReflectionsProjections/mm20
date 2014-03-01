@@ -1,5 +1,4 @@
-
-
+#! /usr/bin/env python2
 import pygame
 import sys
 import os
@@ -13,22 +12,28 @@ GameClock = None
 
 TITLE = "Visualizer"
 
+
 def setup():
-	pygame.display.set_caption(TITLE)
-	global ScreenSurface
-	ScreenSurface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-	global GameClock
-	GameClock = pygame.time.Clock()
+    pygame.display.set_caption(TITLE)
+    global ScreenSurface
+    ScreenSurface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    global GameClock
+    GameClock = pygame.time.Clock()
 
 def main():
-	while(1):
-		draw()
-		pygame.display.flip()
-		GameClock.tick(MAX_FPS)
+    running = True
+    while(running):
+        draw()
+        pygame.display.flip()
+        GameClock.tick(MAX_FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+    pygame.quit()
 
 def draw():
-	image = pygame.image.load("siebel-basement-map.bmp").convert()
-	ScreenSurface.blit(image, (0, 0))
+    image = pygame.image.load("siebel-basement-map.bmp").convert()
+    ScreenSurface.blit(image, (0, 0))
 
 
 pygame.init()
