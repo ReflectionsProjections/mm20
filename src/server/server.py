@@ -14,8 +14,7 @@ import time
 import json
 import game
 
-timeLimit = 10
-maxDataSize = 1024
+constants = json.loads(open("config/constants.json").read())["serverDefaults"]
 
 class MMServer():
     ##
@@ -23,10 +22,14 @@ class MMServer():
     #   @param numPlayers number of players entering the game
     #   @param game Game object that holds the game state
     #   @param log location of the log file
-    def __init__(self, numPlayers, game, log):
+    #   @param timeLimit The amount of time to wait for a player to make their turn
+    #   @param maxDataSize The length in bytes of data received in one call to recv
+    def __init__(self, numPlayers, game, log = constants["log"], timeLimit = constants["time"], maxDataSize = constants["maxDataSize"]):
         self.maxPlayers = numPlayers
         self.game = game
         self.log = log
+        self.timeLimit = timeLimit
+        self.maxDataSize = maxDataSize
 
     ##
     #   Runs the game
@@ -50,7 +53,7 @@ class MMServer():
             playerConnections[i] = clientsocket
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
         currTime = time.time()
-        endTime = time.time() + timeLimit
+        endTime = time.time() + self.timeLimit
         while 1:
             #Receive info
             ready = None
@@ -65,7 +68,7 @@ class MMServer():
             else:
                 for connection in ready[0]:
                     #Receive data
-                    data = connection.recv(maxDataSize)
+                    data = connection.recv(self.maxDataSize)
                     player = lookupPlayer[connection]
                     if turnObjects[player] is None:
                         turnObjects[player] = data
@@ -95,10 +98,10 @@ class MMServer():
                     turnObjects[i]=None
                 #reset endtime
                 currTime = time.time()
-                endTime = time.time() + timeLimit
+                endTime = time.time() + self.timeLimit
             else:
                 currTime = time.time()
 
 if __name__ == "__main__":
-    serv = MMServer(2, game.Game("map.png"), "log.txt")
-    serv.run(8088)
+    serv = MMServer(constants["players"], game.Game(constants["map"]))
+    serv.run(constants["port"])

@@ -10,13 +10,21 @@
     "VERSION": 0.0,
     "NAME": "Meta-Mania"
   },
+  "serverDefaults": {
+    "players": 2,
+    "map": "map.png",
+    "log": "log.txt",
+    "port": 8080,
+    "time": 0.01,
+    "maxDataSize": 1024
+    },
   "rooms": {
     "lab": {
       "key": "255.255.255",
       "edges": [
         "hallway"
       ],
-      "furntiture": [
+      "furniture": [
         {
           "name": "computers",
           "actionPossible": "code",
@@ -30,7 +38,7 @@
         "lab",
         "messHall"
       ],
-      "furntiture": [
+      "furniture": [
         {
           "name": "waterFountain",
           "actionPossible": "consume",
@@ -41,7 +49,7 @@
     "messHall": {
       "key": "255.0.0",
       "edges": "hallway",
-      "furntiture": [
+      "furniture": [
         {
           "name": "sugar",
           "actionPossible": "consume",
