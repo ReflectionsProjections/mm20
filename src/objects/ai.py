@@ -3,12 +3,6 @@ from unittest import TestCase, main
 
 
 class AI:
-    # optimization = 0
-    # stability = 0
-    # complexity = 0
-    # strategy = 0
-    # theory = 0
-    # implementation = 0
 
     def __init__(self):
         defaults = retrieveConstants('aiDefaults')
