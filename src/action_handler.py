@@ -4,7 +4,6 @@ from config.handle_constants import retrieveConstants
 from objects.client_action import Action
 from unittest import TestCase, main
 
-actionBuffer = {}
 actionDispatch = {}
 
 
@@ -29,7 +28,7 @@ def handleTurn(game, listOfAction):
     return
 
 
-def sortActions():
+def sortActions(actionBuffer):
     """Sort the actions in the action buffer by their priority attribute
     """
     # TODO
@@ -38,7 +37,7 @@ def sortActions():
     return
 
 
-def bufferAction(action, *args, **kwargs):
+def bufferAction(actionBuffer, action, *args, **kwargs):
     """Adds the action to a buffered list of actions so that it can be executed later.
     """
     action = Action(action, args, kwargs)
@@ -118,6 +117,11 @@ actionDispatch['serverInfo'] = _serverInfo
 class TestaActionHandler(TestCase):
     """Holds the test cases to test the Action Handler
     """
+    def setup(self):
+        """Sets up the variables that will be needed by each test case
+        """
+        pass
+
     def respone(self):
         """Test that the respone function formats the response correctly.
         """
