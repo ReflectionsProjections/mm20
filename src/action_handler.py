@@ -107,13 +107,6 @@ def _getMap(game, *args, **kwargs):
 actionDispatch['getMap'] = _getMap
 
 
-def _info(game, *args, **kwargs):
-    """What does this do?
-    """
-    return _TODO
-actionDispatch['info'] = _info
-
-
 def _serverInfo(game, *args, **kwargs):
     """Returns information about the server
     """
@@ -125,8 +118,85 @@ actionDispatch['serverInfo'] = _serverInfo
 class TestaActionHandler(TestCase):
     """Holds the test cases to test the Action Handler
     """
-    def placeholder(self):
-        pass
+    def respone(self):
+        """Test that the respone function formats the response correctly.
+        """
+        self.assertTrue(False)
+
+    def sortAction(self):
+        """Test that the sortActions function correctly sorts the actions.
+        """
+        self.assertTrue(False)
+
+    def bufferAction(self):
+        """Tests that the bufferAction function correctly adds an action to the buffer.
+        """
+        self.assertTrue(False)
+
+    def executeActionExists(self):
+        """Tests that the execeuteAction function correctly executes the function given a valid function
+        """
+        self.assertTrue(False)
+
+    def executeActionNotExists(self):
+        """Tests that the executeAction function correctly respons given an invalid action
+        """
+        self.assertTrue(False)
+
+    def _movePlayerValid(self):
+        """Tests that the _movePlayer function returns the same thing as the player.move function given valid parameters.
+        """
+        self.assertTrue(False)
+
+    def _movePlayerInvalid(self):
+        """Tests that the _movePlayer function returns _INVALID given invalid parameters
+        """
+        self.assertTrue(False)
+
+    def _eatFoodValid(self):
+        """Tests that the _eatFood function returns the same thing as the player.eat function given valid parameters.
+        """
+        self.assertTrue(False)
+
+    def _eatFoodInvalid(self):
+        """Tests that the _eatFood function returns _INVALID given invalid parameters
+        """
+        self.assertTrue(False)
+
+    def _sleepValid(self):
+        """Tests that the _sleep function returns the same thing as the player.sleep function given valid parameters.
+        """
+        self.assertTrue(False)
+
+    def _sleepInvalid(self):
+        """Tests that the _sleep function returns _INVALID given invalid parameters
+        """
+        self.assertTrue(False)
+
+    def _codeValid(self):
+        """Tests that the _code function returns the same thing as the player.code function given valid parameters.
+        """
+        self.assertTrue(False)
+
+    def _codeInvalid(self):
+        """Tests that the _code function returns _INVALID given invalid parameters
+        """
+        self.assertTrue(False)
+
+    def _getMap(self):
+        """Tests that the _getMap function returns the same thing as the loggers mapToJson function
+        """
+        self.assertTrue(False)
+
+    def _serverInfo(self):
+        """Tests that the _serverInfo function returns correct information on the server from constants.json
+        """
+        self.assertTrue(False)
+
+    def testhHandleTurn(self):
+        """Test that handleTurn returns the correct list of responses.
+        """
+        self.assertTrue(False)
 
 if __name__ == "__main__":
     # Run all of the test cases
