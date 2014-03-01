@@ -16,7 +16,13 @@ class AI:
         positive number passed to increment
         negative number passed to decrement"""
     def changeAttribute(self, attribute, amount):
+        if attribute not in self.__dict__:
+            return "invalid attribute"
+
         self.__dict__[attribute] += amount
+
+        if self.__dict__[attribute] < 0:
+            self.setAttribute(attribute, 0)
 
     def setAttribute(self, attribute, amount):
         self.__dict__[attribute] = amount
@@ -37,6 +43,23 @@ class TestAI(TestCase):
         pass
 
     def test_2(self):
+        defaults = retrieveConstants('aiDefaults')
+        self.assertIsNotNone(defaults)
+
+        self.ai.changeAttribute('optimization', 5)
+        self.assertEqual(self.ai.optimization, defaults['optimization'] + 5)
+
+        self.ai.changeAttribute('optimization', -90000)
+        self.assertEqual(self.ai.optimization, 0)
+
+        self.assertEqual(
+            self.ai.changeAttribute('bunnies', 500),
+            "invalid attribute")
+        pass
+
+    def test_3(self):
+        self.ai.setAttribute('complexity', 300)
+        self.assertEqual(self.ai.complexity, 300)
         pass
 
 if __name__ == '__main__':

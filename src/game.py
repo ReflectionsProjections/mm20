@@ -5,7 +5,7 @@ from map_functions import map_reader
 
 class Game(object):
 
-    def __init__(self, map_file_url):
+    def __init__(self, file_url):
         """
         This is called once to init the server
         the map reader will return a list of rooms that have been
