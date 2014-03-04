@@ -8,38 +8,52 @@
 #   If a connection is dropped, that player automatically 'forfeits'
 #   When the game ends, the server should send a final status to all players and then shut down gracefully.
 import sys
-import json
 import select
 import socket
 import time
+import json
+import game
 
-timeLimit = 30
-maxDataSize = 1024
+constants = json.loads(open("config/constants.json").read())["serverDefaults"]
 
 class MMServer():
-    def __init__(self, numPlayers):
+    ##
+    #   Constructs the server
+    #   @param numPlayers number of players entering the game
+    #   @param game Game object that holds the game state
+    #   @param log location of the log file
+    #   @param timeLimit The amount of time to wait for a player to make their turn
+    #   @param maxDataSize The length in bytes of data received in one call to recv
+    def __init__(self, numPlayers, game, log = constants["log"], timeLimit = constants["time"], maxDataSize = constants["maxDataSize"]):
         self.maxPlayers = numPlayers
+        self.game = game
+        self.log = log
+        self.timeLimit = timeLimit
+        self.maxDataSize = maxDataSize
 
-    def run(self):
+    ##
+    #   Runs the game
+    #   @param port the port number to wait on
+    def run(self, port):
         #create an INET, STREAMing socket
         serversocket = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
         #Set reuse address so that we don't have to wait before running again
         serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        #bind the socket localhost port 8080
-        serversocket.bind(('localhost', 8088))
+        #bind the socket to localhost and the port
+        serversocket.bind(('localhost', port))
         #become a server socket
-        serversocket.listen(5)
+        serversocket.listen(self.maxPlayers)
         playerConnections = [None for i in range(0, self.maxPlayers)]
         turnObjects = [None for i in range(0, self.maxPlayers)]
         validTurns = 0
-        #Accept connections from correct tnumber of players
+        #Accept connections from correct number of players
         for i in range(0, self.maxPlayers):
             (clientsocket, address) = serversocket.accept()
             playerConnections[i] = clientsocket
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
         currTime = time.time()
-        endTime = time.time() + timeLimit
+        endTime = time.time() + self.timeLimit
         while 1:
             #Receive info
             ready = None
@@ -51,25 +65,43 @@ class MMServer():
                     if turnObjects[i] is None:
                         turnObjects[i] = '{}'
                         validTurns = validTurns + 1
-            for connection in ready[0]:
-                #Receive data
-                data = connection.recv(maxDataSize)
-                player = lookupPlayer[connection]
-                if turnObjects[player] is None:
-                    turnObjects[player] = data
-                    validTurns = validTurns+1
+            else:
+                for connection in ready[0]:
+                    #Receive data
+                    data = connection.recv(self.maxDataSize)
+                    player = lookupPlayer[connection]
+                    if turnObjects[player] is None:
+                        turnObjects[player] = data
+                        validTurns = validTurns+1
             if validTurns == self.maxPlayers:
-                #TODO: send data to engine
+                #Parse json
+                jsonObjects = [None for i in turnObjects]
+                for i in range(0, self.maxPlayers):
+                    try:
+                        jsonObjects[i] = json.loads(i)
+                    except:
+                        jsonObjects[i] = json.loads('{}')
+
+                #TODO: Send turns to engine
+                data = ["{}" for i in turnObjects]
+
+                #TODO: Return data to send back to the clients
+                for i in range(0, self.maxPlayers):
+                    try:
+                        playerConnections[i].send(data[i])
+                    except:
+                        pass
+
                 #clear turn objects
                 validTurns = 0
                 for i in range(0, self.maxPlayers):
                     turnObjects[i]=None
                 #reset endtime
                 currTime = time.time()
-                endTime = time.time() + timeLimit
+                endTime = time.time() + self.timeLimit
             else:
                 currTime = time.time()
 
 if __name__ == "__main__":
-    serv = MMServer(2)
-    serv.run()
+    serv = MMServer(constants["players"], game.Game(constants["map"]))
+    serv.run(constants["port"])

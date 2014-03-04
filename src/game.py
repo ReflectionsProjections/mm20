@@ -5,13 +5,20 @@ from map_functions import map_reader
 
 class Game(object):
 
-    def __init__(self, map_file_url):
+    def __init__(self, file_url):
         """
         This is called once to init the server
         the map reader will return a list of rooms that have been
-        linked together as defined in the design doc. 
+        linked together as defined in the design doc.
         """
-        rooms = map_reader(file_url)
+        self.rooms = map_reader(file_url)
+        self.turn = 0
         
     def add_new_team():
+        pass
+
+    def execute_turn():
+        pass
+
+    def queue_turn(action_list, player_id):
         pass

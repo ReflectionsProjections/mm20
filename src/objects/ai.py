@@ -3,12 +3,6 @@ from unittest import TestCase, main
 
 
 class AI:
-    # optimization = 0
-    # stability = 0
-    # complexity = 0
-    # strategy = 0
-    # theory = 0
-    # implementation = 0
 
     def __init__(self):
         defaults = retrieveConstants('aiDefaults')
@@ -18,14 +12,20 @@ class AI:
         self.theory = defaults['theory']
         self.implementation = defaults['implementation']
 
-    def incrementAttribute(self, attribute, ammount):
-        self.__dict__[attribute] += ammount
+    """Changes an attribute given the amount
+        positive number passed to increment
+        negative number passed to decrement"""
+    def changeAttribute(self, attribute, amount):
+        if attribute not in self.__dict__:
+            return "invalid attribute"
 
-    def decrementAttribute(self, attribute, ammount):
-        self.__dict__[attribute] -= ammount
+        self.__dict__[attribute] += amount
 
-    def setAttribute(self, attribute, ammount):
-        self.__dict__[attribute] = ammount
+        if self.__dict__[attribute] < 0:
+            self.setAttribute(attribute, 0)
+
+    def setAttribute(self, attribute, amount):
+        self.__dict__[attribute] = amount
 
 
 class TestAI(TestCase):
@@ -43,6 +43,23 @@ class TestAI(TestCase):
         pass
 
     def test_2(self):
+        defaults = retrieveConstants('aiDefaults')
+        self.assertIsNotNone(defaults)
+
+        self.ai.changeAttribute('optimization', 5)
+        self.assertEqual(self.ai.optimization, defaults['optimization'] + 5)
+
+        self.ai.changeAttribute('optimization', -90000)
+        self.assertEqual(self.ai.optimization, 0)
+
+        self.assertEqual(
+            self.ai.changeAttribute('bunnies', 500),
+            "invalid attribute")
+        pass
+
+    def test_3(self):
+        self.ai.setAttribute('complexity', 300)
+        self.assertEqual(self.ai.complexity, 300)
         pass
 
 if __name__ == '__main__':

@@ -1,5 +1,7 @@
 class TeamMember(object):
 
+    _INVALID = "Invalid Request"
+
     def __init__(self, name, archetype, location):
         """
         Initializes a team member object with name, archetype, and coordinates
@@ -26,6 +28,19 @@ class TeamMember(object):
         """
         self.energy += foodTable.food.energyValue
         foodTable.amount -= 1
+
+    def sleep(hours):
+        """
+        Adjusts player's energy based on how long they sleep for
+        """
+        self.energy += (hours * 15)
+
+    def code(team, attribute):
+        """
+        Adjusts the team's ai's stats. should probably accept some argument
+        that says which stats to adjust and in what way
+        """
+        team.ai.changeAttribute(attribute, 10)
 
 
 #this is how you can do simple tests
