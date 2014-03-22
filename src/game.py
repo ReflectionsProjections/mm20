@@ -20,7 +20,7 @@ class Game(object):
     ##  Actually execute queued actions
     #   @return True if the game is running, False if the game ended
     def execute_turn(self):
-        return True
+        return False
 
     ##  Get these actions ready to execute
     #   @param action_list A list of actions to be queued

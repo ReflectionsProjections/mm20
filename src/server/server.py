@@ -106,6 +106,10 @@ class MMServer():
                 endTime = time.time() + self.timeLimit
             else:
                 currTime = time.time()
+        #Close connections
+        for conn in playerConnections:
+            conn.close()
+        serversocket.close()
 
 if __name__ == "__main__":
     serv = MMServer(constants["players"], game.Game(constants["map"]))
