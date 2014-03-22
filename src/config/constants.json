@@ -12,7 +12,7 @@
   },
   "serverDefaults": {
     "players": 2,
-    "map": "map.png",
+    "map": "rooms.bmp",
     "log": "log.txt",
     "port": 8080,
     "time": 0.01,

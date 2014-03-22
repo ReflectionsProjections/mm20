@@ -74,23 +74,25 @@ class MMServer():
                         turnObjects[player] = data
                         validTurns = validTurns+1
             if validTurns == self.maxPlayers:
-                #Parse json
-                jsonObjects = [None for i in turnObjects]
+                #Parse json and send turns to engine
+                errors = ["{}" for i in turnObjects]
                 for i in range(0, self.maxPlayers):
                     try:
-                        jsonObjects[i] = json.loads(i)
+                        jsonObject = json.loads(i)
                     except:
-                        jsonObjects[i] = json.loads('{}')
+                        jsonObject = json.loads('{}')
+                    errors[i] = self.game.queue_turn(jsonObject, i)
 
-                #TODO: Send turns to engine
-                data = ["{}" for i in turnObjects]
+                self.game.execute_turn()
 
-                #TODO: Return data to send back to the clients
+                #Return turn info back to the clients
                 for i in range(0, self.maxPlayers):
                     try:
-                        playerConnections[i].send(data[i])
+                        data = self.game.get_info(i)
+                        data["errors"] = errors[i]
+                        playerConnections[i].send(json.dumps(data, ensure_ascii=True))
                     except:
-                        pass
+                        print "Bad stuff"
 
                 #clear turn objects
                 validTurns = 0
