@@ -54,7 +54,9 @@ class MMServer():
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
         currTime = time.time()
         endTime = time.time() + self.timeLimit
-        while 1:
+        running = True
+        while running:
+            #TODO: Accept starting connection info
             #Receive info
             ready = None
             if endTime - currTime > 0:
@@ -83,16 +85,17 @@ class MMServer():
                         jsonObject = json.loads('{}')
                     errors[i] = self.game.queue_turn(jsonObject, i)
 
-                self.game.execute_turn()
+                running = self.game.execute_turn()
 
                 #Return turn info back to the clients
                 for i in range(0, self.maxPlayers):
                     try:
                         data = self.game.get_info(i)
-                        data["errors"] = errors[i]
+                        if running:
+                            data["errors"] = errors[i]
                         playerConnections[i].send(json.dumps(data, ensure_ascii=True))
                     except:
-                        print "Bad stuff"
+                        pass
 
                 #clear turn objects
                 validTurns = 0
