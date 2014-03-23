@@ -1,24 +1,28 @@
-from config.handle_constants import retrieveConstants
+#from config.handle_constants import retrieveConstants
 from unittest import TestCase, main
 
 
 class Action:
-    actions = {}
+    actions = None # This should be Initilzed to actionDispatch
 
-    def __init__(self, action, *args, **kwargs):
+    def __init__(self, action, parameters, playerID):
         if not action in Action.actions:
             raise KeyError("Action not defined")
         self.action = action
-        self.args = args
-        self.kwargs = kwargs
-        self.key = self.kwargs['target']
+        self.parameters = parameters
+        self.key = self.parameters['target']
+        #what is key used for?
+        self.owner = playerID
+        self.priority = 30
+        #TODO find a good way to set this
 
-Action.actions = retrieveConstants("actions")
+#Action.actions = retrieveConstants("actions")
 
 
 class TestaClientActions(TestCase):
     def testUnavailableAction(self):
-        self.assertRaises(KeyError, Action, 'notDefined', {'move': 'banjos'})
+        Action.actions = {}
+        self.assertRaises(KeyError, Action, {'move': 'banjos'}, 0)
 
 if __name__ == "__main__":
     main()

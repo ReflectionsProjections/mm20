@@ -17,14 +17,14 @@ _TODO = response(500, message="not yet implemented")
 _INVALID = response(404, message="invalid call")
 
 
-def handleTurn(game, listOfAction):
-    """Takes in a list of json actions taken by all of the clients and executes them.
+def handleTurn(game, action_buffer):
+    """Takes in the list of actions given from all of the clients.
+    it sorts then and executes them by the given prioity.
     """
-    # TODO
-    # go through the list, json loads the action and buffer it.
-    # sort the buffered actions by priority
-    # execute the buffered actions and store their responses in a dictionary
-    # return a the response dictionary to the server
+    
+    action_buffer.sort(lambda a,b: a.priority - b.priority, reverse=True)
+    for action in action_buffer:
+        game.msg_buffer[action.playerID] = executeAction(game, action)
     return
 
 
@@ -37,49 +37,49 @@ def sortActions(actionBuffer):
     return
 
 
-def bufferAction(actionBuffer, action, *args, **kwargs):
+def bufferAction(actionBuffer, action, parameters, playerID):
     """Adds the action to a buffered list of actions so that it can be executed later.
     """
-    action = Action(action, *args, **kwargs)
-    actionBuffer.append({action.key: action})
+    action = Action(action, parameters, playerID)
+    actionBuffer.append(action)
 
 
 def executeAction(game, action):
     """Executes the given action.
     """
-    if action in actionDispatch:
-        return actionDispatch[action.key](game, action.args, action.kwargs)
+    if action.action in actionDispatch:
+        return actionDispatch[action.key](game, action.parameters)
     else:
         return response(404, message="invalid call")
 
 
-def _movePlayer(game, *args, **kwargs):
+def _movePlayer(game, parameters):
     """Attempts to move a player from one room to another
     """
-    if 'room' in kwargs and 'player' in kwargs:
-        return game.people[kwargs['player']].move(kwargs['room'])
+    if 'room' in parameters and 'player' in parameters:
+        return game.people[parameters['player']].move(parameters['room'])
     else:
         return _INVALID
     # return _TODO
 actionDispatch['movePlayer'] = _movePlayer
 
 
-def _eatFood(game, *args, **kwargs):
+def _eatFood(game, parameters):
     """Attempts to have a player eat the food from FoodTable
     """
-    if 'foodTable' in kwargs and 'player' in kwargs:
-        return game.people[kwargs['player']].eat(kwargs['foodTable'])
+    if 'foodTable' in parameters and 'player' in parameters:
+        return game.people[parameters['player']].eat(parameters['foodTable'])
     else:
         return _INVALID
     # return _TODO
 actionDispatch['eatFood'] = _eatFood
 
 
-def _sleep(game, *args, **kwargs):
+def _sleep(game, parameters):
     """Attempts to tell a player to sleep
     """
-    if 'player' in kwargs and 'hours' in kwargs:
-        return game.people[kwargs['player']].sleep(kwargs['hours'])
+    if 'player' in parameters and 'hours' in parameters:
+        return game.people[parameters['player']].sleep(parameters['hours'])
     else:
         return _INVALID
 
@@ -87,18 +87,20 @@ def _sleep(game, *args, **kwargs):
 actionDispatch['sleep'] = _sleep
 
 
-def _code(game, *args, **kwargs):
+def _code(game, parameters):
     """Attempts to tell a player to code
     """
-    if 'player' in kwargs and 'team' in kwargs and 'attribute' in kwargs:
-        return game.people[kwargs['player']].code(kwargs['team'], kwargs['attribute'])
+    if 'player' in parameters and 'team' in parameters
+        and 'attribute' in parameters:
+        return game.people[parameters['player']].code(
+            parameters['team'], parameters['attribute'])
     else:
         return _INVALID
     # return _TODO
 actionDispatch['code'] = _code
 
 
-def _getMap(game, *args, **kwargs):
+def _getMap(game, parameters):
     """Returns a json version of the current game maps
     """
     # This should be the same json interpretation that the logger uses.
@@ -106,12 +108,14 @@ def _getMap(game, *args, **kwargs):
 actionDispatch['getMap'] = _getMap
 
 
-def _serverInfo(game, *args, **kwargs):
+def _serverInfo(game, parameters):
     """Returns information about the server
     """
     constants = retrieveConstants('generalInfo')
     return response(200, version=constants.VERSION, name=constants.NAME)
 actionDispatch['serverInfo'] = _serverInfo
+
+Action.actions = actionDispatch;
 
 
 class TestaActionHandler(TestCase):
