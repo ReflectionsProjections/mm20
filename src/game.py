@@ -5,14 +5,15 @@ from map_functions import getRoomsFromMap as map_reader
 
 class Game(object):
 
+    # Initial values
+    rooms = []
+    turn = 0
+
+    # Initialize the server
     def __init__(self, file_url):
-        """
-        This is called once to init the server
-        the map reader will return a list of rooms that have been
-        linked together as defined in the design doc.
-        """
+        
+        # Get a list of rooms
         self.rooms = map_reader(file_url)
-        self.turn = 0
         
     def add_new_team(self):
         pass
