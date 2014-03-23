@@ -80,8 +80,8 @@ class MMServer():
                 errors = ["{}" for i in turnObjects]
                 for i in range(0, self.maxPlayers):
                     try:
-                        jsonObject = json.loads(i)
-                    except:
+                        jsonObject = json.loads(turnObjects[i])
+                    except ValueError, TypeError:
                         jsonObject = json.loads('{}')
                     errors[i] = self.game.queue_turn(jsonObject, i)
 
@@ -94,7 +94,7 @@ class MMServer():
                         if running:
                             data["errors"] = errors[i]
                         playerConnections[i].send(json.dumps(data, ensure_ascii=True))
-                    except:
+                    except IOError:
                         pass
 
                 #clear turn objects
