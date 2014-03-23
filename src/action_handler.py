@@ -90,7 +90,7 @@ actionDispatch['sleep'] = _sleep
 def _code(game, parameters):
     """Attempts to tell a player to code
     """
-    if 'player' in parameters and 'team' in parameters
+    if 'player' in parameters and 'team' in parameters \
         and 'attribute' in parameters:
         return game.people[parameters['player']].code(
             parameters['team'], parameters['attribute'])
@@ -150,7 +150,7 @@ class TestaActionHandler(TestCase):
         validActions = retrieveConstants("actions")
         pseudoBuffer = []
         pseudoAction = validActions[0]
-        bufferAction(pseudoBuffer, pseudoAction, target='pseudoTarget')
+        bufferAction(pseudoBuffer, pseudoAction, {"target":'pseudoTarget'}, 0)
         self.assertFalse(not pseudoBuffer)
         self.assertEquals(pseudoBuffer[0], validActions[0])
 

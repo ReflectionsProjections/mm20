@@ -22,7 +22,7 @@ class Action:
 class TestaClientActions(TestCase):
     def testUnavailableAction(self):
         Action.actions = {}
-        self.assertRaises(KeyError, Action, {'move': 'banjos'}, 0)
+        self.assertRaises(KeyError, Action,'move', {'team_member': 'banjos'}, 0)
 
 if __name__ == "__main__":
     main()
