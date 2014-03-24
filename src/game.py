@@ -18,18 +18,21 @@ class Game(object):
         self.msg_buffer = {};
 
         
-        
+    ##  Adds a new team and returns success / failure message
+    #   @param data The data sent by the player to set up state
+    #   @param playerID The ID assigned to that player by the server
+    #   @return A (bool, dict) tuple stating success or failure and listing errors or sending starting info to the player
     def add_new_team(self, data, playerID):
-        
-        msg_buffer[playerID] = []
-        pass
+        response = {}
+        self.msg_buffer[playerID] = []
+        return (True, response)
 
     ##  Actually execute queued actions
     #   @return True if the game is running, False if the game ended
     def execute_turn(self):
         action_list = []
         action_handler.handleTurn(self, action_list)
-        return True
+        return False
 
     ##  Get these actions ready to execute
     #   @param action_list A list of actions to be queued
@@ -39,8 +42,8 @@ class Game(object):
         error_list = []
         for action in action_list:
             try:
-                action_handler.bufferAction(action_buffer, action["action"],
-                                            action, playerID)
+                action_handler.bufferAction(self.action_buffer, action["action"],
+                                            action, player_id)
             except KeyError:
                 error_list.append({"error": "invalid action",
                                    "action": action["action"]})
