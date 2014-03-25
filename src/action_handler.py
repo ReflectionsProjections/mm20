@@ -1,61 +1,60 @@
-"""@actionHandler Handles the client's actions sent to the engine from the server.
-"""
+# actionHandler - Handles the client's actions sent to the engine from the server.
 from config.handle_constants import retrieveConstants
 from objects.client_action import Action
 from unittest import TestCase, main
 
-actionDispatch = {}
+def __init__(self):
+    actionDispatch = {}
 
-
+## Create a response (on the client) to be sent to the server.
+# @param status_code TODO
 def response(status_code, **kwargs):
-    """Creates a response formatted to be understood by the server.
-    """
     kwargs["status"] = status_code
     return kwargs
 
 _TODO = response(500, message="not yet implemented")
 _INVALID = response(404, message="invalid call")
 
-
+## Takes in a list of json actions taken by all of the clients and executes them.
 def handleTurn(game, action_buffer):
-    """Takes in the list of actions given from all of the clients.
-    it sorts then and executes them by the given prioity.
-    """
     
     action_buffer.sort(lambda a,b: a.priority - b.priority, reverse=True)
     for action in action_buffer:
         game.msg_buffer[action.playerID] = executeAction(game, action)
     return
 
-
+## Sort the actions in the action buffer by their priority.
+# @param actionBuffer The buffered list of actions to sort.
+# @returns TODO
 def sortActions(actionBuffer):
-    """Sort the actions in the action buffer by their priority attribute
-    """
+
     # TODO
     # sort the actions in actionBuffer by priority, see the python
     # built-in sort function
     return
 
-
+## Adds the action to a buffered list of actions so that it can be executed later.
+# @param actionBuffer The buffered list of actions to add the action to
+# @param action The action to add to the actionBuffer
+# @param parameters TODO
+# @param playerID TODO
 def bufferAction(actionBuffer, action, parameters, playerID):
-    """Adds the action to a buffered list of actions so that it can be executed later.
-    """
     action = Action(action, parameters, playerID)
     actionBuffer.append(action)
 
-
+## Attempts to execute the given action. If it is invalid, a 404 response is returned.
+# @param game TODO The current game state?
+# @param action The action to execute
+# @returns An actionDispatch object indicating (TODO - indicating what?) if the action is successful, a 404 "Invalid Call" response otherwise
 def executeAction(game, action):
-    """Executes the given action.
-    """
     if action.action in actionDispatch:
         return actionDispatch[action.key](game, action.parameters)
     else:
         return response(404, message="invalid call")
 
-
+## Attempts to move a player. If the move is invalid, a 404 "Invalid Call" response is returned.
+# @param action The action to execute
 def _movePlayer(game, parameters):
-    """Attempts to move a player from one room to another
-    """
     if 'room' in parameters and 'player' in parameters:
         return game.people[parameters['player']].move(parameters['room'])
     else:
@@ -63,10 +62,9 @@ def _movePlayer(game, parameters):
     # return _TODO
 actionDispatch['movePlayer'] = _movePlayer
 
-
+## Attempts to eat food from FoodTable
+# @param parameters TODO - Explain valid parameters
 def _eatFood(game, parameters):
-    """Attempts to have a player eat the food from FoodTable
-    """
     if 'foodTable' in parameters and 'player' in parameters:
         return game.people[parameters['player']].eat(parameters['foodTable'])
     else:
@@ -74,10 +72,9 @@ def _eatFood(game, parameters):
     # return _TODO
 actionDispatch['eatFood'] = _eatFood
 
-
+## Attempts to make a player sleep
+# @param parameters TODO - Explain valid parameters
 def _sleep(game, parameters):
-    """Attempts to tell a player to sleep
-    """
     if 'player' in parameters and 'hours' in parameters:
         return game.people[parameters['player']].sleep(parameters['hours'])
     else:
@@ -86,10 +83,9 @@ def _sleep(game, parameters):
     # return _TODO
 actionDispatch['sleep'] = _sleep
 
-
+## Attempts to make a player code
+# @param parameters TODO - Explain valid parameters
 def _code(game, parameters):
-    """Attempts to tell a player to code
-    """
     if 'player' in parameters and 'team' in parameters \
         and 'attribute' in parameters:
         return game.people[parameters['player']].code(
@@ -99,15 +95,15 @@ def _code(game, parameters):
     # return _TODO
 actionDispatch['code'] = _code
 
-
+## Returns a serialized-to-json version of the current game map(s?)
+# @param parameters TODO - Explain valid parameters
 def _getMap(game, parameters):
-    """Returns a json version of the current game maps
-    """
     # This should be the same json interpretation that the logger uses.
     return _TODO
 actionDispatch['getMap'] = _getMap
 
-
+## Returns information about the server
+# @param parameters TODO - Explain valid parameters.
 def _serverInfo(game, parameters):
     """Returns information about the server
     """
@@ -117,23 +113,19 @@ actionDispatch['serverInfo'] = _serverInfo
 
 Action.actions = actionDispatch;
 
-
 class TestaActionHandler(TestCase):
-    """Holds the test cases to test the Action Handler
-    """
+    # Test cases for Action Handler
+
+	## Sets up variables required by each test case
     def setup(self):
-        """Sets up the variables that will be needed by each test case
-        """
         return
 
-    def testRespone(self):
-        """Test that the respone function formats the response correctly.
-        """
+    ## Test that the response() function formats the response correctly.
+    def testResponse(self):
         self.assertTrue(False)
 
+    ## Test that the sortActions() function correctly sorts the actions.
     def testSortAction(self):
-        """Test that the sortActions function correctly sorts the actions.
-        """
         pseudoBuffer = [
             {'priority': 0, 'name': 'last'},
             {'priority': 10, 'name': 'first'},
@@ -144,9 +136,8 @@ class TestaActionHandler(TestCase):
         self.assertEquals(pseudoBuffer[1]['name'], 'middle')
         self.assertEquals(pseudoBuffer[2]['name'], 'last')
 
+    ## Tests that the bufferAction function correctly adds an action to the buffer.
     def testBufferAction(self):
-        """Tests that the bufferAction function correctly adds an action to the buffer.
-        """
         validActions = retrieveConstants("actions")
         pseudoBuffer = []
         pseudoAction = validActions[0]
@@ -154,69 +145,56 @@ class TestaActionHandler(TestCase):
         self.assertFalse(not pseudoBuffer)
         self.assertEquals(pseudoBuffer[0], validActions[0])
 
+    ## Tests that the executeAction() function correctly executes the action given a valid action.
     def testExecuteActionExists(self):
-        """Tests that the execeuteAction function correctly executes the function given a valid function
-        """
         self.assertTrue(False)
 
+    ## Tests that the executeAction() function correctly responds given an invalid action.
     def testExecuteActionNotExists(self):
-        """Tests that the executeAction function correctly respons given an invalid action
-        """
         self.assertTrue(False)
 
+    ## Tests that the _movePlayer function returns the same thing as the player.move function given valid parameters.
     def test_movePlayerValid(self):
-        """Tests that the _movePlayer function returns the same thing as the player.move function given valid parameters.
-        """
         self.assertTrue(False)
 
+    ## Tests that the _movePlayer function returns _INVALID given invalid parameters.
     def test_movePlayerInvalid(self):
-        """Tests that the _movePlayer function returns _INVALID given invalid parameters
-        """
         self.assertTrue(False)
 
+    ## Tests that the _eatFood function returns the same thing as the player.eat function given valid parameters.
     def test_eatFoodValid(self):
-        """Tests that the _eatFood function returns the same thing as the player.eat function given valid parameters.
-        """
         self.assertTrue(False)
 
+    ## Tests that the _eatFood function returns _INVALID given invalid parameters.
     def test_eatFoodInvalid(self):
-        """Tests that the _eatFood function returns _INVALID given invalid parameters
-        """
         self.assertTrue(False)
 
+    ## Tests that the _sleep function returns the same thing as the player.sleep function given valid parameters.
     def test_sleepValid(self):
-        """Tests that the _sleep function returns the same thing as the player.sleep function given valid parameters.
-        """
         self.assertTrue(False)
 
+    ## Tests that the _sleep function returns _INVALID given invalid parameters
     def test_sleepInvalid(self):
-        """Tests that the _sleep function returns _INVALID given invalid parameters
-        """
         self.assertTrue(False)
 
+    ## Tests that the _code function returns the same thing as the player.code function given valid parameters.
     def test_codeValid(self):
-        """Tests that the _code function returns the same thing as the player.code function given valid parameters.
-        """
         self.assertTrue(False)
 
+    ## Tests that the _code function returns _INVALID given invalid parameters
     def test_codeInvalid(self):
-        """Tests that the _code function returns _INVALID given invalid parameters
-        """
         self.assertTrue(False)
 
+    ## Tests that the _getMap function returns the same thing as the loggers mapToJson function
     def test_getMap(self):
-        """Tests that the _getMap function returns the same thing as the loggers mapToJson function
-        """
         self.assertTrue(False)
 
+    ## Tests that the _serverInfo function returns correct information on the server from constants.json
     def test_serverInfo(self):
-        """Tests that the _serverInfo function returns correct information on the server from constants.json
-        """
         self.assertTrue(False)
 
+    ## Test that handleTurn returns the correct list of responses.
     def testHandleTurn(self):
-        """Test that handleTurn returns the correct list of responses.
-        """
         self.assertTrue(True)
 
 if __name__ == "__main__":

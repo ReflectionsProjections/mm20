@@ -1,55 +1,53 @@
 from random import randint
 class Room(object):
 
-    # Instance values (a complete list)
-    furniture = dict()      # A dictionary of furniture in the room (key = (x,y); value = "furniture name")
-    connected_rooms = []    # A list of rooms connected to the current one by doors
-    color = (0,0,0,0)       # The color of the room on the map
-
-    # Passes in objects to be placed within the room.
+    ## Initializes a Room object with the following attributes
+    # @param furniture A dict of furniture objects to be placed in the room of {key:value} format {name:(posX,posY)}
     def __init__(self, furniture=dict(), color = (0,0,0,0), connectedRooms=[]):
-        """
-        Initializes a room object with the following attributes
-        Keyword arguments:
-            furniture -- a dictionary of furniture objects to be placed in the room
-                         with a tuple key of coordinates for where it should be placed
-            
-        """
 
         # Initialize parameters
         self.furniture = furniture
         self.color = color
         self.connectedRooms = connectedRooms
 
-    """
-    Get connected rooms
-    """
+    ## Get connected rooms
     def getConnectedRooms(self):
         return self.connected_rooms
         
-    """
-    Add connected room
-    Doesn't allow duplicates (and will error if it encounters them)
-    """
+    
+    ## Connect one room to another (both ways)
+    # @throws ValueError Thrown if self and room are already connected
     def addConnectedRoom(self,room):
-        if room in self.connectedRooms:
-            raise ValueError("This room is already connected to that room.")
+        if isConnectedTo(room):
+            raise ValueError("These two rooms are already connected.")
         else:
             self.connectedRooms.append(room)
+            room.connectedRooms.append(self) # This goes both ways
     
-    """
-    Remove connected room
-    Won't error if the two rooms aren't connected
-    """
+    ## Remove connected room
+    # @errors Won't error if self and room aren't connected
     def removeConnectedRoom(self,room):
-        if room in self.connected_rooms:
+
+        # Check that connection goes both ways; otherwise error out
+        if isConnectedTo(room):
             self.connected_rooms.remove(room)
+            room.connected_rooms.remove(self)
             
-    """
-    Check if this room is connected to another
-    """
+    ##  Check if this room is connected to another
+    # @throws ValueError Thrown if self and room are only connected in one way (indicates an error somewhere upstream)
     def isConnectedToRoom(room):
-        return room in self.connected_rooms
+        counter = 0
+        if room in self.connectedRooms:
+            counter += 1
+        if self in room.connectedRooms:
+            counter += 1
+
+        # Error check
+        if counter == 1:
+            raise ValueError("The connection between these rooms only goes one way (i.e. A --> B, instead of A <-> B).")
+
+        # Done!
+        return counter == 2;
     
 
     # What is the point of this? furniture and self.furniture seem like the same thing - Ace

@@ -3,7 +3,7 @@ from unittest import TestCase, main
 
 
 class Action:
-    actions = None # This should be Initilzed to actionDispatch
+    actions = None # TODO This should be initialzed to actionDispatch
 
     def __init__(self, action, parameters, playerID):
         if not action in Action.actions:

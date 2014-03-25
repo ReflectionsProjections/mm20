@@ -2,6 +2,8 @@ from PIL import Image
 from Queue import Queue
 from objects.room import Room
 
+# Colors used for walls
+# TODO move to constants.py or something like that
 wallColors = [(0,0,0,255)]
 
 # For debugging
@@ -14,14 +16,15 @@ colorDict = {
     (76, 255, 0, 255):"green"
 }
 
-"""
-Returns a list of Rooms given a path to a map file
-The map file's colors must be exact i.e. (1,0,0) and (2,0,0) are considered different rooms
-"""
-def getRoomsFromMap(map_path):
+## Gets a list of Rooms (with connections) from a given map image
+# @param map_path A path to the map image
+# @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
+# @param stepSize The number of pixels the algorithm moves per step
+# @returns A list of Rooms if any exist, an empty list otherwise.
+def getRoomsFromMap(map_path, start=(2,2), stepSize=2):
 
-    # This function takes a path to a map file and turns it into a list of nodes (edges are stored on the nodes)
-
+    # NOTE: The map file's colors must be exact i.e. (1,0,0) and (2,0,0) are considered different rooms
+    
     # Open picture
     img = Image.open(map_path).convert("RGBA")
     pixels = img.load()
@@ -36,8 +39,7 @@ def getRoomsFromMap(map_path):
         visited.append(col)
    
     # Get connections between rooms
-    # - NOTE: This should NOT start on a wall (it throws an error if you do)
-    floodFillConnectionsIter((4,4),connections,pixels,visited,2)
+    floodFillConnectionsIter(start,connections,pixels,visited,stepSize)
    
     # Show picture
     rooms = []
@@ -59,7 +61,12 @@ def getRoomsFromMap(map_path):
 
 # --- INTERNAL CODE - DO NOT USE OUTSIDE OF THIS FILE ---
 
-# Gets the connections between rooms
+## [map_functions.py only] Gets the connections between rooms
+# @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
+# @param connections (Output) A dictionary of rooms used to store connections
+# @param pixels The pixels of the image (obtained using Image.load())
+# @param visited (Output) An array indicating which pixels have been visited
+# @param stepSize The number of pixels the algorithm moves per step
 def floodFillConnectionsIter(start,connections,pixels,visited,stepSize):
    
     # Queues
@@ -69,13 +76,17 @@ def floodFillConnectionsIter(start,connections,pixels,visited,stepSize):
     nodeQueue.put(start)
     parentQueue.put(start)
 
-    visitedLen = len(visited)
-    visitedLen2 = len(visited[0])
-   
+    width = len(visited)
+    height = len(visited[0])
+
+    # Make sure start is a 2-tuple of integers
+    if len(start) is not 2 or not isinstance(start[0],int) or not isinstance(start[1],int):
+        raise ValueError("Starting pixel must be a 2-tuple of integers.")
+
     # Make sure this wasn't started on a wall or out of bounds
     x = start[0]
     y = start[1]
-    if (x < 0 or y < 0) or (visitedLen <= x or visitedLen2 <= y):
+    if (x < 0 or y < 0) or (width <= x or height <= y):
         raise ValueError("Starting pixel must not be out of bounds.")
     if pixels[x,y] in wallColors:
         raise ValueError("Starting pixel must not be a wall.")
@@ -90,7 +101,7 @@ def floodFillConnectionsIter(start,connections,pixels,visited,stepSize):
         y = node[1]
    
         # Base case 1: out of bounds
-        if (x < 0 or y < 0) or (visitedLen <= x or visitedLen2 <= y):
+        if (x < 0 or y < 0) or (width <= x or height <= y):
             continue
          
         # Base case 2: hit black
@@ -129,6 +140,6 @@ def floodFillConnectionsIter(start,connections,pixels,visited,stepSize):
             
 # Do something (if appropriate)
 if __name__ == "__main__":
-    getRoomsFromMap("/home/ace/Desktop/mm20/src/rooms.bmp")
+    getRoomsFromMap("./rooms.bmp")
    
    
