@@ -30,6 +30,7 @@ class MMServer():
         self.log = log
         self.timeLimit = timeLimit
         self.maxDataSize = maxDataSize
+        self.initialTimeLimit = constants["initialConnectTime"]
 
     ##
     #   Runs the game
@@ -52,16 +53,55 @@ class MMServer():
             (clientsocket, address) = serversocket.accept()
             playerConnections[i] = clientsocket
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
+
+        #Accept starting connection first
+        starting = True
+        while starting:
+            #Receive info
+            ready = select.select(playerConnections, [], [], self.initialTimeLimit)
+            if ready[0] == [] :
+                #TODO: How to handle timeout when connecting? Forfeit?
+                for i in range(0, self.maxPlayers):
+                    if turnObjects[i] is None:
+                        turnObjects[i] = '{ "error" : "Timeout on initial connection, auto-forfeit" }'
+                        validTurns = validTurns + 1
+            else:
+                for connection in ready[0]:
+                    #Receive data
+                    data = connection.recv(self.maxDataSize)
+                    player = lookupPlayer[connection]
+                    if turnObjects[player] is None:
+                        try:
+                            jsonObject = json.loads(data)
+                        except ValueError, TypeError:
+                            jsonObject = json.loads('{}')
+                        (success, response) = self.game.add_new_team(jsonObject, player)
+                        if success:
+                            turnObjects[player] = response
+                            validTurns = validTurns+1
+            if validTurns == self.maxPlayers:
+
+                starting = False
+
+                #Return turn info back to the clients
+                for i in range(0, self.maxPlayers):
+                    try:
+                        playerConnections[i].send(json.dumps(turnObjects[i], ensure_ascii=True))
+                    except IOError:
+                        pass
+
+        validTurns = 0
+        for i in range(0, self.maxPlayers):
+            turnObjects[i]=None
         currTime = time.time()
         endTime = time.time() + self.timeLimit
         running = True
         while running:
-            #TODO: Accept starting connection info
             #Receive info
-            ready = None
+            ready = [[],[],[]]
             if endTime - currTime > 0:
                 ready = select.select(playerConnections, [], [], endTime - currTime)
-            if ready is None:
+            if ready[0] == []:
                 #Timeout
                 for i in range(0, self.maxPlayers):
                     if turnObjects[i] is None:

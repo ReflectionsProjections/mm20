@@ -16,6 +16,7 @@
     "log": "log.txt",
     "port": 8080,
     "time": 0.01,
+    "initialConnectTime": 1,
     "maxDataSize": 1024
     },
   "rooms": {
