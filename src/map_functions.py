@@ -140,6 +140,6 @@ def floodFillConnectionsIter(start,connections,pixels,visited,stepSize):
             
 # Do something (if appropriate)
 if __name__ == "__main__":
-    getRoomsFromMap("/home/ace/Desktop/mm20/src/rooms.bmp")
+    getRoomsFromMap("./rooms.bmp")
    
    

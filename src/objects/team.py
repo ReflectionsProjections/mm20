@@ -3,6 +3,7 @@ from ai import AI
 
 
 class Team(object):
+
     # Attributes:
     #   teamName = ""
     #   color = ""
@@ -10,6 +11,9 @@ class Team(object):
     #   numMembers = 0
     teamCount = 0
 
+    ## Initialize a Team
+    # @param teamName The name of the Team
+    # @param members The members of the Team (should be TeamMember objects)
     def __init__(self, teamName, members):
         self.teamName = teamName
         self.color = ""
