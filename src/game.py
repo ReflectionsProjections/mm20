@@ -6,14 +6,14 @@ import action_handler
 
 class Game(object):
 
-    # Initial values
-    rooms = []
-    turn = 0
-    action_buffer = []
-    msg_buffer = {}
-
     # Initialize the server (only called once)
     def __init__(self, file_url):
+        
+        # Initialize values
+        rooms = []
+        turn = 0
+        action_buffer = []
+        msg_buffer = {}
         
         # Get a list of rooms
         self.rooms = map_reader(file_url)

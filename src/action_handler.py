@@ -3,7 +3,8 @@ from config.handle_constants import retrieveConstants
 from objects.client_action import Action
 from unittest import TestCase, main
 
-actionDispatch = {}
+def __init__(self):
+    actionDispatch = {}
 
 ## Create a response (on the client) to be sent to the server.
 # @param status_code TODO
