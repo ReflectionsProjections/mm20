@@ -22,19 +22,11 @@ def handleTurn(game, action_buffer):
     it sorts then and executes them by the given prioity.
     """
     
-    action_buffer.sort(lambda a,b: a.priority - b.priority, reverse=True)
+    action_buffer.sort(lambda a,b: a.priority - b.priority, reverse=True) #TODO: test this function
     for action in action_buffer:
-        game.msg_buffer[action.playerID] = executeAction(game, action)
+        game.msg_buffer[action.playerID].append(executeAction(game, action))
     return
 
-
-def sortActions(actionBuffer):
-    """Sort the actions in the action buffer by their priority attribute
-    """
-    # TODO
-    # sort the actions in actionBuffer by priority, see the python
-    # built-in sort function
-    return
 
 
 def bufferAction(actionBuffer, action, parameters, playerID):
@@ -115,7 +107,7 @@ def _serverInfo(game, parameters):
     return response(200, version=constants.VERSION, name=constants.NAME)
 actionDispatch['serverInfo'] = _serverInfo
 
-Action.actions = actionDispatch;
+Action.actions = actionDispatch
 
 
 class TestaActionHandler(TestCase):

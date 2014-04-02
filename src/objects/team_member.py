@@ -19,7 +19,7 @@ class TeamMember(object):
         Moves the player to the desired room
         How will this be worked out visually, pathfinding?
         """
-        self.location = destinations
+        self.location = destinations #TODO: Fix the typo on this line. Also, add tests
 
     def eat(foodTable):
         """

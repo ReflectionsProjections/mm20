@@ -14,7 +14,7 @@ class Action:
         #what is key used for?
         self.owner = playerID
         self.priority = 30
-        #TODO find a good way to set this
+        #TODO find a good way to set the priority
 
 #Action.actions = retrieveConstants("actions")
 

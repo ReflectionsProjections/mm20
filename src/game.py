@@ -16,6 +16,8 @@ class Game(object):
         self.turn = 0
         self.action_buffer = []
         self.msg_buffer = {}
+        #TODO: populate self.people
+        self.people= {}
 
         
     ##  Adds a new team and returns success / failure message
@@ -30,8 +32,9 @@ class Game(object):
     ##  Actually execute queued actions
     #   @return True if the game is running, False if the game ended
     def execute_turn(self):
-        action_list = []
-        action_handler.handleTurn(self, action_list)
+        action_handler.handleTurn(self, self.action_buffer)
+        self.action_buffer = []
+        #TODO check if the game is running
         return False
 
     ##  Get these actions ready to execute
