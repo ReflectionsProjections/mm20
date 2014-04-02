@@ -7,12 +7,11 @@ import action_handler
 class Game(object):
 
     # Initialize the server (only called once)
+
     def __init__(self, file_url):
-        """
-        This is called once to init the server
-        the map reader will return a list of rooms that have been
-        linked together as defined in the design doc.
-        """
+
+        # the map reader will return a list of rooms that have bee
+        # linked together as defined in the design doc.
         self.rooms = map_reader(file_url)
         self.turn = 0
         self.action_buffer = []
@@ -20,7 +19,6 @@ class Game(object):
         #TODO: populate self.people
         self.people= {}
 
-        
     ##  Adds a new team and returns success / failure message
     #   @param data The data sent by the player to set up state
     #   @param playerID The ID assigned to that player by the server

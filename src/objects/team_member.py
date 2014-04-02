@@ -35,9 +35,14 @@ class TeamMember(object):
     ## Adjusts the team's AI's stats
     # @param attribute The attribute to change
     # @param amount The amount of change it by (need not be positive)
-    def code(team, attribute, amount):
-        # TODO Why is this not called changeAiAttribute? That makes more sense to me... - Ace
-        team.ai.changeAttribute(attribute, amount)
+    def code(team, attribute):
+
+        # TODO 10 should be loaded from a constants file and should be based on the attribute.
+        # e.g the amount of change whe working on optimization might be diffent from stability
+        # Also this will be based on a funtion that take time spent and player attributes into consderaion
+        
+        
+        team.ai.changeAttribute(attribute, 10)
 
 
 #this is how you can do simple tests

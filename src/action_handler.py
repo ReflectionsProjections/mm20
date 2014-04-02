@@ -1,5 +1,5 @@
-"""@actionHandler Handles the client's actions sent to the engine from the server.
-"""
+## actionHandler Handles the client's actions sent to the engine from the server.
+
 from config.handle_constants import retrieveConstants
 from objects.client_action import Action
 from unittest import TestCase, main
