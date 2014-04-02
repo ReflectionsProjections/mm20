@@ -15,7 +15,7 @@ class Game(object):
         self.rooms = map_reader(file_url)
         self.turn = 0
         self.action_buffer = []
-        self.msg_buffer = {};
+        self.msg_buffer = {}
 
         
     ##  Adds a new team and returns success / failure message
