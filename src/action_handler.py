@@ -1,10 +1,10 @@
-# actionHandler - Handles the client's actions sent to the engine from the server.
+"""@actionHandler Handles the client's actions sent to the engine from the server.
+"""
 from config.handle_constants import retrieveConstants
 from objects.client_action import Action
 from unittest import TestCase, main
 
-def __init__(self):
-    actionDispatch = {}
+actionDispatch = {}
 
 ## Create a response (on the client) to be sent to the server.
 # @param status_code TODO
@@ -18,9 +18,9 @@ _INVALID = response(404, message="invalid call")
 ## Takes in a list of json actions taken by all of the clients and executes them.
 def handleTurn(game, action_buffer):
     
-    action_buffer.sort(lambda a,b: a.priority - b.priority, reverse=True)
+    action_buffer.sort(lambda a,b: a.priority - b.priority, reverse=True) #TODO: test this function
     for action in action_buffer:
-        game.msg_buffer[action.playerID] = executeAction(game, action)
+        game.msg_buffer[action.playerID].append(executeAction(game, action))
     return
 
 ## Sort the actions in the action buffer by their priority.
@@ -111,7 +111,7 @@ def _serverInfo(game, parameters):
     return response(200, version=constants.VERSION, name=constants.NAME)
 actionDispatch['serverInfo'] = _serverInfo
 
-Action.actions = actionDispatch;
+Action.actions = actionDispatch
 
 class TestaActionHandler(TestCase):
     # Test cases for Action Handler

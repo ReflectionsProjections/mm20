@@ -8,11 +8,18 @@ class Game(object):
 
     # Initialize the server (only called once)
     def __init__(self, file_url):
-
+        """
+        This is called once to init the server
+        the map reader will return a list of rooms that have been
+        linked together as defined in the design doc.
+        """
         self.rooms = map_reader(file_url)
         self.turn = 0
         self.action_buffer = []
-        self.msg_buffer = {};
+        self.msg_buffer = {}
+        #TODO: populate self.people
+        self.people= {}
+
         
     ##  Adds a new team and returns success / failure message
     #   @param data The data sent by the player to set up state
@@ -26,8 +33,9 @@ class Game(object):
     ##  Actually execute queued actions
     #   @return True if the game is running, False if the game ended
     def execute_turn(self):
-        action_list = []
-        action_handler.handleTurn(self, action_list)
+        action_handler.handleTurn(self, self.action_buffer)
+        self.action_buffer = []
+        #TODO check if the game is running
         return False
 
     ##  Get these actions ready to execute
