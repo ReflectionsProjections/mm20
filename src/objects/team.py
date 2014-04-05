@@ -3,6 +3,7 @@ from ai import AI
 from team_member import TeamMember
 
 
+## This class represents a team competing in the game.
 class Team(object):
 
     # Attributes:
