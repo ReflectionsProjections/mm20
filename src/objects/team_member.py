@@ -6,13 +6,15 @@ class TeamMember(object):
     # @param name The name of the TeamMember (e.g. "Sam")
     # @param archetype The archetype of the TeamMember (e.g. "Coder")
     # @param location The location that the TeamMember will start in
-    def __init__(self, name, archetype, location, team):
+    def __init__(self, name, archetype, location, team, people):
 
         self.energy = 100
         self.name = name
         self.archetype = archetype #TODO Archetypes should be defined in constants along with characteristics
         self.location = location
         self.team = team
+        self.person_id = len(people)
+         
 
     ## Moves the player to the desired room
     # @param Destination The Room to move to

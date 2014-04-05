@@ -12,11 +12,13 @@ class Team(object):
     #   The members of the Team (should be a list of dicts with name and class)
     # @param startingLocation
     #   The starting location of members
-    def __init__(self, name, members, startingLocation):
+    def __init__(self, name, members, startingLocation, people):
         self.name = name
         self.members = dict()
         for member in members:
-            self.members[member["name"]] = (TeamMember(member["name"], member["class"], startingLocation, self))
+            newMember = (TeamMember(member["name"], member["class"], startingLocation, self, people))
+            self.members[member["name"]] = newMember
+            people.append(newMember)
         self.numMembers = len(members)
         self.ai = AI()
 
