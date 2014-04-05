@@ -11,8 +11,6 @@ class Action:
             raise KeyError("Action not defined")
         self.action = action
         self.parameters = parameters
-        self.key = self.parameters['target']
-        #what is key used for?
         self.owner = client_id
         self.priority = Action.priorities[action]
 
