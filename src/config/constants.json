@@ -1,11 +1,4 @@
 {
-  "aiDefaults": {
-    "optimization": 0,
-    "stability": 0,
-    "complexity": 0,
-    "theory": 0,
-    "implementation": 0
-  },
   "generalInfo": {
     "VERSION": 0.0,
     "NAME": "Meta-Mania",
@@ -19,7 +12,38 @@
     "time": 0.01,
     "initialConnectTime": 1,
     "maxDataSize": 1024
+  },
+  "actions": [
+    "movePlayer",
+    "eatFood",
+    "code",
+    "sleep"
+  ],
+  "aiDefaults": {
+    "optimization": 0,
+    "stability": 0,
+    "complexity": 0,
+    "theory": 0,
+    "implementation": 0
+  },
+  "archetypes": {
+    "Coder": {
+      "codingProwess": 10,
+      "energy": 100
     },
+    "Theorist": {
+      "codingProwess": 5,
+      "energy": 100
+    },
+    "Architect": {
+      "codingProwess": 7,
+      "energy": 100
+    },
+    "Informant": {
+      "codingProwess": 3,
+      "energy": 100
+    }
+  },
   "rooms": {
     "lab": {
       "key": "255.255.255",
@@ -59,11 +83,5 @@
         }
       ]
     }
-  },
-  "actions": [
-    "movePlayer",
-    "eatFood",
-    "code",
-    "sleep"
-  ]
+  }
 }
