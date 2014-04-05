@@ -8,6 +8,6 @@ s.sendall('{"team":"test", "members":[{"name":"test1", "class":"test"},{"name":"
 data = s.recv(1024)
 while len(data) > 0: #TODO: Need check for game over
     print 'Received', repr(data)
-    s.sendall('{}') #TODO: send actual stuff
+    s.sendall('[{"action":"serverInfo"}]')
     data = s.recv(1024)
 s.close()
