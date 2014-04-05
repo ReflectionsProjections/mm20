@@ -5,8 +5,12 @@ class Room(object): #TODO: This class doesn't need to know what the furniture's 
     def __init__(self, furniture=dict(), color=(0, 0, 0, 0), connectedRooms=[]):
         # Initialize parameters
         self.furniture = furniture
-        self.color = color
+        self.name = name
         self.connectedRooms = connectedRooms
+
+    def __str__(self):
+        return "<id:{}, connected_rooms:{}>".format(name, connectedRooms.keys)
+        
 
     ## Get connected rooms
     def getConnectedRooms(self):
