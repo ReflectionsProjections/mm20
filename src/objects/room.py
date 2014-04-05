@@ -10,7 +10,7 @@ class Room(object):
     # @param name
     #   The identifier of the room.
     # @param furniture
-    #   Test
+    #   TODO
     def __init__(self, name):
         self.connectedRooms = dict()
         self.name = name
