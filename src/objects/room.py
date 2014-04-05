@@ -1,7 +1,7 @@
 from unittest import TestCase, main
 
 
-## This class manages "rooms" which are nodes on our locations graph.
+## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
 #  Rooms contain team members and furniture (TODO)
 class Room(object):
@@ -10,7 +10,7 @@ class Room(object):
     # @param name
     #   The identifier of the room.
     # @param furniture
-    #   Test
+    #   TODO
     def __init__(self, name):
         self.connectedRooms = dict()
         self.name = name
@@ -60,6 +60,7 @@ class Room(object):
         return room.name in self.connectedRooms
 
 
+## Tests that all of the functionality in Room works correctly
 class TestRoom(TestCase):
     def setUp(self):
         self.room = Room("testRoom")
