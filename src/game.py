@@ -15,13 +15,13 @@ class Game(object):
 
         # the map reader will return a list of rooms that have bee
         # linked together as defined in the design doc.
-        self.rooms = map_reader(file_url)
+        self.rooms = {i.name: i for i in map_reader(file_url)}
         self.turn = 0
         #self.turn_limit = retrieveConstants("generalInfo")["TURNLIMIT"]
         self.turn_limit = 80
         self.action_buffer = []
         self.msg_buffer = {}
-        self.teams = []
+        self.teams = {}
 
     ##  Adds a new team and returns success / failure message
     #   @param data The data sent by the player to set up state
@@ -31,10 +31,11 @@ class Game(object):
         response = {}
         
         try:
-            newTeam = Team(data["team"], data["members"], rooms[STARTING_ROOM])
+            newTeam = Team(data["team"], data["members"], self.rooms[STARTING_ROOM])
         except KeyError:
             return (False, response)
         self.msg_buffer[client_id] = []
+        self.teams[client_id] = newTeam
         return (True, response)
 
     ##  Actually execute queued actions
