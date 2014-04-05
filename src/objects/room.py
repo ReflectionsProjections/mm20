@@ -1,5 +1,5 @@
 from random import randint
-class Room(object):
+class Room(object): #TODO: This class doesn't need to know what the furniture's location is, it just needs to know that it exists
 
     ## Initializes a Room object with the following attributes
     # @param furniture A dict of furniture objects to be placed in the room of {key:value} format {name:(posX,posY)}
@@ -35,7 +35,7 @@ class Room(object):
             
     ##  Check if this room is connected to another
     # @throws ValueError Thrown if self and room are only connected in one way (indicates an error somewhere upstream)
-    def isConnectedToRoom(room):
+    def isConnectedToRoom(self, room):
         counter = 0
         if room in self.connectedRooms:
             counter += 1
@@ -64,32 +64,12 @@ class Room(object):
     # What is the point of this? furniture and self.furniture seem like the same thing - Ace
     # (were you intending furniture to be something outside of this class? if so, you should
     #  pass it in as an argument)
-    def placeFurniture(furn, x, y):
+    def placeFurniture(self, furn, x, y):
         
         """
         Adds the furniture object to the dictionary and places it at a given coordinate
         """
-        furniture[(x,y)] = furn
-        
-    # This randomly moves furniture around the map. Are you sure it wouldn't be a better idea
-    # to use a function that generate a random coordinate and simply move furniture to its
-    # result? - Ace   
-    def randomizeCoord(self, oldX, oldY):
-    
-        """
-        Moves a piece of furniture to a random empty spot in the room
-        """
-        oldCoord = (oldX, oldY)
-
-        x = randint(0, self.width)
-        y = randint(0, self.length)
-        newCoord = (x,y)
-        if newCoord not in self.furniture:
-            self.furniture[newCoord] = self.furniture[oldCoord]
-            self.furniture.pop(oldCoord,None)
-        else:
-            randomizeCoord(oldX,oldY) # This should be done with a loop instead of recursion (it's more natural that way IMHO - functionalitywise, it doesn't matter as long as we don't encounter stack overflows)
-        pass
+        self.furniture[(x,y)] = furn
 
 
     def removeFurniture(furn):
