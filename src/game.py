@@ -22,6 +22,7 @@ class Game(object):
         self.action_buffer = []
         self.msg_buffer = {}
         self.teams = {}
+        self.people = []
 
     ##  Adds a new team and returns success / failure message
     #   @param data The data sent by the player to set up state
@@ -29,13 +30,14 @@ class Game(object):
     #   @return A (bool, dict) tuple stating success or failure and listing errors or sending starting info to the player
     def add_new_team(self, data, client_id):
         response = {}
-        
         try:
-            newTeam = Team(data["team"], data["members"], self.rooms[STARTING_ROOM])
+            newTeam = Team(data["team"], data["members"],
+                           self.rooms[STARTING_ROOM],self.people)
         except KeyError:
             return (False, response)
         self.msg_buffer[client_id] = []
         self.teams[client_id] = newTeam
+        
         return (True, response)
 
     ##  Actually execute queued actions

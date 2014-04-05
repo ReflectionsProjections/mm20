@@ -19,6 +19,7 @@ class TeamMember(object):
         self.archetype = TeamMember.Archetypes[archetype]
         self.location = location
         self.team = team
+        self.person_id = len(people)
         self.energy = TeamMember.Archetypes[archetype]["energy"]
 
     ## Moves the team member from one room to another.
