@@ -1,6 +1,6 @@
-from unittest import TestCase, main
-from ai import AI
-from team_member import TeamMember
+import unittest
+import ai
+import team_member
 
 
 ## This class represents a team competing in the game.
@@ -16,12 +16,12 @@ class Team(object):
         self.name = name
         self.members = dict()
         for member in members:
-            self.members[member["name"]] = (TeamMember(member["name"], member["class"], startingLocation, self))
+            self.members[member["name"]] = (team_member.TeamMember(member["name"], member["class"], startingLocation, self))
         self.numMembers = len(members)
-        self.ai = AI()
+        self.ai = ai.AI()
 
 
-class TestTeam(TestCase):
+class TestTeam(unittest.TestCase):
     def setUp(self):
         self.team = Team("testTeam",
                          [
@@ -36,4 +36,4 @@ class TestTeam(TestCase):
         self.assertEqual(self.team.numMembers, 2)
 
 if __name__ == "__main__":
-    main()
+    unittest.main()

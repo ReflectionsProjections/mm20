@@ -12,7 +12,6 @@ class Room(object):
     # @param furniture
     #   Test
     def __init__(self, room_id):
-
         self.connectedRooms = dict()
         self.name = room_id
 
@@ -61,14 +60,19 @@ class Room(object):
         return room.name in self.connectedRooms
 
 
-## Tests that all of the functionality in Room works correctly
+## ## Tests all of the functionality in Room
 class TestRoom(TestCase):
     def setUp(self):
         self.room = Room("testRoom")
 
-    def testInit(self):
-        self.assertEqual(self.room.name, "testRoom")
-        self.assertFalse(self.room.getConnectedRooms())
+    def testInitCorrect(self):
+        room = Room("testRoom")
+        self.assertEqual(room.name, "testRoom")
+        self.assertFalse(room.getConnectedRooms())
+
+    def testInitIncorrect(self):
+        with self.assertEqual(TypeError):
+            Room(None)
 
     def testConnectAValidRoom(self):
         roomTwo = Room("testRoom2")
