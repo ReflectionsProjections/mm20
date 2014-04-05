@@ -1,18 +1,24 @@
+from config.handle_constants import retrieveConstants
+
+
+## Holds information and functions for individual team members
 class TeamMember(object):
-
     _INVALID = "Invalid Request"
+    Archetypes = retrieveConstants("archetypes")
 
-    ## Initializes a TeamMember with name, archetype, and coordinates
-    # @param name The name of the TeamMember (e.g. "Sam")
-    # @param archetype The archetype of the TeamMember (e.g. "Coder")
-    # @param location The location that the TeamMember will start in
+    ## Initializes a TeamMember with name, archetype, and team
+    # @param name
+    #   The name of the TeamMember
+    # @param archetype
+    #   The archetype of the TeamMember
+    # @param location
+    #   The location that the TeamMember will start in
     def __init__(self, name, archetype, location, team):
-
-        self.energy = 100
         self.name = name
-        self.archetype = archetype #TODO Archetypes should be defined in constants along with characteristics
+        self.archetype = archetype
         self.location = location
         self.team = team
+        self.energy = TeamMember.Archetypes[archetype]["energy"]
 
     ## Moves the player to the desired room
     # @param Destination The Room to move to
@@ -41,8 +47,6 @@ class TeamMember(object):
         # TODO 10 should be loaded from a constants file and should be based on the attribute.
         # e.g the amount of change whe working on optimization might be diffent from stability
         # Also this will be based on a funtion that take time spent and player attributes into consderaion
-        
-        
         team.ai.changeAttribute(attribute, 10)
 
 
