@@ -46,17 +46,17 @@ class Room(object):
     #   this room.
     # @return
     #   Returns whether this room is connected to the passed in room.
-    def isConnectedToRoom(self, room):
+    def isConnectedTo(self, room):
         pass  # TODO
 
 
 class TestRoom(TestCase):
-    def setup(self):
+    def setUp(self):
         self.room = Room("testRoom")
 
     def testInit(self):
         self.assertEqual(self.room.name, "testRoom")
-        self.assertTrue(self.room.getConnectedRooms().empty())
+        self.assertFalse(self.room.getConnectedRooms())
 
     def testConnectAValidRoom(self):
         roomTwo = Room("testRoom2")
@@ -65,19 +65,19 @@ class TestRoom(TestCase):
 
     def testConnectAnInvalidRoom(self):
         with self.assertRaises(TypeError):
-            self.room.connectedRoom("NotARoom")
+            self.room.connectRoom("NotARoom")
 
     def testConnectARoomAlreadyConnected(self):
         roomTwo = Room("testRoom2")
         self.room.connectRoom(roomTwo)
         with self.assertRaises(ValueError):
-            self.room.connectedRoom(roomTwo)
+            self.room.connectRoom(roomTwo)
 
     def testDisconnectRoom(self):
         roomTwo = Room("testRoom2")
-        self.room.connectedRoom(roomTwo)
+        self.room.connectRoom(roomTwo)
         self.room.disconnectRoom(roomTwo)
-        self.assertTrue(self.room.getConnectedRooms().empty())
+        self.assertFalse(self.room.getConnectedRooms())
 
     def testDisconnectNotARoom(self):
         with self.assertRaises(TypeError):
