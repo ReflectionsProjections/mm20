@@ -48,6 +48,7 @@ class MMServer():
         playerConnections = [None for i in range(0, self.maxPlayers)]
         turnObjects = [None for i in range(0, self.maxPlayers)]
         validTurns = 0
+        print 'connecting ...'
         #Accept connections from correct number of players
         for i in range(0, self.maxPlayers):
             (clientsocket, address) = serversocket.accept()
