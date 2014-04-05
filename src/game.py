@@ -5,6 +5,8 @@ from map_functions import getRoomsFromMap as map_reader
 from config.handle_constants import retrieveConstants
 import action_handler
 
+STARTING_ROOM = (72, 0, 255, 255)
+
 class Game(object):
 
     # Initialize the server (only called once)
@@ -13,13 +15,13 @@ class Game(object):
 
         # the map reader will return a list of rooms that have bee
         # linked together as defined in the design doc.
-        self.rooms = map_reader(file_url)
+        self.rooms = {i.name: i for i in map_reader(file_url)}
         self.turn = 0
         #self.turn_limit = retrieveConstants("generalInfo")["TURNLIMIT"]
         self.turn_limit = 80
         self.action_buffer = []
         self.msg_buffer = {}
-        self.teams = []
+        self.teams = {}
 
     ##  Adds a new team and returns success / failure message
     #   @param data The data sent by the player to set up state
@@ -27,11 +29,13 @@ class Game(object):
     #   @return A (bool, dict) tuple stating success or failure and listing errors or sending starting info to the player
     def add_new_team(self, data, client_id):
         response = {}
+        
         try:
-            newTeam = Team(data["team"], data["members"], Room("default"))
+            newTeam = Team(data["team"], data["members"], self.rooms[STARTING_ROOM])
         except KeyError:
             return (False, response)
         self.msg_buffer[client_id] = []
+        self.teams[client_id] = newTeam
         return (True, response)
 
     ##  Actually execute queued actions

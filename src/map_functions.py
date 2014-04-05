@@ -44,10 +44,10 @@ def getRoomsFromMap(map_path, start=(2,2), stepSize=2):
     # Show picture
     rooms = []
     for c in connections:
-        room = Room(name=c)
+        room = Room(c)
         rooms.append(room)
     for i in range(0,len(rooms)):
-        rooms[i].connections = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
+        rooms[i].connectedRooms = dict([(r.name, r) for r in rooms if r.name in connections[rooms[i].name]])
     
     # Done!
     """
