@@ -53,7 +53,7 @@ def bufferAction(actionBuffer, action, parameters, client_id):
 # @returns An actionDispatch object indicating (TODO - indicating what?) if the action is successful, a 404 "Invalid Call" response otherwise
 def executeAction(game, action):
     if action.action in actionDispatch:
-        return actionDispatch[action.key](game, action.parameters)
+        return actionDispatch[action.action](game, action.parameters)
     else:
         return response(404, message="invalid call")
 
@@ -115,7 +115,7 @@ def _serverInfo(game, parameters):
     """Returns information about the server
     """
     constants = retrieveConstants('generalInfo')
-    return response(200, version=constants.VERSION, name=constants.NAME)
+    return response(200, version=constants["VERSION"], name=constants["NAME"])
 actionDispatch['serverInfo'] = _serverInfo
 actionPriorities['serverInfo'] = 100
 
