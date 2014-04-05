@@ -5,48 +5,35 @@ from team_member import TeamMember
 
 ## This class represents a team competing in the game.
 class Team(object):
-
-    # Attributes:
-    #   teamName = ""
-    #   color = ""
-    #   members = []
-    #   numMembers = 0
-
     ## Initialize a Team
-    # @param teamName The name of the Team
-    # @param members The members of the Team (should be a list of dicts with name and class)
-    # @param location The starting location of members
-    def __init__(self, teamName, members, location):
-        self.teamName = teamName
-        self.color = ""
-        self.members = []
-        for m in members:
-            self.members.append(TeamMember(m["name"], m["class"], location, self))
+    # @param name
+    #   The name of the Team
+    # @param members
+    #   The members of the Team (should be a list of dicts with name and class)
+    # @param startingLocation
+    #   The starting location of members
+    def __init__(self, name, members, startingLocation):
+        self.name = name
+        self.members = dict()
+        for member in members:
+            self.members[member["name"]] = (TeamMember(member["name"], member["class"], startingLocation, self))
         self.numMembers = len(members)
         self.ai = AI()
 
 
 class TestTeam(TestCase):
     def setUp(self):
-        pass
+        self.team = Team("testTeam",
+                         [
+                             {"name": "Steve", "class": "Aristocrat"},
+                             {"name": "Bob", "class": "Commoner"}
+                         ], "Narnia")
 
-    def test_(self):
-        pass
-
-    def test_2(self):
-        pass
+    def testInit(self):
+        self.assertEqual(self.team.name, "testTeam")
+        self.assertIn("Steve", self.team.members)
+        self.assertIn("Bob", self.team.members)
+        self.assertEqual(self.team.numMembers, 2)
 
 if __name__ == "__main__":
-    EightBL = Team("teamName", ["Hello", "Goodbye"])
-    print EightBL.teamName
-    print EightBL.members[0]
-    print EightBL.numMembers
-    print EightBL.teamNum
-
-    NineBL = Team("fdjaklfasjlkfajlfk", ["What?", "jfkdaljfla"])
-    print NineBL.teamName
-    print NineBL.members[0]
-    print NineBL.numMembers
-    print NineBL.teamNum
-
     main()
