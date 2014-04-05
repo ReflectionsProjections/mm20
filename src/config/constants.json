@@ -8,7 +8,8 @@
   },
   "generalInfo": {
     "VERSION": 0.0,
-    "NAME": "Meta-Mania"
+    "NAME": "Meta-Mania",
+    "TURNLIMIT": 2880
   },
   "serverDefaults": {
     "players": 2,

@@ -16,7 +16,7 @@ import game
 
 constants = json.loads(open("config/constants.json").read())["serverDefaults"]
 
-class MMServer():
+class MMServer( object ):
     ##
     #   Constructs the server
     #   @param numPlayers number of players entering the game

@@ -21,7 +21,7 @@ class Team(object):
         self.color = ""
         self.members = []
         for m in members:
-            self.members.append(m["name"], m["class"], location, self)
+            self.members.append(TeamMember(m["name"], m["class"], location, self))
         self.numMembers = len(members)
         self.teamNum = Team.teamCount
         Team.teamCount += 1

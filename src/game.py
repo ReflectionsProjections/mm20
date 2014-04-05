@@ -14,6 +14,7 @@ class Game(object):
         # linked together as defined in the design doc.
         self.rooms = map_reader(file_url)
         self.turn = 0
+        self.turn_limit = 80 #Load this in from constants
         self.action_buffer = []
         self.msg_buffer = {}
         self.teams = []
@@ -25,7 +26,7 @@ class Game(object):
     def add_new_team(self, data, client_id):
         response = {}
         try:
-            newTeam = Team(data["team"], data["members"], location)
+            newTeam = Team(data["team"], data["members"], Room())
         except KeyError:
             return (False, response)
         self.msg_buffer[client_id] = []
@@ -36,8 +37,10 @@ class Game(object):
     def execute_turn(self):
         action_handler.handleTurn(self, self.action_buffer)
         self.action_buffer = []
-        #TODO check if the game is running
-        return False
+        self.turn += 1
+        if self.turn >= self.turn_limit:
+            return False
+        return True
 
     ##  Get these actions ready to execute
     #   @param action_list A list of actions to be queued
