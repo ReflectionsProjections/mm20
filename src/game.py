@@ -5,6 +5,8 @@ from map_functions import getRoomsFromMap as map_reader
 from config.handle_constants import retrieveConstants
 import action_handler
 
+STARTING_ROOM = (72, 0, 255, 255)
+
 class Game(object):
 
     # Initialize the server (only called once)
@@ -27,8 +29,9 @@ class Game(object):
     #   @return A (bool, dict) tuple stating success or failure and listing errors or sending starting info to the player
     def add_new_team(self, data, client_id):
         response = {}
+        
         try:
-            newTeam = Team(data["team"], data["members"], Room("default"))
+            newTeam = Team(data["team"], data["members"], rooms[STARTING_ROOM])
         except KeyError:
             return (False, response)
         self.msg_buffer[client_id] = []
