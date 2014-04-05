@@ -2,6 +2,7 @@ from objects.room import Room
 from objects.team import Team
 from objects.team_member import TeamMember
 from map_functions import getRoomsFromMap as map_reader
+from config.handle_constants import retrieveConstants
 import action_handler
 
 class Game(object):
@@ -14,7 +15,8 @@ class Game(object):
         # linked together as defined in the design doc.
         self.rooms = map_reader(file_url)
         self.turn = 0
-        self.turn_limit = 80 #Load this in from constants
+        #self.turn_limit = retrieveConstants("generalInfo")["TURNLIMIT"]
+        self.turn_limit = 80
         self.action_buffer = []
         self.msg_buffer = {}
         self.teams = []
