@@ -29,16 +29,24 @@ class Room(object):
     #   Throws a value error if this room and the passed in
     #   room are already connected.
     def connectRoom(self, room):
+        if not isinstance(room, Room):
+            raise TypeError("room is not a Room Object")
         if self.isConnectedTo(room):
             raise ValueError("These two rooms are already connected.")
         else:
-            pass  # TODO
+            self.connectedRooms[room.name] = room
+            room.connectedRooms[self.name] = self
 
     ## Disconnects two rooms
     # @param room
     #   The room to disconnect from this room
     def disconnectRoom(self, room):
-        pass  # TODO
+        if not isinstance(room, Room):
+            raise TypeError("room is not a Room Object")
+        if not self.isConnectedTo(room):
+            raise KeyError("These two rooms are not connected")
+        del self.connectedRooms[room.name]
+        del room.connectedRooms[self.name]
 
     ## Reports whether two rooms are connected
     # @param room
@@ -47,7 +55,9 @@ class Room(object):
     # @return
     #   Returns whether this room is connected to the passed in room.
     def isConnectedTo(self, room):
-        pass  # TODO
+        if not isinstance(room, Room):
+            raise TypeError("room is not a Room Object")
+        return room.name in self.connectedRooms
 
 
 class TestRoom(TestCase):
