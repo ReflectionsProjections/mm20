@@ -11,8 +11,8 @@ class Room(object):
     #   The identifier of the room.
     # @param furniture
     #   Test
-    def __init__(self, name, connectedRooms=dict()):
-        self.connectedRooms = connectedRooms
+    def __init__(self, name):
+        self.connectedRooms = dict()
         self.name = name
 
     def __str__(self):

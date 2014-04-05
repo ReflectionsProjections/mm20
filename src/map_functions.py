@@ -39,15 +39,15 @@ def getRoomsFromMap(map_path, start=(2,2), stepSize=2):
         visited.append(col)
    
     # Get connections between rooms
-    floodFillConnectionsIter(start,connections,pixels,visited,stepSize)
+    _floodFillConnectionsIter(start,connections,pixels,visited,stepSize)
    
     # Show picture
     rooms = []
     for c in connections:
-        room = Room(color=c)
+        room = Room(name=c)
         rooms.append(room)
     for i in range(0,len(rooms)):
-        rooms[i].connections = [r for r in rooms if r.color in connections[rooms[i].color]]
+        rooms[i].connections = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
     
     # Done!
     """
@@ -67,7 +67,7 @@ def getRoomsFromMap(map_path, start=(2,2), stepSize=2):
 # @param pixels The pixels of the image (obtained using Image.load())
 # @param visited (Output) An array indicating which pixels have been visited
 # @param stepSize The number of pixels the algorithm moves per step
-def floodFillConnectionsIter(start,connections,pixels,visited,stepSize):
+def _floodFillConnectionsIter(start,connections,pixels,visited,stepSize):
    
     # Queues
     nodeQueue = Queue()
@@ -140,6 +140,6 @@ def floodFillConnectionsIter(start,connections,pixels,visited,stepSize):
             
 # Do something (if appropriate)
 if __name__ == "__main__":
-    getRoomsFromMap("./rooms.bmp")
+    print map(str,getRoomsFromMap("./rooms.bmp"))
    
    
