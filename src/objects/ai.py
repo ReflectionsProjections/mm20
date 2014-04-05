@@ -17,7 +17,7 @@ class AI:
     # @param amount The amount to (in-/de-)crement the attribute (positive = increment; negative = decrement)
     def changeAttribute(self, attribute, amount):
         if attribute not in self.__dict__:
-            return "Invalid attribute" # TODO - Should this be an exception instead?
+            return "Invalid attribute"  # TODO - Should this be an exception instead?
 
         self.__dict__[attribute] += amount
 
@@ -28,7 +28,8 @@ class AI:
     # @param attribute The attribute to set
     # @param amount The value to set it to
     def setAttribute(self, attribute, amount):
-        self.__dict__[attribute] = amount # TODO Do we want to allow negative values here?
+        self.__dict__[attribute] = amount  # TODO Do we want to allow negative values here?
+
 
 class TestAI(TestCase):
     def setUp(self):
@@ -46,7 +47,7 @@ class TestAI(TestCase):
         pass
 
     ## Test changeAttribute
-    def test_2(self):
+    def test_changeAttribute(self):
         defaults = retrieveConstants('aiDefaults')
         self.assertIsNotNone(defaults)
 
@@ -65,7 +66,7 @@ class TestAI(TestCase):
         pass
 
     ## Test that AI's complexity can be set
-    def test_3(self):
+    def test_complexity(self):
         self.ai.setAttribute('complexity', 300)
         self.assertEqual(self.ai.complexity, 300)
         pass
