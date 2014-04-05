@@ -28,7 +28,7 @@ class Game(object):
     def add_new_team(self, data, client_id):
         response = {}
         try:
-            newTeam = Team(data["team"], data["members"], Room())
+            newTeam = Team(data["team"], data["members"], Room("default"))
         except KeyError:
             return (False, response)
         self.msg_buffer[client_id] = []
@@ -64,4 +64,6 @@ class Game(object):
     #   @param client_id the identifier for the player to give info to
     #   @return A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
-        return {"warnings": [], "map": []}
+        response = {"warnings": [], "map": [], "messages": self.msg_buffer[client_id]}
+        self.msg_buffer[client_id] = []
+        return response
