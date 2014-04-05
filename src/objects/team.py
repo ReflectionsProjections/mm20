@@ -10,7 +10,6 @@ class Team(object):
     #   color = ""
     #   members = []
     #   numMembers = 0
-    teamCount = 0
 
     ## Initialize a Team
     # @param teamName The name of the Team
@@ -21,10 +20,8 @@ class Team(object):
         self.color = ""
         self.members = []
         for m in members:
-            self.members.append(m["name"], m["class"], location, self)
+            self.members.append(TeamMember(m["name"], m["class"], location, self))
         self.numMembers = len(members)
-        self.teamNum = Team.teamCount
-        Team.teamCount += 1
         self.ai = AI()
 
 

@@ -5,6 +5,7 @@ from objects.client_action import Action
 from unittest import TestCase, main
 
 actionDispatch = {}
+actionPriorities = {}
 
 ## Create a response (on the client) to be sent to the server.
 # @param status_code TODO
@@ -20,7 +21,7 @@ def handleTurn(game, action_buffer):
     
     action_buffer.sort(lambda a,b: a.priority - b.priority, reverse=True) #TODO: test this function
     for action in action_buffer:
-        game.msg_buffer[action.playerID].append(executeAction(game, action))
+        game.msg_buffer[action.owner].append(executeAction(game, action))
     return
 
 ## Sort the actions in the action buffer by their priority.
@@ -37,9 +38,9 @@ def sortActions(actionBuffer):
 # @param actionBuffer The buffered list of actions to add the action to
 # @param action The action to add to the actionBuffer
 # @param parameters TODO
-# @param playerID TODO
-def bufferAction(actionBuffer, action, parameters, playerID):
-    action = Action(action, parameters, playerID)
+# @param client_id TODO
+def bufferAction(actionBuffer, action, parameters, client_id):
+    action = Action(action, parameters, client_id)
     actionBuffer.append(action)
 
 ## Attempts to execute the given action. If it is invalid, a 404 response is returned.
@@ -61,6 +62,7 @@ def _movePlayer(game, parameters):
         return _INVALID
     # return _TODO
 actionDispatch['movePlayer'] = _movePlayer
+actionPriorities['movePlayer'] = 30
 
 ## Attempts to eat food from FoodTable
 # @param parameters TODO - Explain valid parameters
@@ -71,6 +73,7 @@ def _eatFood(game, parameters):
         return _INVALID
     # return _TODO
 actionDispatch['eatFood'] = _eatFood
+actionPriorities['eatFood'] = 10
 
 ## Attempts to make a player sleep
 # @param parameters TODO - Explain valid parameters
@@ -82,6 +85,7 @@ def _sleep(game, parameters):
 
     # return _TODO
 actionDispatch['sleep'] = _sleep
+actionPriorities['sleep'] = 1
 
 ## Attempts to make a player code
 # @param parameters TODO - Explain valid parameters
@@ -94,13 +98,7 @@ def _code(game, parameters):
         return _INVALID
     # return _TODO
 actionDispatch['code'] = _code
-
-## Returns a serialized-to-json version of the current game map(s?)
-# @param parameters TODO - Explain valid parameters
-def _getMap(game, parameters):
-    # This should be the same json interpretation that the logger uses.
-    return _TODO
-actionDispatch['getMap'] = _getMap
+actionPriorities['code'] = 20
 
 ## Returns information about the server
 # @param parameters TODO - Explain valid parameters.
@@ -110,8 +108,10 @@ def _serverInfo(game, parameters):
     constants = retrieveConstants('generalInfo')
     return response(200, version=constants.VERSION, name=constants.NAME)
 actionDispatch['serverInfo'] = _serverInfo
+actionPriorities['serverInfo'] = 100
 
 Action.actions = actionDispatch
+Action.priorities = actionPriorities
 
 class TestaActionHandler(TestCase):
     # Test cases for Action Handler

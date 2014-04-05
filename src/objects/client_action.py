@@ -3,18 +3,18 @@ from unittest import TestCase, main
 
 
 class Action:
-    actions = None  # TODO This should be initialzed to actionDispatch
+    actions = None # This is initialzed to actionDispatch in action_handler
+    priorities = None
 
-    def __init__(self, action, parameters, playerID):
+    def __init__(self, action, parameters, client_id):
         if not action in Action.actions:
             raise KeyError("Action not defined")
         self.action = action
         self.parameters = parameters
         self.key = self.parameters['target']
         #what is key used for?
-        self.owner = playerID
-        self.priority = 30
-        #TODO find a good way to set the priority
+        self.owner = client_id
+        self.priority = Action.priorities[action]
 
 #Action.actions = retrieveConstants("actions")
 
