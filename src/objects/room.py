@@ -1,4 +1,4 @@
-class Room(object):
+class Room(object): #TODO: This class doesn't need to know what the furniture's location is, it just needs to know that it exists
 
     ## Initializes a Room object with the following attributes
     # @param furniture A dict of furniture objects to be placed in the room of {key:value} format {name:(posX,posY)}

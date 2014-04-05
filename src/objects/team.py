@@ -1,5 +1,6 @@
 from unittest import TestCase, main
 from ai import AI
+from team_member import TeamMember
 
 
 class Team(object):
@@ -13,11 +14,14 @@ class Team(object):
 
     ## Initialize a Team
     # @param teamName The name of the Team
-    # @param members The members of the Team (should be TeamMember objects)
-    def __init__(self, teamName, members):
+    # @param members The members of the Team (should be a list of dicts with name and class)
+    # @param location The starting location of members
+    def __init__(self, teamName, members, location):
         self.teamName = teamName
         self.color = ""
-        self.members = members
+        self.members = []
+        for m in members:
+            self.members.append(m["name"], m["class"], location, self)
         self.numMembers = len(members)
         self.teamNum = Team.teamCount
         Team.teamCount += 1
