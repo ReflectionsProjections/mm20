@@ -3,12 +3,16 @@ class Room(object): #TODO: This class doesn't need to know what the furniture's 
 
     ## Initializes a Room object with the following attributes
     # @param furniture A dict of furniture objects to be placed in the room of {key:value} format {name:(posX,posY)}
-    def __init__(self, furniture=dict(), color = (0,0,0,0), connectedRooms=[]):
+    def __init__(self, furniture=dict(), name = (0,0,0,0), connectedRooms={}):
 
         # Initialize parameters
         self.furniture = furniture
-        self.color = color
+        self.name = name
         self.connectedRooms = connectedRooms
+
+    def __str__(self):
+        return "<id:{}, connected_rooms:{}>".format(name, connectedRooms.keys)
+        
 
     ## Get connected rooms
     def getConnectedRooms(self):
@@ -91,6 +95,7 @@ class Room(object): #TODO: This class doesn't need to know what the furniture's 
         if coords in furniture:
             del furniture[coords]
         pass
+    
 
 if __name__ == "__main__":
     room1104 = Room({(0,0):"couch", (2,2):"chair"})
