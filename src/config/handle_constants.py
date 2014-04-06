@@ -1,11 +1,11 @@
-from unittest import TestCase, main
-from json import loads
-from os import path
+import unittest
+import json
+import os
 
 constantsLoaded = False
 constants = {}
 
-directory = path.dirname(__file__)
+directory = os.path.dirname(__file__)
 
 
 def retrieveConstants(key):
@@ -18,7 +18,7 @@ def retrieveConstants(key):
     try:
         with open(directory + '/' + 'constants.json', 'r') as constantsFile:
             jsonConstantsString = constantsFile.read()
-        constants = loads(jsonConstantsString)
+        constants = json.loads(jsonConstantsString)
     except IOError as e:
         print "IOError: " + str(e)
     try:
@@ -27,7 +27,7 @@ def retrieveConstants(key):
         return None
 
 
-class TestHandleConstants(TestCase):
+class TestHandleConstants(unittest.TestCase):
     def testReadFile(self):
         # Asserts that the retrieveConstants function does not fail via an error
         constants = retrieveConstants('aiDefaults')
@@ -39,4 +39,4 @@ class TestHandleConstants(TestCase):
 
 
 if __name__ == '__main__':
-    main()
+    unittest.main()

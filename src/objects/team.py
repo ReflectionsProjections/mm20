@@ -1,6 +1,6 @@
-from unittest import TestCase, main
-from ai import AI
-from team_member import TeamMember
+import unittest
+import ai
+import team_member
 
 
 ## This class represents a team competing in the game.
@@ -16,11 +16,11 @@ class Team(object):
         self.name = name
         self.members = dict()
         for member in members:
-            newMember = (TeamMember(member["name"], member["class"], startingLocation, self, people))
+            newMember = (team_member.TeamMember(member["name"], member["class"], startingLocation, self, len(people)))
             self.members[member["name"]] = newMember
             people.append(newMember)
         self.numMembers = len(members)
-        self.ai = AI()
+        self.ai = ai.AI()
 
     ## returns a serializable representation of what the player sees
     def get_visable_map(self):
@@ -31,13 +31,13 @@ class Team(object):
         return rooms.values()
 
 
-class TestTeam(TestCase):
+class TestTeam(unittest.TestCase):
     def setUp(self):
         self.team = Team("testTeam",
                          [
-                             {"name": "Steve", "class": "Aristocrat"},
-                             {"name": "Bob", "class": "Commoner"}
-                         ], "Narnia")
+                             {"name": "Steve", "class": "Coder"},
+                             {"name": "Bob", "class": "Theorist"}
+                         ], "Narnia", [])
 
     def testInit(self):
         self.assertEqual(self.team.name, "testTeam")
@@ -46,4 +46,4 @@ class TestTeam(TestCase):
         self.assertEqual(self.team.numMembers, 2)
 
 if __name__ == "__main__":
-    main()
+    unittest.main()

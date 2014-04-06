@@ -1,11 +1,9 @@
-from objects.room import Room
 from objects.team import Team
-from objects.team_member import TeamMember
-from map_functions import getRoomsFromMap as map_reader
-from config.handle_constants import retrieveConstants
+import map_functions
 import action_handler
 
 STARTING_ROOM = (72, 0, 255, 255)
+
 
 class Game(object):
 
@@ -15,7 +13,7 @@ class Game(object):
 
         # the map reader will return a list of rooms that have bee
         # linked together as defined in the design doc.
-        self.rooms = {i.name: i for i in map_reader(file_url)}
+        self.rooms = {i.name: i for i in map_functions.map_reader(file_url)}
         self.turn = 0
         #self.turn_limit = retrieveConstants("generalInfo")["TURNLIMIT"]
         self.turn_limit = 80
@@ -32,12 +30,12 @@ class Game(object):
         response = {}
         try:
             newTeam = Team(data["team"], data["members"],
-                           self.rooms[STARTING_ROOM],self.people)
+                           self.rooms[STARTING_ROOM], self.people)
         except KeyError:
             return (False, response)
         self.msg_buffer[client_id] = []
         self.teams[client_id] = newTeam
-        
+
         return (True, response)
 
     ##  Actually execute queued actions

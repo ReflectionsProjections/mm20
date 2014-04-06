@@ -1,8 +1,6 @@
 #!/usr/bin/env python2
-
-
-from unittest import TestLoader, TextTestRunner
+import unittest
 
 if __name__ == "__main__":
-    suit = TestLoader().discover('.', '*.py')
-    TextTestRunner(verbosity=2).run(suit)
+    suit = unittest.TestLoader().discover('.', '*.py')
+    unittest.TextTestRunner(verbosity=2).run(suit)

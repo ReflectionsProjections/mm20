@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+import unittest
 
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
@@ -11,7 +11,6 @@ class Room(object):
     # @param furniture
     #   Test
     def __init__(self, room_id):
-
         self.connectedRooms = dict()
         self.name = room_id
 
@@ -31,7 +30,7 @@ class Room(object):
     # @throws ValueError
     #   Throws a value error if this room and the passed in
     #   room are already connected.
-    def connectRoom(self, room):
+    def connectToRoom(self, room):
         if not isinstance(room, Room):
             raise TypeError("room is not a Room Object")
         if self.isConnectedTo(room):
@@ -63,33 +62,38 @@ class Room(object):
         return room.name in self.connectedRooms
 
 
-## Tests that all of the functionality in Room works correctly
-class TestRoom(TestCase):
+## ## Tests all of the functionality in Room
+class TestRoom(unittest.TestCase):
     def setUp(self):
         self.room = Room("testRoom")
 
-    def testInit(self):
-        self.assertEqual(self.room.name, "testRoom")
-        self.assertFalse(self.room.getConnectedRooms())
+    def testInitCorrect(self):
+        room = Room("testRoom")
+        self.assertEqual(room.name, "testRoom")
+        self.assertFalse(room.getConnectedRooms())
+
+    def testInitIncorrect(self):
+        with self.assertEqual(TypeError):
+            Room(None)
 
     def testConnectAValidRoom(self):
         roomTwo = Room("testRoom2")
-        self.room.connectRoom(roomTwo)
+        self.room.connectToRoom(roomTwo)
         self.assertListEqual(self.room.getConnectedRooms(), [roomTwo.name])
 
     def testConnectAnInvalidRoom(self):
         with self.assertRaises(TypeError):
-            self.room.connectRoom("NotARoom")
+            self.room.connectToRoom("NotARoom")
 
     def testConnectARoomAlreadyConnected(self):
         roomTwo = Room("testRoom2")
-        self.room.connectRoom(roomTwo)
+        self.room.connectToRoom(roomTwo)
         with self.assertRaises(ValueError):
-            self.room.connectRoom(roomTwo)
+            self.room.connectToRoom(roomTwo)
 
     def testDisconnectRoom(self):
         roomTwo = Room("testRoom2")
-        self.room.connectRoom(roomTwo)
+        self.room.connectToRoom(roomTwo)
         self.room.disconnectRoom(roomTwo)
         self.assertFalse(self.room.getConnectedRooms())
 
@@ -104,7 +108,7 @@ class TestRoom(TestCase):
 
     def testIsConnectedToActuallyConnected(self):
         roomTwo = Room("testRoom2")
-        self.room.connectRoom(roomTwo)
+        self.room.connectToRoom(roomTwo)
         self.assertTrue(self.room.isConnectedTo(roomTwo))
 
     def testIsConnectedNotConnected(self):
@@ -116,4 +120,4 @@ class TestRoom(TestCase):
             self.room.isConnectedTo("NotARoom")
 
 if __name__ == "__main__":
-    main()
+    unittest.main()

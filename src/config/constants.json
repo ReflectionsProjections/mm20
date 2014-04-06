@@ -29,19 +29,23 @@
   "archetypes": {
     "Coder": {
       "codingProwess": 10,
-      "energy": 100
+      "energy": 100,
+      "sleepEffectiveness": 2
     },
     "Theorist": {
       "codingProwess": 5,
-      "energy": 100
+      "energy": 100,
+      "sleepEffectiveness": 2
     },
     "Architect": {
       "codingProwess": 7,
-      "energy": 100
+      "energy": 100,
+      "sleepEffectiveness": 2
     },
     "Informant": {
       "codingProwess": 3,
-      "energy": 100
+      "energy": 100,
+      "sleepEffectiveness": 2
     }
   },
   "rooms": {

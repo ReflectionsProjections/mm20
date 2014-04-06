@@ -1,9 +1,8 @@
-#from config.handle_constants import retrieveConstants
-from unittest import TestCase, main
+import unittest
 
 
 class Action:
-    actions = None # This is initialzed to actionDispatch in action_handler
+    actions = None  # This is initialzed to actionDispatch in action_handler
     priorities = None
 
     def __init__(self, action, parameters, client_id):
@@ -14,13 +13,12 @@ class Action:
         self.owner = client_id
         self.priority = Action.priorities[action]
 
-#Action.actions = retrieveConstants("actions")
 
-
-class TestaClientActions(TestCase):
+class TestaClientActions(unittest.TestCase):
     def testUnavailableAction(self):
         Action.actions = {}
-        self.assertRaises(KeyError, Action, 'move', {'team_member': 'banjos'}, 0)
+        with self.assertRaises(KeyError):
+            Action('move', {'team_member': 'banjos'}, 0)
 
 if __name__ == "__main__":
-    main()
+    unittest.main()
