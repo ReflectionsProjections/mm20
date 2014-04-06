@@ -26,15 +26,18 @@ class TeamMember(object):
     # @param destination
     #   The room (a Room object) to move to.
     def move(self, destination):
-        pass  # TODO
+        if not self.location.isConnectedTo(destination):
+            raise ValueError("Cannot move to destination, it is not connected to current location")
+        else:
+            self.location = destination
 
     ## The team member sleeps for some time to regain energy.
     #  The amount of energy regained depends on their Archetype
     # @param turns
     #   The number of turns the team member sleeps for.
     def sleep(self, turns):
-        pass  # TODO
-
+        self.energy += turns * self.archetype["sleepEffectiveness"]
+        # TODO: Make a team member unable to do anything else while sleeping!
 
 import team
 import room
