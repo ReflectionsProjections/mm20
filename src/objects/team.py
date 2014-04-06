@@ -16,7 +16,7 @@ class Team(object):
         self.name = name
         self.members = dict()
         for member in members:
-            newMember = (team_member.TeamMember(member["name"], member["class"], startingLocation, self, people))
+            newMember = (team_member.TeamMember(member["name"], member["class"], startingLocation, self, len(people)))
             self.members[member["name"]] = newMember
             people.append(newMember)
         self.numMembers = len(members)
@@ -27,9 +27,9 @@ class TestTeam(unittest.TestCase):
     def setUp(self):
         self.team = Team("testTeam",
                          [
-                             {"name": "Steve", "class": "Aristocrat"},
-                             {"name": "Bob", "class": "Commoner"}
-                         ], "Narnia")
+                             {"name": "Steve", "class": "Coder"},
+                             {"name": "Bob", "class": "Theorist"}
+                         ], "Narnia", [])
 
     def testInit(self):
         self.assertEqual(self.team.name, "testTeam")

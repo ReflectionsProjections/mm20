@@ -1,4 +1,3 @@
-#from config.handle_constants import retrieveConstants
 import unittest
 
 
@@ -14,13 +13,12 @@ class Action:
         self.owner = client_id
         self.priority = Action.priorities[action]
 
-#Action.actions = retrieveConstants("actions")
-
 
 class TestaClientActions(unittest.TestCase):
     def testUnavailableAction(self):
         Action.actions = {}
-        self.assertRaises(KeyError, Action, 'move', {'team_member': 'banjos'}, 0)
+        with self.assertRaises(KeyError):
+            Action('move', {'team_member': 'banjos'}, 0)
 
 if __name__ == "__main__":
     unittest.main()
