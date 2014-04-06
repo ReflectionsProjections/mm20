@@ -1,6 +1,5 @@
 from unittest import TestCase, main
 
-
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
 #  Rooms contain team members and furniture (TODO)
@@ -19,6 +18,9 @@ class Room(object):
     def __str__(self):
         return "<id:{}, connected_rooms:{}>".format(self.name, self.connectedRooms.keys())
 
+    
+
+    
     ## Returns connected rooms
     def getConnectedRooms(self):
         return self.connectedRooms.keys()
