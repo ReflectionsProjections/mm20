@@ -28,7 +28,7 @@ class Team(object):
         for m in self.Member.values():
             room = m.location
             rooms[room.name] = room
-        return rooms.values()
+        return [r.output_dict() for r in rooms.values()]
 
 
 class TestTeam(unittest.TestCase):
