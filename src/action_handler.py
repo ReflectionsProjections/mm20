@@ -1,8 +1,8 @@
 ## actionHandler Handles the client's actions sent to the engine from the server.
 
-from config.handle_constants import retrieveConstants
-from objects.client_action import Action
-from unittest import TestCase, main
+import config.handle_constants
+import objects.client_action
+import unittest
 
 actionDispatch = {}
 actionPriorities = {}
@@ -43,7 +43,7 @@ def sortActions(actionBuffer):
 # @param parameters TODO
 # @param client_id TODO
 def bufferAction(actionBuffer, action, parameters, client_id):
-    action = Action(action, parameters, client_id)
+    action = objects.client_action.Action(action, parameters, client_id)
     actionBuffer.append(action)
 
 
@@ -114,16 +114,16 @@ actionPriorities['code'] = 20
 def _serverInfo(game, parameters):
     """Returns information about the server
     """
-    constants = retrieveConstants('generalInfo')
+    constants = config.handle_constants.retrieveConstants('generalInfo')
     return response(200, version=constants["VERSION"], name=constants["NAME"])
 actionDispatch['serverInfo'] = _serverInfo
 actionPriorities['serverInfo'] = 100
 
-Action.actions = actionDispatch
-Action.priorities = actionPriorities
+objects.client_action.Action.actions = actionDispatch
+objects.client_action.Action.priorities = actionPriorities
 
 
-class TestaActionHandler(TestCase):
+class TestaActionHandler(unittest.TestCase):
     # Test cases for Action Handler
 
     ## Sets up variables required by each test case
@@ -148,7 +148,7 @@ class TestaActionHandler(TestCase):
 
     ## Tests that the bufferAction function correctly adds an action to the buffer.
     def testBufferAction(self):
-        validActions = retrieveConstants("actions")
+        validActions = config.handle_constants.retrieveConstants("actions")
         pseudoBuffer = []
         pseudoAction = validActions[0]
         bufferAction(pseudoBuffer, pseudoAction, {"target": 'pseudoTarget'}, 0)
@@ -208,5 +208,5 @@ class TestaActionHandler(TestCase):
         self.assertTrue(True)
 
 if __name__ == "__main__":
-    # Run all of the test cases
-    main()
+    # Run all of the test cases in this file
+    unittest.main()

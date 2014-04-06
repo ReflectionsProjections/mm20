@@ -1,4 +1,4 @@
-from unittest import TestCase, main
+import unittest
 
 
 ## Manages "rooms" which are nodes on our locations graph.
@@ -61,7 +61,7 @@ class Room(object):
 
 
 ## ## Tests all of the functionality in Room
-class TestRoom(TestCase):
+class TestRoom(unittest.TestCase):
     def setUp(self):
         self.room = Room("testRoom")
 
@@ -118,4 +118,4 @@ class TestRoom(TestCase):
             self.room.isConnectedTo("NotARoom")
 
 if __name__ == "__main__":
-    main()
+    unittest.main()

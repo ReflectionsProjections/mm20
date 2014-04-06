@@ -1,11 +1,10 @@
-from config.handle_constants import retrieveConstants
-from unittest import TestCase, main
+import config.handle_constants
+import unittest
 
 
 class AI:
-
     def __init__(self):
-        defaults = retrieveConstants('aiDefaults')
+        defaults = config.handle_constants.retrieveConstants('aiDefaults')
         self.optimization = defaults['optimization']
         self.stability = defaults['stability']
         self.complexity = defaults['complexity']
@@ -31,13 +30,13 @@ class AI:
         self.__dict__[attribute] = amount  # TODO Do we want to allow negative values here?
 
 
-class TestAI(TestCase):
+class TestAI(unittest.TestCase):
     def setUp(self):
         self.ai = AI()
 
     ## Test value initialization + constant retrieval
     def test_init(self):
-        defaults = retrieveConstants('aiDefaults')
+        defaults = config.handle_constants.retrieveConstants('aiDefaults')
         self.assertIsNotNone(defaults)
         self.assertEqual(self.ai.optimization, defaults['optimization'])
         self.assertEqual(self.ai.stability, defaults['stability'])
@@ -48,7 +47,7 @@ class TestAI(TestCase):
 
     ## Test changeAttribute
     def test_changeAttribute(self):
-        defaults = retrieveConstants('aiDefaults')
+        defaults = config.handle_constants.retrieveConstants('aiDefaults')
         self.assertIsNotNone(defaults)
 
         # Test that changeAttribute actually sets values
@@ -72,4 +71,4 @@ class TestAI(TestCase):
         pass
 
 if __name__ == '__main__':
-    main()
+    unittest.main()
