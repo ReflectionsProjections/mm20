@@ -28,7 +28,7 @@ class Room(object):
     # @throws ValueError
     #   Throws a value error if this room and the passed in
     #   room are already connected.
-    def connectRoom(self, room):
+    def connectToRoom(self, room):
         if not isinstance(room, Room):
             raise TypeError("room is not a Room Object")
         if self.isConnectedTo(room):
@@ -76,22 +76,22 @@ class TestRoom(unittest.TestCase):
 
     def testConnectAValidRoom(self):
         roomTwo = Room("testRoom2")
-        self.room.connectRoom(roomTwo)
+        self.room.connectToRoom(roomTwo)
         self.assertListEqual(self.room.getConnectedRooms(), [roomTwo.name])
 
     def testConnectAnInvalidRoom(self):
         with self.assertRaises(TypeError):
-            self.room.connectRoom("NotARoom")
+            self.room.connectToRoom("NotARoom")
 
     def testConnectARoomAlreadyConnected(self):
         roomTwo = Room("testRoom2")
-        self.room.connectRoom(roomTwo)
+        self.room.connectToRoom(roomTwo)
         with self.assertRaises(ValueError):
-            self.room.connectRoom(roomTwo)
+            self.room.connectToRoom(roomTwo)
 
     def testDisconnectRoom(self):
         roomTwo = Room("testRoom2")
-        self.room.connectRoom(roomTwo)
+        self.room.connectToRoom(roomTwo)
         self.room.disconnectRoom(roomTwo)
         self.assertFalse(self.room.getConnectedRooms())
 
@@ -106,7 +106,7 @@ class TestRoom(unittest.TestCase):
 
     def testIsConnectedToActuallyConnected(self):
         roomTwo = Room("testRoom2")
-        self.room.connectRoom(roomTwo)
+        self.room.connectToRoom(roomTwo)
         self.assertTrue(self.room.isConnectedTo(roomTwo))
 
     def testIsConnectedNotConnected(self):

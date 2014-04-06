@@ -14,12 +14,12 @@ class TeamMember(object):
     #   The archetype of the TeamMember.
     # @param location
     #   The location (a Room object) that the TeamMember will start in.
-    def __init__(self, name, archetype, location, team):
+    def __init__(self, name, archetype, location, team, person_id):
         self.name = name
         self.archetype = TeamMember.Archetypes[archetype]
         self.location = location
         self.team = team
-        self.person_id = len(people)
+        self.person_id = person_id
         self.energy = TeamMember.Archetypes[archetype]["energy"]
 
     ## Moves the team member from one room to another.
@@ -46,14 +46,15 @@ class TestTeamMember(unittest.TestCase):
         class PseudoTeam(team.Team):
             def __init__(self):
                 pass
+        TestTeamMember.PseudoTeam = PseudoTeam
         self.testRoom = room.Room("testRoom")
         self.testTeam = TestTeamMember.PseudoTeam()
-        self.testMember = TeamMember("Joe", "Coder", self.testRoom, self.testTeam)
+        self.testMember = TeamMember("Joe", "Coder", self.testRoom, self.testTeam, 0)
 
     def testInitCorrect(self):
         testRoom = room.Room("testRoom")
         testTeam = TestTeamMember.PseudoTeam()
-        testMember = TeamMember("Joe", "Coder", testRoom, testTeam)
+        testMember = TeamMember("Joe", "Coder", testRoom, testTeam, 0)
         self.assertEqual(testMember.name, "Joe")
         self.assertEqual(testMember.archetype, TeamMember.Archetypes["Coder"])
         self.assertEqual(testMember.location, testRoom)
@@ -73,17 +74,17 @@ class TestTeamMember(unittest.TestCase):
         testRoom = room.Room("testRoom")
         testTeam = TestTeamMember.PseudoTeam()
         with self.assertRaises(KeyError):
-            TeamMember("Joe", "NotAnArchetype", testRoom, testTeam)
+            TeamMember("Joe", "NotAnArchetype", testRoom, testTeam, 0)
 
     def testInitNotAName(self):
         testRoom = room.Room("testRoom")
         testTeam = TestTeamMember.PseudoTeam()
-        with self.assertRaises(TypeError):
-            TeamMember(None, "NotAnArchetype", testRoom, testTeam)
+        with self.assertRaises(KeyError):
+            TeamMember(None, "NotAnArchetype", testRoom, testTeam, 0)
 
     def testValidMove(self):
         roomTwo = room.Room("testRoomTwo")
-        self.testRoom.connectTo(roomTwo)
+        self.testRoom.connectToRoom(roomTwo)
         self.testMember.move(roomTwo)
         self.assertEquals(self.testMember.location, roomTwo)
 
@@ -99,7 +100,7 @@ class TestTeamMember(unittest.TestCase):
     def testSleep(self):
         energy = self.testMember.energy
         self.testMember.sleep(10)
-        self.assertEqual(self.testMember.energy, energy + 10 * TeamMember.Archetypes["coder"]["sleepEffectiveness"])
+        self.assertEqual(self.testMember.energy, energy + 10 * TeamMember.Archetypes["Coder"]["sleepEffectiveness"])
 
 if __name__ == "__main__":
     unittest.main()
