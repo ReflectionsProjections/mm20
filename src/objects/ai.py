@@ -12,8 +12,10 @@ class AI:
         self.implementation = defaults['implementation']
 
     # Changes an attribute given the amount
-    # @param Attribute The attribute to (in-/de-)crement
-    # @param amount The amount to (in-/de-)crement the attribute (positive = increment; negative = decrement)
+    # @param Attribute
+    #   The attribute to (in-/de-)crement
+    # @param amount
+    #   The amount to (in-/de-)crement the attribute (positive = increment; negative = decrement)
     def changeAttribute(self, attribute, amount):
         if attribute not in self.__dict__:
             return "Invalid attribute"  # TODO - Should this be an exception instead?
@@ -24,8 +26,10 @@ class AI:
             self.setAttribute(attribute, 0)
 
     ## Sets an attribute to a given amount
-    # @param attribute The attribute to set
-    # @param amount The value to set it to
+    # @param attribute
+    #   The attribute to set
+    # @param amount
+    #   The value to set it to
     def setAttribute(self, attribute, amount):
         self.__dict__[attribute] = amount  # TODO Do we want to allow negative values here?
 
