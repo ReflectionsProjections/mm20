@@ -22,6 +22,14 @@ class Team(object):
         self.numMembers = len(members)
         self.ai = ai.AI()
 
+    ## returns a serializable representation of what the player sees
+    def get_visable_map(self):
+        rooms = dict()
+        for m in self.Member.values():
+            room = m.location
+            rooms[room.name] = room
+        return rooms.values()
+
 
 class TestTeam(unittest.TestCase):
     def setUp(self):

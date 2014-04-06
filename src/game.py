@@ -68,6 +68,9 @@ class Game(object):
     #   @param client_id the identifier for the player to give info to
     #   @return A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
-        response = {"warnings": [], "map": [], "messages": self.msg_buffer[client_id]}
+        response = {"warnings": [],
+                    "map": self.teams[client_id].get_visable_map(),
+                    "messages": self.msg_buffer[client_id]}
         self.msg_buffer[client_id] = []
         return response
+        
