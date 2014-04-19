@@ -1,4 +1,5 @@
 from objects.team import Team
+from objects.room import Room
 import map_functions
 import action_handler
 
@@ -28,11 +29,8 @@ class Game(object):
     #   @return A (bool, dict) tuple stating success or failure and listing errors or sending starting info to the player
     def add_new_team(self, data, client_id):
         response = {}
-        try:
-            newTeam = Team(data["team"], data["members"],
-                           self.rooms[STARTING_ROOM], self.people)
-        except KeyError:
-            return (False, response)
+        newTeam = Team(data["team"], data["members"],
+                       self.rooms[STARTING_ROOM], self.people)
         self.msg_buffer[client_id] = []
         self.teams[client_id] = newTeam
 
@@ -69,7 +67,7 @@ class Game(object):
     #   @return A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
         response = {"warnings": [],
-                    "map": self.teams[client_id].get_visable_map(),
+                    "map": self.teams[client_id].get_visible_map(),
                     "messages": self.msg_buffer[client_id]}
         self.msg_buffer[client_id] = []
         return response

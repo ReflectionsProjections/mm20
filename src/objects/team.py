@@ -23,11 +23,11 @@ class Team(object):
         self.ai = ai.AI()
 
     ## returns a serializable representation of what the player sees
-    def get_visable_map(self):
+    def get_visible_map(self):
         rooms = dict()
-        for m in self.Member.values():
+        for m in self.members.values():
             room = m.location
-            rooms[room.name] = room
+            rooms[room.name] = room.to_JSON()
         return rooms.values()
 
 

@@ -18,9 +18,9 @@ class Room(object):
         return "<id:{}, connected_rooms:{}>".format(self.name, self.connectedRooms.keys())
 
     def to_JSON(self):
-        room_info = {"room": name,
-                     "connectedRooms": self.connectedRoom.keys()}
-        return room_into
+        room_info = {"room": self.name,
+                     "connectedRooms": self.connectedRooms.keys()}
+        return room_info
     
     ## Returns connected rooms
     def getConnectedRooms(self):

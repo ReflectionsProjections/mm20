@@ -1,4 +1,4 @@
-import PIL
+from PIL import Image
 import Queue
 import objects.room
 
@@ -22,12 +22,12 @@ colorDict = {
 # @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
 # @param stepSize The number of pixels the algorithm moves per step
 # @returns A list of Rooms if any exist, an empty list otherwise.
-def getRoomsFromMap(map_path, start=(2, 2), stepSize=2):
+def map_reader(map_path, start=(2, 2), stepSize=2):
 
     # NOTE: The map file's colors must be exact i.e. (1,0,0) and (2,0,0) are considered different rooms
 
     # Open picture
-    img = PIL.Image.open(map_path).convert("RGBA")
+    img = Image.open(map_path).convert("RGBA")
     pixels = img.load()
 
     # Find connecting rooms
