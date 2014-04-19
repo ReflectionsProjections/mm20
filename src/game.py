@@ -28,12 +28,12 @@ class Game(object):
     #   @param client_id The ID assigned to that player by the server
     #   @return A (bool, dict) tuple stating success or failure and listing errors or sending starting info to the player
     def add_new_team(self, data, client_id):
-        response = {"status": "Success"}
+        response = {"status": "Success", "errors": []}
         try:
             newTeam = Team(data["team"], data["members"],
                        self.rooms[STARTING_ROOM], self.people)
         except KeyError:
-            return (False, {"status": "Failure"})
+            return (False, {"status": "Failure", "errors": ["KeyError"]})
         self.msg_buffer[client_id] = []
         self.teams[client_id] = newTeam
 
