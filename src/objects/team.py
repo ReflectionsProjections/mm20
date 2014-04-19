@@ -15,8 +15,10 @@ class Team(object):
     def __init__(self, name, members, startingLocation, people):
         self.name = name
         self.members = dict()
+        #TODO: limit the number of team members one team can have, and throw/catch an appropriate exception
         for member in members:
             newMember = (team_member.TeamMember(member["name"], member["class"], startingLocation, self, len(people)))
+            #TODO: check for non-unique names, then throw/catch an appropriate exception
             self.members[member["name"]] = newMember
             people.append(newMember)
         self.numMembers = len(members)

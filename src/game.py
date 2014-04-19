@@ -33,7 +33,7 @@ class Game(object):
             newTeam = Team(data["team"], data["members"],
                        self.rooms[STARTING_ROOM], self.people)
         except KeyError:
-            return (False, {"status": "Failure", "errors": ["KeyError"]})
+            return (False, {"status": "Failure", "errors": ["KeyError"]}) #TODO: Make all error objects uniform
         self.msg_buffer[client_id] = []
         self.teams[client_id] = newTeam
 
@@ -69,6 +69,7 @@ class Game(object):
     #   @param client_id the identifier for the player to give info to
     #   @return A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
+        #TODO: Check for end of game, then do scoring and return the winner
         response = {"warnings": [],
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.msg_buffer[client_id]}
