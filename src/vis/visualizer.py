@@ -20,20 +20,27 @@ def setup():
     GameClock = pygame.time.Clock()
 
 def main():
-    running = True
     while(running):
-        draw()
-        pygame.display.flip()
-        GameClock.tick(MAX_FPS)
-        for event in pygame.event.get():
+        frame()
+
+def frame():
+    step()
+    draw()
+    GameClock.tick(MAX_FPS)
+    for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-    pygame.quit()
+                pygame.quit()
+    frame()
+
+
+def step():
+    pass
 
 def draw():
     image = pygame.image.load("siebel-basement-map.bmp").convert()
     image = pygame.transform.scale(image,(SCREEN_WIDTH, SCREEN_HEIGHT))
     ScreenSurface.blit(image, (0, 0))
+    pygame.display.flip()
 
 
 pygame.init()
