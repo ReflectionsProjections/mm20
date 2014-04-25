@@ -67,7 +67,7 @@ def _movePlayer(game, parameters):
         return _INVALID
     # return _TODO
 actionDispatch['movePlayer'] = _movePlayer
-actionPriorities['movePlayer'] = 30
+actionPriorities['movePlayer'] = 80
 
 
 ## Attempts to eat food from FoodTable
@@ -79,7 +79,7 @@ def _eatFood(game, parameters):
         return _INVALID
     # return _TODO
 actionDispatch['eatFood'] = _eatFood
-actionPriorities['eatFood'] = 10
+actionPriorities['eatFood'] = 80
 
 
 ## Attempts to make a player sleep
@@ -92,21 +92,19 @@ def _sleep(game, parameters):
 
     # return _TODO
 actionDispatch['sleep'] = _sleep
-actionPriorities['sleep'] = 1
+actionPriorities['sleep'] = 60
 
 
 ## Attempts to make a player code
 # @param parameters TODO - Explain valid parameters
 def _code(game, parameters):
-    if 'player' in parameters and 'team' in parameters \
-            and 'attribute' in parameters:
-        return game.people[parameters['player']].code(
-            parameters['team'], parameters['attribute'])
+    if 'player' in parameters and 'type' in parameters and
+        'duration' in parameters:
+        return game.people[parameters['player']].code(parameters['type'], parameters['duration'])
     else:
         return _INVALID
-    # return _TODO
 actionDispatch['code'] = _code
-actionPriorities['code'] = 20
+actionPriorities['code'] = 60
 
 
 ## Returns information about the server
