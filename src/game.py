@@ -69,10 +69,34 @@ class Game(object):
     #   @param client_id the identifier for the player to give info to
     #   @return A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
-        #TODO: Check for end of game, then do scoring and return the winner
+        #Check for end of game, then do scoring and return the winner
+        if self.turn >= self.turn_limit:
+            winner = self.find_victor()
+            win = False
+            if winner == client_id:
+                win = True
+            return {"winner": win}
         response = {"warnings": [],
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.msg_buffer[client_id]}
         self.msg_buffer[client_id] = []
         return response
+
+    ##  At endgame, find the winner
+    #   @return the id of the team that has won
+    def find_victor(self):
+        victor = 0
+        score = 0.0
+        for ident, team in self.teams.iteritems():
+            team_score = self.calc_score(ident)
+            if team_score > score:
+                victor = ident
+                score = team_score
+        return victor
         
+    ##  Calculate score for a team
+    #
+    #   @param client_id the id of the team to check
+    #   @return the score for that team
+    def calc_score(self, client_id):
+        return 0.0
