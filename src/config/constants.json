@@ -2,7 +2,9 @@
   "generalInfo": {
     "VERSION": 0.0,
     "NAME": "Meta-Mania",
-    "TURNLIMIT": 2880
+    "TURNLIMIT": 2880,
+    "UNOPTWEIGHT": 0.2,
+    "OPTWEIGHT": 0.8
   },
   "serverDefaults": {
     "players": 2,
