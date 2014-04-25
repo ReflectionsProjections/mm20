@@ -12,7 +12,7 @@ class Game(object):
     # turn: Which turn it is
     # turn_limit: The maximum length the game will run
     # action_buffer: A list of actions to be performed at the next 'tick'
-    # msg_buffer: A dictionary, indexed by client, of lists of responses to actions
+    # result_buffer: A dictionary, indexed by client, of lists of responses to actions
     # teams: A list of all of the teams
     # people: A list of all of the people
 
@@ -25,7 +25,7 @@ class Game(object):
         # self.turn_limit = retrieveConstants("generalInfo")["TURNLIMIT"]
         self.turn_limit = 80  # For testing purposes only
         self.action_buffer = []
-        self.msg_buffer = {}
+        self.result_buffer = {}
         self.teams = {}
         self.people = []
 
@@ -43,7 +43,7 @@ class Game(object):
                            self.rooms[STARTING_ROOM], self.people)
         except KeyError:
             return (False, {"status": "Failure", "errors": ["KeyError"]})  # TODO: Make all error objects uniform
-        self.msg_buffer[client_id] = []
+        self.result_buffer[client_id] = []
         self.teams[client_id] = newTeam
 
         return (True, response)
@@ -85,8 +85,7 @@ class Game(object):
     #   A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
         #TODO: Check for end of game, then do scoring and return the winner
-        response = {"warnings": [],
-                    "map": self.teams[client_id].get_visible_map(),
-                    "messages": self.msg_buffer[client_id]}
-        self.msg_buffer[client_id] = []
+        response = {"map": self.teams[client_id].get_visible_map(),
+                    "results": self.result_buffer[client_id]}
+        self.result_buffer[client_id] = []
         return response
