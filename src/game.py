@@ -2,6 +2,7 @@ from objects.team import Team
 from objects.room import Room
 import map_functions
 import action_handler
+import config.handle_constants
 
 STARTING_ROOM = (72, 0, 255, 255)
 
@@ -16,8 +17,11 @@ class Game(object):
         # linked together as defined in the design doc.
         self.rooms = {i.name: i for i in map_functions.map_reader(file_url)}
         self.turn = 0
-        #self.turn_limit = retrieveConstants("generalInfo")["TURNLIMIT"]
+        defaults = config.handle_constants.retrieveConstants('generalInfo')
+        #self.turn_limit = defaults["TURNLIMIT"]
         self.turn_limit = 80
+        self.unoptimized_weight = defaults["UNOPTWEIGHT"]
+        self.optimized_weight = defaults["OPTWEIGHT"]
         self.action_buffer = []
         self.msg_buffer = {}
         self.teams = {}
@@ -99,4 +103,5 @@ class Game(object):
     #   @param client_id the id of the team to check
     #   @return the score for that team
     def calc_score(self, client_id):
-        return 0.0
+        ai = self.teams[client_id].ai
+        return ((ai.implementation - ai.optimization) * self.unoptimized_weight + ai.optimization * self.optimized_weight) * ai.stability
