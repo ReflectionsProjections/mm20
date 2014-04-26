@@ -8,12 +8,12 @@ wallColors = ["0 0 0 255"]
 
 # For debugging
 colorDict = {
-    "0 0 0": "black",
-    "0 255 255": "cyan",
-    "255 255 255": "white",
-    "72 0 255": "blue",
-    "255 0 220": "pink",
-    "76 255 0": "green"
+    "0 0 0":        "black",
+    "0 255 255":    "cyan",
+    "255 255 255":  "white",
+    "72 0 255":     "blue",
+    "255 0 220":    "pink",
+    "76 255 0":     "green"
 }
 
 # Furniture
@@ -77,7 +77,6 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
     
     # Hacky transformation code
     rooms2 = {i.name: i for i in rooms}
-    print rooms2
     return rooms2
 
 # --- INTERNAL CODE - DO NOT USE OUTSIDE OF THIS FILE ---
@@ -141,7 +140,7 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
         y = node[1]
 
         # Base case 1: hit target
-        curColor = pixels[x, y]
+        curColor = _stringify(pixels[x, y])
         if curColor == targetColor:
             return (x, y)
             
@@ -288,6 +287,31 @@ def _floodFillConnectionsIter(
                     nodeQueue.put((px, py))
                     parentQueue.put((x, y))
 
-# Do something (if appropriate)
+# Run a simple test
 if __name__ == "__main__":
-    print map_reader("./rooms.bmp")
+
+    # Execute function
+    rooms = map_reader("./rooms.bmp")
+    
+    # ============== Test 1: test connections ==============
+    colors = {
+              "cyan":  "0 255 255",
+              "white": "255 255 255",
+              "blue":  "72 0 255",
+              "pink":  "255 0 220",
+              "green": "76 255 0"
+             }     
+    
+    # What should be connected to what
+    should_be_connected =  {
+              "cyan":  ["pink", "white"],
+              "white": ["cyan", "pink", "green", "blue"],
+              "blue":  ["white"],
+              "pink":  ["green", "white", "cyan"],
+              "green": ["pink", "white"]
+             }   
+             
+    #for c1 in should_be_connected:
+    #    for c2 in should_be_connected[c1]:
+        
+    #        assert rooms[colors[c1]]
