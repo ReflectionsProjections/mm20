@@ -60,9 +60,9 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         print rooms[i].name
         
         # Room objects
-        rooms[i].chairs = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "chair"]
-        rooms[i].desks = [(r[0], r[1])  for r in roomObjects[rooms[i].name] if r[2] == "desk"]
-        rooms[i].doors = [(r[0], r[1])  for r in roomObjects[rooms[i].name] if r[2] == "door"]
+        rooms[i].chairs = [(r[0], r[1])      for r in roomObjects[rooms[i].name] if r[2] == "chair"]
+        rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
+        rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
 
     # Done!
     """
