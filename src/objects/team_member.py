@@ -23,13 +23,20 @@ class TeamMember(object):
         self.person_id = person_id
         self.energy = TeamMember.Archetypes[archetype]["energy"]
 
+    def output_dict(self):
+        my_info = dict(self.__dict__)
+        del my_info["team"]
+        my_info["location"] = self.location.name
+        return my_info
+        
     ## Moves the team member from one room to another.
     # @param destination
     #   The room (a Room object) to move to.
     def move(self, destination):
         if not self.location.isConnectedTo(destination):
-            raise ValueError("NOTCONNECTED",
-                             "Cannot move to destination, it is not connected to current location")
+            raise ValueError(
+                "NOTCONNECTED",
+        "Cannot move to destination, it is not connected to current location")
         else:
             self.location = destination
 
@@ -94,7 +101,8 @@ class TestTeamMember(unittest.TestCase):
         TestTeamMember.PseudoTeam = PseudoTeam
         self.testRoom = room.Room("testRoom")
         self.testTeam = TestTeamMember.PseudoTeam()
-        self.testMember = TeamMember("Joe", "Coder", self.testRoom, self.testTeam, 0)
+        self.testMember = TeamMember("Joe", "Coder", self.testRoom,
+                                     self.testTeam, 0)
 
     def testInitCorrect(self):
         testRoom = room.Room("testRoom")

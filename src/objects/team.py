@@ -20,7 +20,7 @@ class Team(object):
         self.members = dict()
         #TODO: limit the number of team members one team can have, and throw/catch an appropriate exception
         for member in members:
-            newMember = (team_member.TeamMember(member["name"], member["class"], startingLocation, self, len(people)))
+            newMember = team_member.TeamMember(member["name"], member["class"], startingLocation, self, len(people))
             #TODO: check for non-unique names, then throw/catch an appropriate exception
             self.members[member["name"]] = newMember
             people.append(newMember)
@@ -35,6 +35,8 @@ class Team(object):
             rooms[room.name] = room
         return [r.output_dict() for r in rooms.values()]
 
+    def get_team_members(self):
+        return [m.output_dict() for m in self.members.values()]
 
 class TestTeam(unittest.TestCase):
     def setUp(self):

@@ -47,9 +47,11 @@ class Game(object):
             newTeam = Team(data["team"], data["members"],
                            self.rooms[STARTING_ROOM], self.people)
         except KeyError:
-            return (False, {"status": "Failure", "errors": ["KeyError"]})  # TODO: Make all error objects uniform
+            return (False, {"status": "Failure", "errors": ["KeyError"]})
+        # TODO: Make all error objects uniform
         self.result_buffer[client_id] = []
         self.teams[client_id] = newTeam
+        response = {"status": "Success", "team": newTeam.get_team_members()}
 
         return (True, response)
 
