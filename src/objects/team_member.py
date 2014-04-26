@@ -27,7 +27,8 @@ class TeamMember(object):
     #   The room (a Room object) to move to.
     def move(self, destination):
         if not self.location.isConnectedTo(destination):
-            raise ValueError("Cannot move to destination, it is not connected to current location")
+            raise ValueError("NOTCONNECTED",
+                             "Cannot move to destination, it is not connected to current location")
         else:
             self.location = destination
 
