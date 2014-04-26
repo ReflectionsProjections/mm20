@@ -19,10 +19,14 @@ class Team(object):
         self.name = name
         self.my_id = my_id
         self.members = dict()
-        #TODO: limit the number of team members one team can have, and throw/catch an appropriate exception
+        # TODO: limit the number of team members one team can have,
+        # and throw/catch an appropriate exception
         for member in members:
-            newMember = team_member.TeamMember(member["name"], member["class"], startingLocation, self, len(people))
-            #TODO: check for non-unique names, then throw/catch an appropriate exception
+            newMember = team_member.TeamMember(member["name"], member["class"],
+                                               startingLocation, self,
+                                               len(people))
+            # TODO: check for non-unique names, then throw/catch an
+            # appropriate exception
             self.members[member["name"]] = newMember
             people.append(newMember)
         self.numMembers = len(members)
@@ -49,7 +53,7 @@ class TestTeam(unittest.TestCase):
                          [
                              {"name": "Steve", "class": "Coder"},
                              {"name": "Bob", "class": "Theorist"}
-                         ], self.testRoom, [])
+                         ], self.testRoom, [], 0)
 
     def testInit(self):
         self.assertEqual(self.team.name, "testTeam")

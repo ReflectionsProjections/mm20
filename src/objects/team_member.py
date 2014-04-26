@@ -19,17 +19,25 @@ class TeamMember(object):
     # @param location
     #   The location (a Room object) that the TeamMember will start in.
     def __init__(self, name, archetype, location, team, person_id):
+        self.person_id = person_id
         self.name = name
         self.archetype = TeamMember.Archetypes[archetype]
         self.location = location
         location.addMember(self)
         self.team = team
-        self.person_id = person_id
         self.hunger = 0
         self.fatigue = 50.0  # Start at 8 hours awake (halfway to passed out)
         self.asleep = False
         self.acted = None  # acted is the string of the action performed.
                            # (True) or None (False)
+
+    ## Each person should have a unique person_id that will never change once a
+    #  person has been created
+    def __hash__(self):
+        return hash(self.person_id)
+
+    def __eq__(self, other):
+        return self.person_id == other.person_id
 
     def output_dict(self):
         my_info = dict(self.__dict__)
