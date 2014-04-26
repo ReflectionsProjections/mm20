@@ -26,7 +26,7 @@ class TeamMember(object):
         self.hunger = 0
         self.fatigue = 50.0 #Start at 8 hours awake (halfway to passed out)
         self.asleep = False
-        self.acted = False
+        self.acted = None #acted is the string of the action performed (True) or None (False).
 
     def output_dict(self):
         my_info = dict(self.__dict__)
@@ -47,9 +47,13 @@ class TeamMember(object):
                 self.location.removeMember(self)
                 destination.addMember(self)
                 self.location = destination
-            self.acted = True
+            self.acted = "move"
         else:
             if self.acted:
+                if self.acted == "distracted":
+                    raise client_action.ActionError(
+                        "DISTRACTED",
+                        "You have been distracted this turn")
                 raise client_action.ActionError(
                     "ALREADYACTED",
                     "Cannot move to destination, this player has already acted this turn")
@@ -98,7 +102,7 @@ class TeamMember(object):
             amount = effective * self.archetype["optimize"] / (ai.complexity / 10.0)
             ai.complexity += amount
             ai.optimization += amount
-        self.acted = True
+        self.acted = "code"
 
     ##  Theorize!
     #
@@ -107,7 +111,7 @@ class TeamMember(object):
         self._can_move()
         effective = self._getEffectiveness()
         self.team.ai.theory += self.archetype["theorize"] * effective
-        self.acted = True
+        self.acted = "theorize"
 
     ##  Eat!
     #
@@ -121,7 +125,52 @@ class TeamMember(object):
     #   @param victim The person you are trying to distract
     def distract(self, victim):
         self._can_move()
-        #TODO: More stuff here
+        if victim.location != self.location:
+            raise client_action.ActionError(
+                "UNDISTRACTABLE",
+                "Cannot distract someone who is in another room")
+        if victim.asleep:
+            raise client_action.ActionError(
+                "UNDISTRACTABLE",
+                "Cannot distract someone who is asleep")
+        if victim.acted:
+            raise client_action.ActionError(
+                "UNDISTRACTABLE",
+                "Distraction failed because they ignored you")
+        if victim.hunger >=100:
+            raise client_action.ActionError(
+                "UNDISTRACTABLE",
+                "Cannot distract someone who is focused on food")
+        victim.acted = "distracted"
+        self.acted = "distract"
+
+    ##  Spy!
+    def spy(self):
+        self._can_move()
+        effective = self._getEffectiveness() * self.archetype["spy"]
+        amount = 0
+        for person in self.location.people:
+            if person.acted == "theorize":
+                amount += 2*effective
+            if person.acted == "code":
+                amount += effective
+        self.acted = "spy"
+
+    ##  Wake up!
+    #
+    #   @param victim The person you are trying to wake up
+    def wake(self, victim):
+        self._can_move()
+        if victim.location != self.location:
+            raise client_action.ActionError(
+                "CANNOTWAKE",
+                "Cannot wake someone who is in another room")
+        if not victim.asleep:
+            raise client_action.ActionError(
+                "CANNOTWAKE",
+                "Cannot wake someone who is not asleep")
+        victim.asleep = False
+        self.acted = "wake"
 
     ##Calculate effectiveness based on fatigue and hunger
     def _getEffectiveness(self):
@@ -134,6 +183,10 @@ class TeamMember(object):
 
     def _can_move(self):
         if self.acted:
+            if self.acted == "distracted":
+                raise client_action.ActionError(
+                    "DISTRACTED",
+                    "You have been distracted this turn")
             raise client_action.ActionError(
                 "ALREADYACTED",
                 "This player has already acted this turn")
@@ -161,7 +214,7 @@ class TeamMember(object):
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
-        self.acted = False
+        self.acted = None
 
 
 import team

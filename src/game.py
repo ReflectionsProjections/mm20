@@ -45,7 +45,7 @@ class Game(object):
         try:
             print data
             newTeam = Team(data["team"], data["members"],
-                           self.rooms[STARTING_ROOM], self.people)
+                           self.rooms[STARTING_ROOM], self.people, client_id)
         except KeyError:
             return (False, {"status": "Failure", "errors": ["KeyError"]})
         # TODO: Make all error objects uniform

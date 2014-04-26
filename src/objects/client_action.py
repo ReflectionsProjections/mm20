@@ -115,6 +115,48 @@ class Action:
                 response['message'] = e.message
         return response
 
+    ## Attempts to make a member theorize
+    # @param parameters
+    #   TODO - Explain valid parameters
+    def _distract(self, game, parameters):
+        response = self._build_response(game, parameters, ['member', 'victim'], "distracting")
+        if response['success'] is True:
+            try:
+                game.people[parameters['member']].theorize(game.people[parameters['victim']])
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e.reason
+                response['message'] = e.message
+        return response
+
+    ## Attempts to make a member theorize
+    # @param parameters
+    #   TODO - Explain valid parameters
+    def _wake(self, game, parameters):
+        response = self._build_response(game, parameters, ['member', 'victim'], "distracting")
+        if response['success'] is True:
+            try:
+                game.people[parameters['member']].wake(game.people[parameters['victim']])
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e.reason
+                response['message'] = e.message
+        return response
+
+    ## Attempts to make a member theorize
+    # @param parameters
+    #   TODO - Explain valid parameters
+    def _spy(self, game, parameters):
+        response = self._build_response(game, parameters, ['member'], "distracting")
+        if response['success'] is True:
+            try:
+                game.people[parameters['member']].theorize()
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e.reason
+                response['message'] = e.message
+        return response
+
     ## Returns information about the server
     # @param parameters
     #   TODO - Explain valid parameters.
@@ -146,6 +188,16 @@ class Action:
                 response['message'] = "Member {0} is ".format(parameters['member']) + message
             else:
                 response['message'] = message
+        if 'member' in parameters:
+            if not isinstance(parameters['member'], int) or parameters['member'] > len(game.people):
+                response['success'] = False
+                response['message'] = "KeyError: {0} not a valid member".format(parameters['member'])
+                response['reason'] = 'KEYERROR'
+            elif game.people[parameters['member']].team.my_id != self.owner:
+                response['success'] = False
+                response['message'] = "{0} is not a member of your team".format(parameters['member'])
+                response['reason'] = 'NOTTEAMMEMBER'
+
         return response
 
 

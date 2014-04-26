@@ -15,8 +15,9 @@ class Team(object):
     # @param people
     #   A global list of people that the game stores and the team initializer
     #   appends all members to
-    def __init__(self, name, members, startingLocation, people):
+    def __init__(self, name, members, startingLocation, people, my_id):
         self.name = name
+        self.my_id = my_id
         self.members = dict()
         #TODO: limit the number of team members one team can have, and throw/catch an appropriate exception
         for member in members:

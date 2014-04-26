@@ -22,6 +22,9 @@
       "code",
       "sleep",
       "theorize",
+      "distract",
+      "wake",
+      "spy",
       "serverInfo"
     ],
     "priorities": {
@@ -32,7 +35,7 @@
       "sleep": 60,
       "code": 60,
       "theorize": 50,
-      "wakeUp": 40,
+      "wake": 40,
       "spy": 20
     }
   },
@@ -49,28 +52,32 @@
       "refactor":7,
       "test":7,
       "optimize":5,
-      "theorize":3
+      "theorize":3,
+      "spy":5
     },
     "Theorist": {
       "codingProwess": 5,
       "refactor":5,
       "test":7,
       "optimize":5,
-      "theorize":10
+      "theorize":10,
+      "spy":5
     },
     "Architect": {
       "codingProwess": 7,
       "refactor":10,
       "test":10,
       "optimize":5,
-      "theorize":5
+      "theorize":5,
+      "spy":5
     },
     "Informant": {
       "codingProwess": 3,
       "refactor":5,
       "test":5,
       "optimize":5,
-      "theorize":7
+      "theorize":7,
+      "spy":10
     }
   },
   "rooms": {
