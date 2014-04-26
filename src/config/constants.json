@@ -17,8 +17,8 @@
   },
   "actions": {
     "validActions": [
-      "movePlayer",
-      "eatFood",
+      "move",
+      "eat",
       "code",
       "sleep",
       "theorize",
@@ -26,8 +26,8 @@
     ],
     "priorities": {
       "serverInfo": 100,
-      "movePlayer": 80,
-      "eatFood": 80,
+      "move": 80,
+      "eat": 80,
       "distract": 70,
       "sleep": 60,
       "code": 60,

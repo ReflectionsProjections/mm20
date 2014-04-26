@@ -31,25 +31,34 @@ class Action:
 
     # --- Actions available to clients ---
 
-    ## Attempts to move a player. If the move is invalid, a 404 "Invalid Call" response is returned.
+    ## Attempts to move a member. If the move is invalid, a 404 "Invalid Call" response is returned.
     # @param action
     #   The action to execute
-    def _movePlayer(self, game, parameters):
+    def _move(self, game, parameters):
         response = self._build_response(game, parameters, ['member', 'room'], "moving")
         if response['success'] == True:
-            game.people[parameters['player']].move(parameters['room'])
+            try:
+                game.people[parameters['member']].move(game.rooms[parameters['room']])
+            except ValueError as e:
+                response['success'] = False
+                response['reason'] = e[0]
+                response['message'] = e[1]
+            except KeyError as e:
+                response['success'] = False
+                response['reason'] = 'KEYERROR'
+                response['message'] = 'Room does not exist'
         return response
 
     ## Attempts to eat food from FoodTable
     # @param parameters
     #   TODO - Explain valid parameters
-    def _eatFood(self, game, parameters):
+    def _eat(self, game, parameters):
         response = self._build_response(game, parameters, ['member', 'foodTable'], "eating")
         if response['success'] == True:
-            game.people[parameters['player']].eat(parameters['foodTable'])
+            game.people[parameters['member']].eat(parameters['foodTable'])
         return response
 
-    ## Attempts to make a player sleep
+    ## Attempts to make a member sleep
     # @param parameters
     #   TODO - Explain valid parameters
     def _sleep(self, game, parameters):
@@ -58,7 +67,7 @@ class Action:
             game.people[parameters['member']].sleep()
         return response
 
-    ## Attempts to make a player code
+    ## Attempts to make a member code
     # @param parameters
     #   TODO - Explain valid parameters
     def _code(self, game, parameters):
@@ -67,7 +76,7 @@ class Action:
             game.people[parameters['member']].code(parameters['type'], game.turn)
         return response
 
-    ## Attempts to make a player theorize
+    ## Attempts to make a member theorize
     # @param parameters
     #   TODO - Explain valid parameters
     def _theorize(self, game, parameters):
