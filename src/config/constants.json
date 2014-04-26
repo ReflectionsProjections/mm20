@@ -15,12 +15,26 @@
     "initialConnectTime": 1,
     "maxDataSize": 1024
   },
-  "actions": [
-    "movePlayer",
-    "eatFood",
-    "code",
-    "sleep"
-  ],
+  "actions": {
+    "validActions": [
+      "movePlayer",
+      "eatFood",
+      "code",
+      "sleep",
+      "serverInfo"
+    ],
+    "priorities": {
+      "serverInfo": 100,
+      "movePlayer": 80,
+      "eatFood": 80,
+      "distract": 70,
+      "sleep": 60,
+      "code": 60,
+      "theorize": 50,
+      "wakeUp": 40,
+      "spy": 20
+    }
+  },
   "aiDefaults": {
     "optimization": 0.0,
     "stability": 1.0,

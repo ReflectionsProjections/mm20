@@ -11,7 +11,7 @@ class AI:
         self.theory = defaults['theory']
         self.implementation = defaults['implementation']
 
-    # Changes an attribute given the amount
+    ## Changes an attribute given the amount
     # @param Attribute
     #   The attribute to (in-/de-)crement
     # @param amount
