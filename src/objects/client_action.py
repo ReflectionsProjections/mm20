@@ -2,6 +2,16 @@ import config.handle_constants
 import unittest
 
 
+## The type of error occuring due to any client initiated action
+class ActionError(Exception):
+    def __init__(self, reason, message):
+        self.reason = reason
+        self.message = message
+
+    def __str__(self):
+        return "{0} ({1})".format(self.reason, self.message)
+
+
 ## ??
 class Action:
     ## ??
@@ -36,10 +46,10 @@ class Action:
     #   The action to execute
     def _move(self, game, parameters):
         response = self._build_response(game, parameters, ['member', 'room'], "moving")
-        if response['success'] == True:
+        if response['success'] is True:
             try:
                 game.people[parameters['member']].move(game.rooms[parameters['room']])
-            except ValueError as e:
+            except ActionError as e:
                 response['success'] = False
                 response['reason'] = e[0]
                 response['message'] = e[1]
@@ -54,7 +64,7 @@ class Action:
     #   TODO - Explain valid parameters
     def _eat(self, game, parameters):
         response = self._build_response(game, parameters, ['member', 'foodTable'], "eating")
-        if response['success'] == True:
+        if response['success'] is True:
             game.people[parameters['member']].eat(parameters['foodTable'])
         return response
 
@@ -63,7 +73,7 @@ class Action:
     #   TODO - Explain valid parameters
     def _sleep(self, game, parameters):
         response = self._build_response(game, parameters, ['member'], "sleeping")
-        if response['success'] == True:
+        if response['success'] is True:
             game.people[parameters['member']].sleep()
         return response
 
@@ -72,7 +82,7 @@ class Action:
     #   TODO - Explain valid parameters
     def _code(self, game, parameters):
         response = self._build_response(game, parameters, ['member', 'type'], "coding")
-        if response['success'] == True:
+        if response['success'] is True:
             game.people[parameters['member']].code(parameters['type'], game.turn)
         return response
 
@@ -81,7 +91,7 @@ class Action:
     #   TODO - Explain valid parameters
     def _theorize(self, game, parameters):
         response = self._build_response(game, parameters, ['member'], "theorizing")
-        if response['success'] == True:
+        if response['success'] is True:
             game.people[parameters['member']].theorize(game.turn)
         return response
 

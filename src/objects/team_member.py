@@ -1,11 +1,11 @@
 import config.handle_constants
+import client_action
 import unittest
-import math
+import room
 
 
 ## Holds information and functions for individual team members
 class TeamMember(object):
-    _INVALID = "Invalid Request"
     Archetypes = config.handle_constants.retrieveConstants("archetypes")
 
     ## Initializes a TeamMember with name, archetype, and team
@@ -28,15 +28,15 @@ class TeamMember(object):
         del my_info["team"]
         my_info["location"] = self.location.name
         return my_info
-        
+
     ## Moves the team member from one room to another.
     # @param destination
     #   The room (a Room object) to move to.
     def move(self, destination):
         if not self.location.isConnectedTo(destination):
-            raise ValueError(
+            raise client_action.ActionError(
                 "NOTCONNECTED",
-        "Cannot move to destination, it is not connected to current location")
+                "Cannot move to destination, it is not connected to current location")
         else:
             self.location = destination
 
@@ -89,7 +89,6 @@ class TeamMember(object):
         self.team.ai.theory += self.archetype["theorize"]
 
 import team
-import room
 
 
 ## Tests all of the functionality in Team Member

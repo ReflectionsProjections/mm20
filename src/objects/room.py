@@ -1,10 +1,42 @@
 import unittest
 
+
+class AlreadyConnectedError(Exception):
+    def __init__(self, roomOne, roomTwo):
+        self.msg = "Room {0} and {1} are already connected.".format(roomOne, roomTwo)
+
+    def __str__(self):
+        return self.msg
+
+
+class NotConnectedError(Exception):
+    def __init__(self, roomOne, roomTwo):
+        self.msg = "Room {0} and {1} are not connected!".format(roomOne, roomTwo)
+
+    def __str__(self):
+        return self.msg
+
+
+class AlreadyInRoomError(Exception):
+    def __init__(self, room, member):
+        self.msg = "{0} is already in {1}.".format(member, room)
+
+    def __str__(self):
+        return self.msg
+
+
+class NotInRoomError(Exception):
+    def __init__(self, room, member):
+        self.msg = "{0} is not ins {1}.".format(member, room)
+
+    def __str__(self):
+        return self.msg
+
+
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
 #  Rooms contain team members and furniture (TODO)
 class Room(object):
-
     ## Initializes a Room object.
     # @param name
     #   The identifier of the room.
@@ -13,15 +45,32 @@ class Room(object):
     def __init__(self, room_id):
         self.connectedRooms = dict()
         self.name = room_id
+        self.people = set()
+
+    ## Adds a member to this room
+    # @param member
+    #   The member to add to this room
+    def addMember(self, member):
+        if member in self.people:
+            raise AlreadyInRoomError(self, member)
+        self.people.add(member)
+
+    ## Removes a member from this room
+    # @param member
+    #   The member to remove from this room
+    def removeMember(self, member):
+        if not member in self.people:
+            raise NotInRoomError(self, member)
+        self.people.remove(member)
 
     def __str__(self):
-        return "<id:{}, connected_rooms:{}>".format(self.name, self.connectedRooms.keys())
+        return "<id:{0}, connected_rooms:{1}>".format(self.name, self.connectedRooms.keys())
 
     def output_dict(self):
         room_info = {"room": self.name,
                      "connectedRooms": self.connectedRooms.keys()}
         return room_info
-    
+
     ## Returns connected rooms
     def getConnectedRooms(self):
         return self.connectedRooms.keys()
@@ -33,10 +82,8 @@ class Room(object):
     #   Throws a value error if this room and the passed in
     #   room are already connected.
     def connectToRoom(self, room):
-        if not isinstance(room, Room):
-            raise TypeError("room is not a Room Object")
         if self.isConnectedTo(room):
-            raise ValueError("These two rooms are already connected.")
+            raise AlreadyConnectedError(self, room)
         else:
             self.connectedRooms[room.name] = room
             room.connectedRooms[self.name] = self
@@ -45,10 +92,8 @@ class Room(object):
     # @param room
     #   The room to disconnect from this room
     def disconnectRoom(self, room):
-        if not isinstance(room, Room):
-            raise TypeError("room is not a Room Object")
         if not self.isConnectedTo(room):
-            raise KeyError("These two rooms are not connected")
+            raise NotConnectedError(self, room)
         del self.connectedRooms[room.name]
         del room.connectedRooms[self.name]
 
@@ -59,8 +104,6 @@ class Room(object):
     # @return
     #   Returns whether this room is connected to the passed in room.
     def isConnectedTo(self, room):
-        if not isinstance(room, Room):
-            raise TypeError("room is not a Room Object")
         return room.name in self.connectedRooms
 
 
@@ -75,22 +118,36 @@ class TestRoom(unittest.TestCase):
         self.assertFalse(room.getConnectedRooms())
 
     def testInitIncorrect(self):
-        with self.assertEqual(TypeError):
+        with self.assertRaises(TypeError):
             Room(None)
+
+    def testAddMember(self):
+        self.room.addMember('Jim')
+        self.assertTrue('Jim' in self.room.people)
+
+    def testAddMemberAlreadyThere(self):
+        self.room.addMember('Jim')
+        with self.assertRaises(AlreadyInRoomError):
+            self.room.addMember('Jim')
+
+    def testRemoveMember(self):
+        self.room.addMember('Jim')
+        self.room.removeMember('Jim')
+        self.assertFalse('Jim' in self.room.people)
+
+    def testRemoveMemberNotInRoom(self):
+        with self.assertRaises(NotInRoomError):
+            self.room.removeMember('Jim')
 
     def testConnectAValidRoom(self):
         roomTwo = Room("testRoom2")
         self.room.connectToRoom(roomTwo)
         self.assertListEqual(self.room.getConnectedRooms(), [roomTwo.name])
 
-    def testConnectAnInvalidRoom(self):
-        with self.assertRaises(TypeError):
-            self.room.connectToRoom("NotARoom")
-
     def testConnectARoomAlreadyConnected(self):
         roomTwo = Room("testRoom2")
         self.room.connectToRoom(roomTwo)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AlreadyConnectedError):
             self.room.connectToRoom(roomTwo)
 
     def testDisconnectRoom(self):
@@ -99,13 +156,9 @@ class TestRoom(unittest.TestCase):
         self.room.disconnectRoom(roomTwo)
         self.assertFalse(self.room.getConnectedRooms())
 
-    def testDisconnectNotARoom(self):
-        with self.assertRaises(TypeError):
-            self.room.disconnectRoom("NotARoom")
-
     def testDisconnectNotConnectedRoom(self):
         roomTwo = Room("testRoom2")
-        with self.assertRaises(KeyError):
+        with self.assertRaises(NotConnectedError):
             self.room.disconnectRoom(roomTwo)
 
     def testIsConnectedToActuallyConnected(self):
@@ -116,10 +169,6 @@ class TestRoom(unittest.TestCase):
     def testIsConnectedNotConnected(self):
         roomTwo = Room("testRoom2")
         self.assertFalse(self.room.isConnectedTo(roomTwo))
-
-    def testIsConnectedNotARoom(self):
-        with self.assertRaises(TypeError):
-            self.room.isConnectedTo("NotARoom")
 
 if __name__ == "__main__":
     unittest.main()
