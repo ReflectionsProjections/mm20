@@ -96,11 +96,11 @@ actionPriorities['sleep'] = 60
 
 
 ## Attempts to make a player code
-# @param parameters TODO - Explain valid parameters
+# @param parameters Should include the player to code and the type of coding to do
 def _code(game, parameters):
     if 'player' in parameters and 'type' in parameters and
         'duration' in parameters:
-        return game.people[parameters['player']].code(parameters['type'], parameters['duration'])
+        return game.people[parameters['player']].code(parameters['type'], game.turn)
     else:
         return _INVALID
 actionDispatch['code'] = _code

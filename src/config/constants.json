@@ -22,30 +22,46 @@
     "sleep"
   ],
   "aiDefaults": {
-    "optimization": 0,
-    "stability": 0,
-    "complexity": 0,
-    "theory": 0,
-    "implementation": 0
+    "optimization": 0.0,
+    "stability": 0.0,
+    "complexity": 1.0,
+    "theory": 0.0,
+    "implementation": 0.0
   },
   "archetypes": {
     "Coder": {
       "codingProwess": 10,
+      "refactor":7,
+      "test":7,
+      "optimize":5,
+      "theorize":3,
       "energy": 100,
       "sleepEffectiveness": 2
     },
     "Theorist": {
       "codingProwess": 5,
+      "refactor":5,
+      "test":7,
+      "optimize":5,
+      "theorize":10,
       "energy": 100,
       "sleepEffectiveness": 2
     },
     "Architect": {
       "codingProwess": 7,
+      "refactor":10,
+      "test":10,
+      "optimize":5,
+      "theorize":5,
       "energy": 100,
       "sleepEffectiveness": 2
     },
     "Informant": {
       "codingProwess": 3,
+      "refactor":5,
+      "test":5,
+      "optimize":5,
+      "theorize":7,
       "energy": 100,
       "sleepEffectiveness": 2
     }

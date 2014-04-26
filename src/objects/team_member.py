@@ -1,5 +1,6 @@
 import config.handle_constants
 import unittest
+import math
 
 
 ## Holds information and functions for individual team members
@@ -38,6 +39,40 @@ class TeamMember(object):
     def sleep(self, turns):
         self.energy += turns * self.archetype["sleepEffectiveness"]
         # TODO: Make a team member unable to do anything else while sleeping!
+
+    ##  Code!
+    #
+    #   @param code_type A string containing the type of coding to be done
+    #   @param turn The turn so that the player knows how long they've been coding
+    def code(self, code_type, turn):
+        ai = self.team.ai
+        if code_type == "refactor":
+            ai.complexity -= self.archetype["refactor"]
+            if ai.complexity < ai.implementation * .25:
+                ai.complexity = ai.implementation * .25
+            if ai.complexity < 1:
+                ai.complexity = 1.0
+        elif code_type == "test":
+            amount = self.archetype["test"] / (ai.complexity / 10.0)
+            ai.stability += amount / 100.0
+            if ai.stability > 1:
+                ai.stability = 1.0
+        elif code_type == "implement":
+            amount = self.archetype["codingProwess"] / (ai.complexity / 10.0)
+            ai.implementation += amount
+            ai.complexity += amount
+            ai.optimization -= amount / 10.0
+            ai.stability -= amount / 200.0
+            if ai.implementation > ai.theory:
+                ai.implementation = ai.theory
+            if ai.stability < 0.0:
+                ai.stability = 0.0
+            if ai.optimization < 0.0:
+                ai.optimization = 0.0
+        elif code_type == "optimize":
+            amount = self.archetype["optimize"] / (ai.complexity / 10.0)
+            ai.complexity += amount
+            ai.optimization += amount
 
 import team
 import room
