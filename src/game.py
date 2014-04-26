@@ -28,6 +28,7 @@ class Game(object):
         self.turn_limit = defaults["TICKSINHOUR"] * 24
         self.unoptimized_weight = defaults["UNOPTWEIGHT"]
         self.optimized_weight = defaults["OPTWEIGHT"]
+        self.team_limit = defaults["TEAMSIZE"]
         self.action_buffer = []
         self.result_buffer = {}
         self.teams = {}
@@ -44,7 +45,8 @@ class Game(object):
     def add_new_team(self, data, client_id):
         response = {"status": "Success", "errors": []}
         try:
-            print data
+            if len(data["members"]) > self.team_limit:
+                return (False, {"status": "Failure", "errors": ["Number of team members exceeds team size"]})
             newTeam = Team(data["team"], data["members"],
                            self.rooms[STARTING_ROOM], self.people, client_id)
         except KeyError:
@@ -61,6 +63,8 @@ class Game(object):
     # @return
     #   True if the game is running, False if the game ended
     def execute_turn(self):
+        if len(self.people) == 0:
+            return False
         action_handler.handleTurn(self, self.action_buffer)
         self.action_buffer = []
         for person in self.people:
@@ -112,7 +116,7 @@ class Game(object):
     #   the id of the team that has won
     def find_victor(self):
         victor = 0
-        score = 0.0
+        score = -1
         for ident, team in self.teams.iteritems():
             team_score = self.calc_score(ident)
             if team_score > score:

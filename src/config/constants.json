@@ -3,6 +3,7 @@
     "VERSION": 0.0,
     "NAME": "Meta-Mania",
     "TICKSINHOUR": 4,
+    "TEAMSIZE": 4,
     "UNOPTWEIGHT": 0.2,
     "OPTWEIGHT": 0.8
   },
