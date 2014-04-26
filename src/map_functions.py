@@ -8,19 +8,19 @@ wallColors = [(0, 0, 0, 255)]
 
 # For debugging
 colorDict = {
-    (0, 0, 0, 255): "black",
-    (0, 255, 255, 255): "cyan",
-    (255, 255, 255, 255): "white",
-    (72, 0, 255, 255): "blue",
-    (255, 0, 220, 255): "pink",
-    (76, 255, 0, 255): "green"
+    "0 0 0": "black",
+    "0 255 255": "cyan",
+    "255 255 255": "white",
+    "72 0 255": "blue",
+    "255 0 220": "pink",
+    "76, 255, 0": "green"
 }
 
 # Furniture
 roomObjectColorDict = {
-    (0, 1, 2, 3): "chair",
-    (4, 5, 6, 7): "desk",
-    (255, 180, 0, 255): "door"
+    "0 1 2 3": "chair",
+    "4 5 6 7": "desk",
+    "255 180 0 255": "door"
 }
 doorColor = (255, 180, 0, 255)
 
@@ -49,14 +49,14 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
     # Get connections between + objects in rooms
     roomObjects = dict()
     _floodFillConnectionsIter(start, connections, roomObjects, pixels, visited, img.size, stepSize)
-
+    
     # Show picture
     rooms = []
     for c in connections:
         room = objects.room.Room(c) # c = room.name
         rooms.append(room)
     for i in range(0, len(rooms)):
-        rooms[i].connectedRooms = dict([(r.name, r) for r in rooms if r.name in connections[rooms[i].name]])
+        rooms[i].connectedRooms = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
         print rooms[i].name
         
         # Room objects
@@ -72,11 +72,30 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         print "---------------------"
         print r.connections
     """
-    return rooms
+    
+    # Hacky transformation code
+    rooms2 = {i.name: i for i in rooms}
+    print rooms2
+    return rooms2
 
 # --- INTERNAL CODE - DO NOT USE OUTSIDE OF THIS FILE ---
+## [map_functions.py only] Converts a tuple to a string.
+# @param t The tuple to convert.
+def _stringify(t):
 
-## [map_functions.py only] Gets the closest spixel with the specified color. Returns NONE if no matches are found.
+    # Edge case
+    if len(t) == 0:
+        return ""
+
+    # Common case
+    s = str(t[0])
+    for i in range(1, len(t)):
+        s += " " + str(t[i])
+        
+    # Done!
+    return s
+
+## [map_functions.py only] Gets the closest pixel with the specified color. Returns NONE if no matches are found.
 # @param start A 2-tuple representing the point in the image to start searching from.
 # @param targetColor The color to search for
 # @param pixels The pixels of the image (obtained using Image.load())
@@ -126,17 +145,23 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
             
         # Iterative case 1: further iteration (basically recursion)
         for mx in range(-1, 2):
+        
+            px = x + mx * stepSize
+            
+            # Skip out of bounds pixels (pt 1/2)
+            if (px < 0 or width <= px):
+                continue
+        
             for my in range(-1, 2):
 
                 # Skip identical pixels
                 if mx == 0 and my == 0:
                     continue
 
-                px = x + mx * stepSize
                 py = y + my * stepSize
                 
-                # Skip out of bounds pixels
-                if (px < 0 or py < 0) or (width <= px or height <= py):
+                # Skip out of bounds pixels (pt 2/2)
+                if (py < 0 or height <= py):
                     continue
                 
                 # Add pixel to queue
@@ -189,8 +214,8 @@ def _floodFillConnectionsIter(start, connections, roomObjects, pixels, visited, 
         y = node[1]
 
         # Base case 1: hit black
-        curColor = pixels[parent[0], parent[1]]
-        nextColor = pixels[x, y]
+        curColor = _stringify(pixels[parent[0], parent[1]])
+        nextColor = _stringify(pixels[x, y])
         if nextColor in wallColors:
             continue
         
@@ -231,17 +256,23 @@ def _floodFillConnectionsIter(start, connections, roomObjects, pixels, visited, 
 
         # Iterative case 1b: further iteration (basically recursion)
         for mx in range(-1, 2):
+        
+            px = x + mx * stepSize
+        
+            # Skip out of bounds pixels (pt 1/2)
+            if (px < 0 or width <= px):
+                continue
+        
             for my in range(-1, 2):
 
                 # Skip identical pixels
                 if mx == 0 and my == 0:
                     continue
 
-                px = x + mx * stepSize
                 py = y + my * stepSize
 
-                # Skip out of bounds pixels
-                if (px < 0 or py < 0) or (width <= px or height <= py):
+                # Skip out of bounds pixels (pt 2/2)
+                if (py < 0 or height <= py):
                     continue
 
                 # Skip visited pixels
