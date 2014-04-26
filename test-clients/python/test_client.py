@@ -13,6 +13,6 @@ while len(data) > 0 and game_running: #TODO: Need check for game over
     if 'winner' in json.loads(data):
         game_running = False
     else:
-        s.sendall('[{"action":"theorize", "player":0}]')
+        s.sendall('[{"action":"theorize", "member":0}]')
         data = s.recv(1024)
 s.close()

@@ -26,11 +26,8 @@ class Action:
                    'reason': 'INVALID'}
         if self.action == 'INVALID':
             return invalid
-        try:
-            func = getattr(self, '_{0}'.format(self.action))
-            return func(game, self.parameters)
-        except AttributeError:
-            return invalid
+        func = getattr(self, '_{0}'.format(self.action))
+        return func(game, self.parameters)
 
     # --- Actions available to clients ---
 
@@ -38,125 +35,45 @@ class Action:
     # @param action
     #   The action to execute
     def _movePlayer(self, game, parameters):
-        response = {'action': 'move'}
-        try:
-            response = {'success': True, 'message': '', 'reason': '',
-                        'member': parameters['player'], 'room': parameters['room']}
-        except KeyError as e:
-            response.success = False
-            response.message = "KeyError: {0} not found in parameters".format(e)
-            response.reason = 'KEYERROR'
-            return response
-        try:
+        response = self._build_response(game, parameters, ['member', 'room'], "moving")
+        if response['success'] == True:
             game.people[parameters['player']].move(parameters['room'])
-        except Exception as e:
-            response.success = False
-            response.message = "{0}".format(e.args[1])
-            response.reason = e.args[0]
-        else:
-            response.success = True
-            response.message = "Member {0} moved to {1}".format(parameters['player'], parameters['room'])
-            response.reason = 'SUCCESS'
         return response
 
     ## Attempts to eat food from FoodTable
     # @param parameters
     #   TODO - Explain valid parameters
     def _eatFood(self, game, parameters):
-        response = {'action': 'eatFood'}
-        try:
-            response = {'success': True, 'message': '', 'reason': '',
-                        'member': parameters['player'], 'foodTable': parameters['foodTable']}
-        except KeyError as e:
-            response.success = False
-            response.message = "KeyError: {0} not found in parameters".format(e)
-            response.reason = 'KEYERROR'
-            return response
-        try:
+        response = self._build_response(game, parameters, ['member', 'foodTable'], "eating")
+        if response['success'] == True:
             game.people[parameters['player']].eat(parameters['foodTable'])
-        except Exception as e:
-            response.success = False
-            response.message = "{0}".format(e.args[1])
-            response.reason = e.args[0]
-        else:
-            response.success = True
-            response.message = "Member {0} ate food from {1}".format(parameters['player'], parameters['foodTable'])
-            response.reason = 'SUCCESS'
         return response
 
     ## Attempts to make a player sleep
     # @param parameters
     #   TODO - Explain valid parameters
     def _sleep(self, game, parameters):
-        response = {'action': 'sleep'}
-        try:
-            response = {'success': True, 'message': '', 'reason': '',
-                        'member': parameters['player']}
-        except KeyError as e:
-            response.success = False
-            response.message = "KeyError: {0} not found in parameters".format(e)
-            response.reason = 'KEYERROR'
-            return response
-        try:
-            game.people[parameters['player']].sleep()
-        except Exception as e:
-            response.success = False
-            response.message = "{0}".format(e.args[1])
-            response.reason = e.args[0]
-        else:
-            response.success = True
-            response.message = "Member {0} went to sleep".format(parameters['player'])
-            response.reason = 'SUCCESS'
+        response = self._build_response(game, parameters, ['member'], "sleeping")
+        if response['success'] == True:
+            game.people[parameters['member']].sleep()
         return response
 
     ## Attempts to make a player code
     # @param parameters
     #   TODO - Explain valid parameters
     def _code(self, game, parameters):
-        response = {'action': 'code'}
-        try:
-            response = {'success': True, 'message': '', 'reason': '',
-                        'member': parameters['player'], 'type': parameters['type']}
-        except KeyError as e:
-            response.success = False
-            response.message = "KeyError: {0} not found in parameters".format(e)
-            response.reason = 'KEYERROR'
-            return response
-        try:
-            game.people[parameters['player']].code(parameters['type'], game.turn)
-        except Exception as e:
-            response.success = False
-            response.message = "{0}".format(e.args[1])
-            response.reason = e.args[0]
-        else:
-            response.success = True
-            response.message = "Member {0} is coding {1}".format(parameters['player'], parameters['type'])
-            response.reason = 'SUCCESS'
+        response = self._build_response(game, parameters, ['member', 'type'], "coding")
+        if response['success'] == True:
+            game.people[parameters['member']].code(parameters['type'], game.turn)
         return response
 
     ## Attempts to make a player theorize
     # @param parameters
     #   TODO - Explain valid parameters
     def _theorize(self, game, parameters):
-        response = {'action': 'code'}
-        try:
-            response = {'success': True, 'message': '', 'reason': '',
-                        'member': parameters['player']}
-        except KeyError as e:
-            response.success = False
-            response.message = "KeyError: {0} not found in parameters".format(e)
-            response.reason = 'KEYERROR'
-            return response
-        try:
-            game.people[parameters['player']].theorize(game.turn)
-        except Exception as e:
-            response.success = False
-            response.message = "{0}".format(e.args[1])
-            response.reason = e.args[0]
-        else:
-            response.success = True
-            response.message = "Member {0} is theorizing".format(parameters['player'])
-            response.reason = 'SUCCESS'
+        response = self._build_response(game, parameters, ['member'], "theorizing")
+        if response['success'] == True:
+            game.people[parameters['member']].theorize(game.turn)
         return response
 
     ## Returns information about the server
@@ -169,6 +86,27 @@ class Action:
         response = {'action': 'getInfo', 'success': True, 'message': 'Information Retrieved',
                     'reason': 'SUCCESS', 'version': constants["VERSION"],
                     'name': constants["NAME"]}
+        return response
+
+    def _build_response(self, game, parameters, expected_params, message):
+        response = {}
+        response['action'] = parameters['action']
+        try:
+            response['success'] = True
+            response['message'] = ''
+            for par in expected_params:
+                response[par] = parameters[par]
+        except KeyError as e:
+            response['success'] = False
+            response['message'] = "KeyError: {0} not found in parameters".format(e)
+            response['reason'] = 'KEYERROR'
+            return response
+        else:
+            response['reason'] = 'SUCCESS'
+            if 'member' in parameters:
+                response['message'] = "Member {0} is ".format(parameters['member']) + message
+            else:
+                response['message'] = message
         return response
 
 
