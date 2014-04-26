@@ -75,6 +75,12 @@ class TeamMember(object):
             ai.complexity += amount
             ai.optimization += amount
 
+        ##  Theorize!
+        #
+        #   @param turn The turn so that the player knows how long they've been theorizing
+        def theorize(self, turn):
+            self.team.ai.theory += self.archetype["theorize"]
+
 import team
 import room
 

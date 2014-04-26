@@ -27,7 +27,7 @@ class Action:
         if self.action == 'INVALID':
             return invalid
         try:
-            func = getattr(Action, '_{0}'.format(self.action))
+            func = getattr(self, '_{0}'.format(self.action))
             return func(game, self.parameters)
         except AttributeError:
             return invalid
@@ -37,7 +37,7 @@ class Action:
     ## Attempts to move a player. If the move is invalid, a 404 "Invalid Call" response is returned.
     # @param action
     #   The action to execute
-    def _movePlayer(game, parameters):
+    def _movePlayer(self, game, parameters):
         response = {'action': 'move'}
         try:
             response = {'success': True, 'message': '', 'reason': '',
@@ -62,7 +62,7 @@ class Action:
     ## Attempts to eat food from FoodTable
     # @param parameters
     #   TODO - Explain valid parameters
-    def _eatFood(game, parameters):
+    def _eatFood(self, game, parameters):
         response = {'action': 'eatFood'}
         try:
             response = {'success': True, 'message': '', 'reason': '',
@@ -87,7 +87,7 @@ class Action:
     ## Attempts to make a player sleep
     # @param parameters
     #   TODO - Explain valid parameters
-    def _sleep(game, parameters):
+    def _sleep(self, game, parameters):
         response = {'action': 'sleep'}
         try:
             response = {'success': True, 'message': '', 'reason': '',
@@ -112,7 +112,7 @@ class Action:
     ## Attempts to make a player code
     # @param parameters
     #   TODO - Explain valid parameters
-    def _code(game, parameters):
+    def _code(self, game, parameters):
         response = {'action': 'code'}
         try:
             response = {'success': True, 'message': '', 'reason': '',
@@ -134,10 +134,35 @@ class Action:
             response.reason = 'SUCCESS'
         return response
 
+    ## Attempts to make a player theorize
+    # @param parameters
+    #   TODO - Explain valid parameters
+    def _theorize(self, game, parameters):
+        response = {'action': 'code'}
+        try:
+            response = {'success': True, 'message': '', 'reason': '',
+                        'member': parameters['player']}
+        except KeyError as e:
+            response.success = False
+            response.message = "KeyError: {0} not found in parameters".format(e)
+            response.reason = 'KEYERROR'
+            return response
+        try:
+            game.people[parameters['player']].theorize(game.turn)
+        except Exception as e:
+            response.success = False
+            response.message = "{0}".format(e.args[1])
+            response.reason = e.args[0]
+        else:
+            response.success = True
+            response.message = "Member {0} is theorizing".format(parameters['player'])
+            response.reason = 'SUCCESS'
+        return response
+
     ## Returns information about the server
     # @param parameters
     #   TODO - Explain valid parameters.
-    def _serverInfo(game, parameters):
+    def _serverInfo(self, game, parameters):
         """Returns information about the server
         """
         constants = config.handle_constants.retrieveConstants('generalInfo')
