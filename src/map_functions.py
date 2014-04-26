@@ -16,6 +16,13 @@ colorDict = {
     (76, 255, 0, 255): "green"
 }
 
+# Furniture
+roomObjectColorDict = {
+    (0, 1, 2, 3): "chair",
+    (4, 5, 6, 7): "desk",
+    (255, 180, 0, 255): "door"
+}
+doorColor = (255, 180, 0, 255)
 
 ## Gets a list of Rooms (with connections) from a given map image
 # @param map_path A path to the map image
@@ -39,16 +46,23 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
             col.append(False)
         visited.append(col)
 
-    # Get connections between rooms
-    _floodFillConnectionsIter(start, connections, pixels, visited, stepSize)
+    # Get connections between + objects in rooms
+    roomObjects = dict()
+    _floodFillConnectionsIter(start, connections, roomObjects, pixels, visited, img.size, stepSize)
 
     # Show picture
     rooms = []
     for c in connections:
-        room = objects.room.Room(c)
+        room = objects.room.Room(c) # c = room.name
         rooms.append(room)
     for i in range(0, len(rooms)):
         rooms[i].connectedRooms = dict([(r.name, r) for r in rooms if r.name in connections[rooms[i].name]])
+        print rooms[i].name
+        
+        # Room objects
+        rooms[i].chairs = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "chair"]
+        rooms[i].desks = [(r[0], r[1])  for r in roomObjects[rooms[i].name] if r[2] == "desk"]
+        rooms[i].doors = [(r[0], r[1])  for r in roomObjects[rooms[i].name] if r[2] == "door"]
 
     # Done!
     """
@@ -62,14 +76,86 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
 
 # --- INTERNAL CODE - DO NOT USE OUTSIDE OF THIS FILE ---
 
+## [map_functions.py only] Gets the closest spixel with the specified color. Returns NONE if no matches are found.
+# @param start A 2-tuple representing the point in the image to start searching from.
+# @param targetColor The color to search for
+# @param pixels The pixels of the image (obtained using Image.load())
+# @param imgsize The size of the image as a tuple: (width, height).
+# @param stepSize The number of pixels the algorithm moves per step
+def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
 
+    # Queues
+    nodeQueue = Queue.Queue()
+
+    nodeQueue.put(start)
+
+    width = imgsize[0]
+    height = imgsize[1]
+
+    # Make sure start is a 2-tuple of integers
+    if len(start) != 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
+        raise ValueError("Starting pixel must be a 2-tuple of integers.")
+        
+    # Make sure this wasn't started on a wall or out of bounds
+    x = start[0]
+    y = start[1]
+    if (x < 0 or y < 0) or (width <= x or height <= y):
+        raise ValueError("Starting pixel must not be out of bounds.")
+        
+    # Visited
+    visited = []
+    for x in range(0, width):
+        col = []
+        for y in range(0, height):
+            col.append(False)
+        visited.append(col)
+    visited[start[0]][start[1]] = True
+        
+    # Search
+    while not nodeQueue.empty():
+
+        node = nodeQueue.get()
+
+        x = node[0]
+        y = node[1]
+
+        # Base case 1: hit target
+        curColor = pixels[x, y]
+        if curColor == targetColor:
+            return (x, y)
+            
+        # Iterative case 1: further iteration (basically recursion)
+        for mx in range(-1, 2):
+            for my in range(-1, 2):
+
+                # Skip identical pixels
+                if mx == 0 and my == 0:
+                    continue
+
+                px = x + mx * stepSize
+                py = y + my * stepSize
+                
+                # Skip out of bounds pixels
+                if (px < 0 or py < 0) or (width <= px or height <= py):
+                    continue
+                
+                # Add pixel to queue
+                if not visited[px][py]:
+                    visited[px][py] = True
+                    nodeQueue.put((px, py))
+
+    # No match found
+    return None
+        
 ## [map_functions.py only] Gets the connections between rooms
 # @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
 # @param connections (Output) A dictionary of rooms used to store connections
+# @param roomObjects (Output) A dictionary of lists of objects and their positions in a room
 # @param pixels The pixels of the image (obtained using Image.load())
 # @param visited (Output) An array indicating which pixels have been visited
+# @param imgsize The size of the image as a tuple: (width, height).
 # @param stepSize The number of pixels the algorithm moves per step
-def _floodFillConnectionsIter(start, connections, pixels, visited, stepSize):
+def _floodFillConnectionsIter(start, connections, roomObjects, pixels, visited, imgsize, stepSize=1):
 
     # Queues
     nodeQueue = Queue.Queue()
@@ -78,11 +164,11 @@ def _floodFillConnectionsIter(start, connections, pixels, visited, stepSize):
     nodeQueue.put(start)
     parentQueue.put(start)
 
-    width = len(visited)
-    height = len(visited[0])
-
+    width = imgsize[0]
+    height = imgsize[1]
+    
     # Make sure start is a 2-tuple of integers
-    if len(start) is not 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
+    if len(start) != 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
         raise ValueError("Starting pixel must be a 2-tuple of integers.")
 
     # Make sure this wasn't started on a wall or out of bounds
@@ -102,32 +188,46 @@ def _floodFillConnectionsIter(start, connections, pixels, visited, stepSize):
         x = node[0]
         y = node[1]
 
-        # Base case 1: out of bounds
-        if (x < 0 or y < 0) or (width <= x or height <= y):
-            continue
-
-        # Base case 2: hit black
+        # Base case 1: hit black
         curColor = pixels[parent[0], parent[1]]
         nextColor = pixels[x, y]
         if nextColor in wallColors:
             continue
+        
+        # Base case 2: hit an object (don't do Iterative Case 1a if this triggers)
+        if nextColor in roomObjectColorDict:
+            if curColor not in roomObjects:
+                roomObjects[curColor] = []
+                
+            if roomObjectColorDict[nextColor] != "door":
+                roomObjects[curColor].append((x, y, roomObjectColorDict[nextColor]))
 
-        # Base case 3: visited
-        if visited[x][y]:
-            continue
-        visited[x][y] = True
+        # Iterative case 1a: hit another color (not black), so record the connection
+        else:
+            if curColor not in connections:
+                connections[curColor] = []
+            if nextColor != curColor and nextColor not in connections[curColor]:
+                connections[curColor].append(nextColor)
+                
+                if curColor not in roomObjects:
+                    roomObjects[curColor] = []
+                if nextColor not in roomObjects:
+                    roomObjects[nextColor] = []
+                
+                # Doors
+                doorPos = _findClosestPixel((x,y), doorColor, pixels, imgsize)
+                
+                dx = doorPos[0]
+                dy = doorPos[1]
+                
+                roomObjects[curColor].append((dx, dy, "door", nextColor))
+                roomObjects[nextColor].append((dx, dy, "door", curColor))
 
-         # Iterative case 1a: hit another color (not black), so record the connection
-        if curColor not in connections:
-            connections[curColor] = []
-        if nextColor != curColor and nextColor not in connections[curColor]:
-            connections[curColor].append(nextColor)
-
-            # Add a connection going the opposite direction (since edges SHOULDN'T be directed)
-            if nextColor not in connections:
-                connections[nextColor] = []
-            if curColor not in connections[nextColor]:  # Redundant, but kept for code clarity
-                connections[nextColor].append(curColor)
+                # Add a connection going the opposite direction (since edges SHOULDN'T be directed)
+                if nextColor not in connections:
+                    connections[nextColor] = []
+                if curColor not in connections[nextColor]:  # Redundant, but kept for code clarity
+                    connections[nextColor].append(curColor)
 
         # Iterative case 1b: further iteration (basically recursion)
         for mx in range(-1, 2):
@@ -137,9 +237,21 @@ def _floodFillConnectionsIter(start, connections, pixels, visited, stepSize):
                 if mx == 0 and my == 0:
                     continue
 
-                nodeQueue.put((x + mx * stepSize, y + my * stepSize))
-                parentQueue.put((x, y))
+                px = x + mx * stepSize
+                py = y + my * stepSize
+
+                # Skip out of bounds pixels
+                if (px < 0 or py < 0) or (width <= px or height <= py):
+                    continue
+
+                # Skip visited pixels
+                if not visited[px][py]:
+                    visited[px][py] = True
+
+                    # Add pixel to queue
+                    nodeQueue.put((px, py))
+                    parentQueue.put((x, y))
 
 # Do something (if appropriate)
 if __name__ == "__main__":
-    print map(str, getRoomsFromMap("./rooms.bmp"))
+    print map_reader("./rooms.bmp")
