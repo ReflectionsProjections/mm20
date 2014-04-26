@@ -12,6 +12,9 @@ class Team(object):
     #   The members of the Team (should be a list of dicts with name and class)
     # @param startingLocation
     #   The starting location of members
+    # @param people
+    #   A global list of people that the game stores and the team initializer
+    #   appends all members to
     def __init__(self, name, members, startingLocation, people):
         self.name = name
         self.members = dict()
