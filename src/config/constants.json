@@ -23,7 +23,7 @@
   ],
   "aiDefaults": {
     "optimization": 0.0,
-    "stability": 0.0,
+    "stability": 1.0,
     "complexity": 1.0,
     "theory": 0.0,
     "implementation": 0.0
