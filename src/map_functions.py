@@ -4,7 +4,7 @@ import objects.room
 
 # Colors used for walls
 # TODO move to constants.py or something like that
-wallColors = [(0, 0, 0, 255)]
+wallColors = ["0 0 0 255"]
 
 # For debugging
 colorDict = {
@@ -13,16 +13,17 @@ colorDict = {
     "255 255 255": "white",
     "72 0 255": "blue",
     "255 0 220": "pink",
-    "76, 255, 0": "green"
+    "76 255 0": "green"
 }
 
 # Furniture
 roomObjectColorDict = {
-    "0 1 2 3": "chair",
-    "4 5 6 7": "desk",
-    "255 180 0 255": "door"
+    "0 1 2 3":          "chair",
+    "4 5 6 7":          "desk",
+    "255 180 0 255":    "door"
+    "3 2 1 0":          "snacktable"
 }
-doorColor = (255, 180, 0, 255)
+doorColor = "255 180 0 255"
 
 ## Gets a list of Rooms (with connections) from a given map image
 # @param map_path A path to the map image
@@ -63,6 +64,7 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].chairs = [(r[0], r[1])      for r in roomObjects[rooms[i].name] if r[2] == "chair"]
         rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
         rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
+        rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
 
     # Done!
     """
