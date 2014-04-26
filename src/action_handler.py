@@ -67,15 +67,17 @@ class TestaActionHandler(unittest.TestCase):
 
     ## Test that the sortActions() function correctly sorts the actions.
     def testSortAction(self):
-        pseudoBuffer = [
-            {'priority': 0, 'name': 'last'},
-            {'priority': 10, 'name': 'first'},
-            {'priority': 5, 'name': 'middle'}
-        ]
+        act1 = objects.client_action.Action("spy", None, 0)
+        act2 = objects.client_action.Action("wake", None, 0)
+        act3 = objects.client_action.Action("eat", None, 0)
+        act1.priority = 0
+        act2.priority = 50
+        act3.priority = 100
+        pseudoBuffer = [act1, act2, act3]
         sortActions(pseudoBuffer)
-        self.assertEquals(pseudoBuffer[0]['name'], 'first')
-        self.assertEquals(pseudoBuffer[1]['name'], 'middle')
-        self.assertEquals(pseudoBuffer[2]['name'], 'last')
+        self.assertEquals(pseudoBuffer[0], act3)
+        self.assertEquals(pseudoBuffer[1], act2)
+        self.assertEquals(pseudoBuffer[2], act1)
 
     ## Tests that the bufferAction function correctly adds an action to the buffer.
     def testBufferAction(self):
