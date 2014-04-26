@@ -46,67 +46,79 @@ class TeamMember(object):
                 self.location = destination
             self.acted = True
         else:
-            pass #TODO: throw errors
+            if self.acted:
+                raise client_action.ActionError(
+                    "ALREADYACTED",
+                    "Cannot move to destination, this player has already acted this turn")
+            if self.asleep:
+                raise client_action.ActionError(
+                    "ASLEEP",
+                    "Cannot move to destination, this player is asleep")
 
     ## The team member sleeps for some time to regain energy.
-    #  The amount of energy regained depends on their Archetype
-    # @param turns
-    #   The number of turns the team member sleeps for.
     def sleep(self):
-        if not self.acted and self.hunger < 100:
-            self.asleep = True
-        else:
-            pass #TODO: throw errors
+        self._can_move()
+        self.asleep = True
 
     ##  Code!
     #
     #   @param code_type A string containing the type of coding to be done
     #   @param turn The turn so that the player knows how long they've been coding
     def code(self, code_type, turn):
-        if not self.acted and not self.asleep and self.hunger < 100:
-            ai = self.team.ai
-            effective = self._getEffectiveness()
-            if code_type == "refactor":
-                ai.complexity -= effective * self.archetype["refactor"]
-                if ai.complexity < ai.implementation * .25:
-                    ai.complexity = ai.implementation * .25
-                if ai.complexity < 1:
-                    ai.complexity = 1.0
-            elif code_type == "test":
-                amount = effective * self.archetype["test"] / (ai.complexity / 10.0)
-                ai.stability += amount / 100.0
-                if ai.stability > 1:
-                    ai.stability = 1.0
-            elif code_type == "implement":
-                amount = effective * self.archetype["codingProwess"] / (ai.complexity / 10.0)
-                ai.implementation += amount
-                ai.complexity += amount
-                ai.optimization -= amount / 10.0
-                ai.stability -= amount / 200.0
-                if ai.implementation > ai.theory:
-                    ai.implementation = ai.theory
-                if ai.stability < 0.0:
-                    ai.stability = 0.0
-                if ai.optimization < 0.0:
-                    ai.optimization = 0.0
-            elif code_type == "optimize":
-                amount = effective * self.archetype["optimize"] / (ai.complexity / 10.0)
-                ai.complexity += amount
-                ai.optimization += amount
-            self.acted = True
-        else:
-            pass #TODO: throw errors
+        self._can_move()
+        ai = self.team.ai
+        effective = self._getEffectiveness()
+        if code_type == "refactor":
+            ai.complexity -= effective * self.archetype["refactor"]
+            if ai.complexity < ai.implementation * .25:
+                ai.complexity = ai.implementation * .25
+            if ai.complexity < 1:
+                ai.complexity = 1.0
+        elif code_type == "test":
+            amount = effective * self.archetype["test"] / (ai.complexity / 10.0)
+            ai.stability += amount / 100.0
+            if ai.stability > 1:
+                ai.stability = 1.0
+        elif code_type == "implement":
+            amount = effective * self.archetype["codingProwess"] / (ai.complexity / 10.0)
+            ai.implementation += amount
+            ai.complexity += amount
+            ai.optimization -= amount / 10.0
+            ai.stability -= amount / 200.0
+            if ai.implementation > ai.theory:
+                ai.implementation = ai.theory
+            if ai.stability < 0.0:
+                ai.stability = 0.0
+            if ai.optimization < 0.0:
+                ai.optimization = 0.0
+        elif code_type == "optimize":
+            amount = effective * self.archetype["optimize"] / (ai.complexity / 10.0)
+            ai.complexity += amount
+            ai.optimization += amount
+        self.acted = True
 
     ##  Theorize!
     #
     #   @param turn The turn so that the player knows how long they've been theorizing
     def theorize(self, turn):
-        if not self.acted and not self.asleep and self.hunger < 100:
-            effective = self._getEffectiveness()
-            self.team.ai.theory += self.archetype["theorize"] * effective
-            self.acted = True
-        else:
-            pass #TODO: Throw error
+        self._can_move()
+        effective = self._getEffectiveness()
+        self.team.ai.theory += self.archetype["theorize"] * effective
+        self.acted = True
+
+    ##  Eat!
+    #
+    #   @param foodTable ???
+    def eat(self, foodTable):
+        self._can_move()
+        #TODO: More stuff here
+
+    ##  Distract!
+    #
+    #   @param victim The person you are trying to distract
+    def distract(self, victim):
+        self._can_move()
+        #TODO: More stuff here
 
     ##Calculate effectiveness based on fatigue and hunger
     def _getEffectiveness(self):
@@ -116,6 +128,20 @@ class TeamMember(object):
         if self.fatigue > TeamMember.effectiveness_drops:
             effective -= 0.5 * (100-self.fatigue) / (100-TeamMember.effectiveness_drops)
         return effective
+
+    def _can_move(self):
+        if self.acted:
+            raise client_action.ActionError(
+                "ALREADYACTED",
+                "This player has already acted this turn")
+        if self.asleep:
+            raise client_action.ActionError(
+                "ASLEEP",
+                "This player is asleep")
+        if self.hunger >= 100:
+            raise client_action.ActionError(
+                "HUNGRY",
+                "This player is too hungry to think about anything but food")
 
     ##  Called every turn to reset values and make incremental changes
     def update(self):
@@ -136,6 +162,7 @@ class TeamMember(object):
 
 
 import team
+import room
 
 
 ## Tests all of the functionality in Team Member
