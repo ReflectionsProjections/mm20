@@ -25,8 +25,7 @@ class Game(object):
         self.rooms = map_functions.map_reader(map_file)
         self.turn = 0
         defaults = config.handle_constants.retrieveConstants('generalInfo')
-        #self.turn_limit = defaults["TURNLIMIT"]
-        self.turn_limit = 80
+        self.turn_limit = defaults["TICKSINHOUR"] * 24
         self.unoptimized_weight = defaults["UNOPTWEIGHT"]
         self.optimized_weight = defaults["OPTWEIGHT"]
         self.action_buffer = []
@@ -62,6 +61,8 @@ class Game(object):
     def execute_turn(self):
         action_handler.handleTurn(self, self.action_buffer)
         self.action_buffer = []
+        for person in self.people:
+            person.update()
         self.turn += 1
         if self.turn >= self.turn_limit:
             return False

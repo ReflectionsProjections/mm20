@@ -2,7 +2,7 @@
   "generalInfo": {
     "VERSION": 0.0,
     "NAME": "Meta-Mania",
-    "TURNLIMIT": 2880,
+    "TICKSINHOUR": 4,
     "UNOPTWEIGHT": 0.2,
     "OPTWEIGHT": 0.8
   },
@@ -49,36 +49,28 @@
       "refactor":7,
       "test":7,
       "optimize":5,
-      "theorize":3,
-      "energy": 100,
-      "sleepEffectiveness": 2
+      "theorize":3
     },
     "Theorist": {
       "codingProwess": 5,
       "refactor":5,
       "test":7,
       "optimize":5,
-      "theorize":10,
-      "energy": 100,
-      "sleepEffectiveness": 2
+      "theorize":10
     },
     "Architect": {
       "codingProwess": 7,
       "refactor":10,
       "test":10,
       "optimize":5,
-      "theorize":5,
-      "energy": 100,
-      "sleepEffectiveness": 2
+      "theorize":5
     },
     "Informant": {
       "codingProwess": 3,
       "refactor":5,
       "test":5,
       "optimize":5,
-      "theorize":7,
-      "energy": 100,
-      "sleepEffectiveness": 2
+      "theorize":7
     }
   },
   "rooms": {
