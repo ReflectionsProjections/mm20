@@ -6,8 +6,10 @@ import unittest
 ## Holds information and functions for individual team members
 class TeamMember(object):
     Archetypes = config.handle_constants.retrieveConstants("archetypes")
-    ticks_in_hour = config.handle_constants.retrieveConstants("generalInfo")["TICKSINHOUR"]
-    effectiveness_drops = config.handle_constants.retrieveConstants("memberConstants")["effectiveness_drops"]
+    ticks_in_hour = config.handle_constants.retrieveConstants("generalInfo")[
+        "TICKSINHOUR"]
+    effectiveness_drops = config.handle_constants.retrieveConstants(
+        "memberConstants")["effectiveness_drops"]
 
     ## Initializes a TeamMember with name, archetype, and team
     # @param name
@@ -26,7 +28,8 @@ class TeamMember(object):
         self.hunger = 0
         self.fatigue = 50.0  # Start at 8 hours awake (halfway to passed out)
         self.asleep = False
-        self.acted = None #acted is the string of the action performed (True) or None (False).
+        self.acted = None  # acted is the string of the action performed.
+                           # (True) or None (False)
 
 
     ## Make a seralible repesentaion room and everything in it
@@ -46,7 +49,8 @@ class TeamMember(object):
             if not self.location.isConnectedTo(destination):
                 raise client_action.ActionError(
                     "NOTCONNECTED",
-                    "Cannot move to destination, it is not connected to current location")
+                    "Cannot move to destination, \
+                    it is not connected to current location")
             else:
                 self.location.removeMember(self)
                 destination.addMember(self)
@@ -60,7 +64,8 @@ class TeamMember(object):
                         "You have been distracted this turn")
                 raise client_action.ActionError(
                     "ALREADYACTED",
-                    "Cannot move to destination, this player has already acted this turn")
+                    "Cannot move to destination, \
+                    this player has already acted this turn")
             if self.asleep:
                 raise client_action.ActionError(
                     "ASLEEP",
@@ -73,8 +78,10 @@ class TeamMember(object):
 
     ##  Code!
     #
-    #   @param code_type A string containing the type of coding to be done
-    #   @param turn The turn so that the player knows how long they've been coding
+    #   @param code_type
+    #     A string containing the type of coding to be done
+    #   @param turn
+    #     The turn so that the player knows how long they have been coding
     def code(self, code_type, turn):
         self._can_move()
         ai = self.team.ai
@@ -86,12 +93,14 @@ class TeamMember(object):
             if ai.complexity < 1:
                 ai.complexity = 1.0
         elif code_type == "test":
-            amount = effective * self.archetype["test"] / (ai.complexity / 10.0)
+            amount = effective * self.archetype["test"] /\
+                (ai.complexity / 10.0)
             ai.stability += amount / 100.0
             if ai.stability > 1:
                 ai.stability = 1.0
         elif code_type == "implement":
-            amount = effective * self.archetype["codingProwess"] / (ai.complexity / 10.0)
+            amount = effective * self.archetype["codingProwess"] /\
+                (ai.complexity / 10.0)
             ai.implementation += amount
             ai.complexity += amount
             ai.optimization -= amount / 10.0
@@ -103,14 +112,16 @@ class TeamMember(object):
             if ai.optimization < 0.0:
                 ai.optimization = 0.0
         elif code_type == "optimize":
-            amount = effective * self.archetype["optimize"] / (ai.complexity / 10.0)
+            amount = effective * self.archetype["optimize"] /\
+                (ai.complexity / 10.0)
             ai.complexity += amount
             ai.optimization += amount
         self.acted = "code"
 
     ##  Theorize!
     #
-    #   @param turn The turn so that the player knows how long they've been theorizing
+    #   @param turn
+    #     The turn so that the player knows how long they've been theorizing
     def theorize(self, turn):
         self._can_move()
         effective = self._getEffectiveness()
@@ -130,7 +141,8 @@ class TeamMember(object):
                 "ASLEEP",
                 "This player is asleep")
         if not self.location.isAvailable('FOOD'):
-            raise client_action.ActionError('NOFOODHERE', "This room does not contain food")
+            raise client_action.ActionError('NOFOODHERE',
+                                            "This room does not contain food")
         self.hunger -= 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))
         if self.hunger < 0.0:
             self.hunger = 0.0
@@ -153,7 +165,7 @@ class TeamMember(object):
             raise client_action.ActionError(
                 "UNDISTRACTABLE",
                 "Distraction failed because they ignored you")
-        if victim.hunger >=100:
+        if victim.hunger >= 100:
             raise client_action.ActionError(
                 "UNDISTRACTABLE",
                 "Cannot distract someone who is focused on food")
@@ -167,7 +179,7 @@ class TeamMember(object):
         amount = 0
         for person in self.location.people:
             if person.acted == "theorize":
-                amount += 2*effective
+                amount += 2 * effective
             if person.acted == "code":
                 amount += effective
         self.acted = "spy"
@@ -192,9 +204,11 @@ class TeamMember(object):
     def _getEffectiveness(self):
         effective = 1.0
         if self.hunger > TeamMember.effectiveness_drops:
-            effective -= 0.5 * (100 - self.hunger) / (100 - TeamMember.effectiveness_drops)
+            effective -= 0.5 * (100 - self.hunger) /\
+                (100 - TeamMember.effectiveness_drops)
         if self.fatigue > TeamMember.effectiveness_drops:
-            effective -= 0.5 * (100 - self.fatigue) / (100 - TeamMember.effectiveness_drops)
+            effective -= 0.5 * (100 - self.fatigue) /\
+                (100 - TeamMember.effectiveness_drops)
         return effective
 
     def _can_move(self):
@@ -295,7 +309,9 @@ class TestTeamMember(unittest.TestCase):
         self.testRoom.addResource('FOOD')
         self.testMember.hunger = 100
         self.testMember.eat()
-        self.assertEqual(self.testMember.hunger, (100.0 - 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))))
+        self.assertEqual(self.testMember.hunger,
+                        (100.0 - 10.0 *
+                            (100.0 / (8.0 * TeamMember.ticks_in_hour))))
 
     def testEatNoFood(self):
         with self.assertRaises(client_action.ActionError):
