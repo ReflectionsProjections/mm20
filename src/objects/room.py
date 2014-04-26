@@ -18,9 +18,9 @@ class Room(object):
         return "<id:{}, connected_rooms:{}>".format(self.name, self.connectedRooms.keys())
 
     def output_dict(self):
-        room_info = {"room": name,
+        room_info = {"room": self.name,
                      "connectedRooms": self.connectedRoom.keys()}
-        return room_into
+        return room_info
     
     ## Returns connected rooms
     def getConnectedRooms(self):

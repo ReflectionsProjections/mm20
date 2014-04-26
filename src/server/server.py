@@ -82,6 +82,11 @@ class MMServer( object ):
                         if success:
                             turnObjects[player] = response
                             validTurns = validTurns+1
+                        else:
+                            try:
+                                connection.send(json.dumps(response, ensure_ascii=True))
+                            except IOError:
+                                pass
             if validTurns == self.maxPlayers:
 
                 starting = False

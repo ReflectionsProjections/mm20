@@ -15,17 +15,19 @@ class Team(object):
     def __init__(self, name, members, startingLocation, people):
         self.name = name
         self.members = dict()
+        #TODO: limit the number of team members one team can have, and throw/catch an appropriate exception
         for member in members:
             newMember = (team_member.TeamMember(member["name"], member["class"], startingLocation, self, len(people)))
+            #TODO: check for non-unique names, then throw/catch an appropriate exception
             self.members[member["name"]] = newMember
             people.append(newMember)
         self.numMembers = len(members)
         self.ai = ai.AI()
 
     ## returns a serializable representation of what the player sees
-    def get_visable_map(self):
+    def get_visible_map(self):
         rooms = dict()
-        for m in self.Member.values():
+        for m in self.members.values():
             room = m.location
             rooms[room.name] = room
         return [r.output_dict() for r in rooms.values()]
