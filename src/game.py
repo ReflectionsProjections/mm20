@@ -1,5 +1,4 @@
 from objects.team import Team
-from objects.room import Room
 import map_functions
 import action_handler
 import config.handle_constants
@@ -39,7 +38,8 @@ class Game(object):
     # @param client_id
     #   The ID assigned to that player by the server
     # @return
-    #   A (bool, dict) tuple stating success or failure and listing errors or sending starting info to the player
+    #   A (bool, dict) tuple stating success or failure and listing
+    #   errors or sending starting info to the player
     def add_new_team(self, data, client_id):
         response = {"status": "Success", "errors": []}
         try:
@@ -79,8 +79,8 @@ class Game(object):
         error_list = []
         for action in action_list:
             try:
-                action_handler.bufferAction(self.action_buffer, action["action"],
-                                            action, client_id)
+                action_handler.bufferAction(
+                    self.action_buffer, action["action"], action, client_id)
             except KeyError:
                 error_list.append({"error": "invalid action",
                                    "action": action["action"]})
@@ -100,7 +100,7 @@ class Game(object):
             if winner == client_id:
                 win = True
             return {"winner": win}
-        response = {"aiStats": [],
+        response = {"aiStats": self.teams[client_id].ai.output_dict(),
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.result_buffer[client_id]}
         self.result_buffer[client_id] = []

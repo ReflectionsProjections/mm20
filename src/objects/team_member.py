@@ -39,6 +39,9 @@ class TeamMember(object):
     def __eq__(self, other):
         return self.person_id == other.person_id
 
+    ## Make a seralible repesentaion room and everything in it
+    # @return
+    #    A dict that reprents the room
     def output_dict(self):
         my_info = dict(self.__dict__)
         del my_info["team"]
