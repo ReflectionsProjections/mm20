@@ -6,6 +6,9 @@
     "UNOPTWEIGHT": 0.2,
     "OPTWEIGHT": 0.8
   },
+  "memberConstants": {
+    "effectiveness_drops": 60.0
+  },
   "serverDefaults": {
     "players": 2,
     "map": "rooms.bmp",

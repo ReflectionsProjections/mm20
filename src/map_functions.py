@@ -18,12 +18,13 @@ colorDict = {
 
 # Furniture
 roomObjectColorDict = {
-    "0 1 2 3":          "chair",
-    "4 5 6 7":          "desk",
+    "0 1 2 255":          "chair",
+    "4 5 6 255":          "desk",
     "255 180 0 255":    "door",
-    "3 2 1 0":          "snacktable"
+    "3 2 1 255":          "snacktable"
 }
 doorColor = "255 180 0 255"
+
 
 ## Gets a list of Rooms (with connections) from a given map image
 # @param map_path A path to the map image
@@ -50,21 +51,23 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
     # Get connections between + objects in rooms
     roomObjects = dict()
     _floodFillConnectionsIter(start, connections, roomObjects, pixels, visited, img.size, stepSize)
-    
+
     # Show picture
     rooms = []
     for c in connections:
-        room = objects.room.Room(c) # c = room.name
+        room = objects.room.Room(c)  # c = room.name
         rooms.append(room)
     for i in range(0, len(rooms)):
         rooms[i].connectedRooms = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
         print rooms[i].name
-        
+
         # Room objects
         rooms[i].chairs = [(r[0], r[1])      for r in roomObjects[rooms[i].name] if r[2] == "chair"]
         rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
         rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
         rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
+        if rooms[i].snacktables:
+            rooms[i].addResource('FOOD')  # For now, this is how we are treating food
 
     # Done!
     """
@@ -74,10 +77,11 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         print "---------------------"
         print r.connections
     """
-    
+
     # Hacky transformation code
     rooms2 = {i.name: i for i in rooms}
     return rooms2
+
 
 # --- INTERNAL CODE - DO NOT USE OUTSIDE OF THIS FILE ---
 ## [map_functions.py only] Converts a tuple to a string.
@@ -92,9 +96,10 @@ def _stringify(t):
     s = str(t[0])
     for i in range(1, len(t)):
         s += " " + str(t[i])
-        
+
     # Done!
     return s
+
 
 ## [map_functions.py only] Gets the closest pixel with the specified color. Returns NONE if no matches are found.
 # @param start A 2-tuple representing the point in the image to start searching from.
@@ -115,13 +120,13 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
     # Make sure start is a 2-tuple of integers
     if len(start) != 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
         raise ValueError("Starting pixel must be a 2-tuple of integers.")
-        
+
     # Make sure this wasn't started on a wall or out of bounds
     x = start[0]
     y = start[1]
     if (x < 0 or y < 0) or (width <= x or height <= y):
         raise ValueError("Starting pixel must not be out of bounds.")
-        
+
     # Visited
     visited = []
     for x in range(0, width):
@@ -130,7 +135,7 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
             col.append(False)
         visited.append(col)
     visited[start[0]][start[1]] = True
-        
+
     # Search
     while not nodeQueue.empty():
 
@@ -143,16 +148,16 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
         curColor = _stringify(pixels[x, y])
         if curColor == targetColor:
             return (x, y)
-            
+
         # Iterative case 1: further iteration (basically recursion)
         for mx in range(-1, 2):
-        
+
             px = x + mx * stepSize
-            
+
             # Skip out of bounds pixels (pt 1/2)
             if (px < 0 or width <= px):
                 continue
-        
+
             for my in range(-1, 2):
 
                 # Skip identical pixels
@@ -160,11 +165,11 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
                     continue
 
                 py = y + my * stepSize
-                
+
                 # Skip out of bounds pixels (pt 2/2)
                 if (py < 0 or height <= py):
                     continue
-                
+
                 # Add pixel to queue
                 if not visited[px][py]:
                     visited[px][py] = True
@@ -195,7 +200,7 @@ def _floodFillConnectionsIter(
 
     width = imgsize[0]
     height = imgsize[1]
-    
+
     # Make sure start is a 2-tuple of integers
     if len(start) != 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
         raise ValueError("Starting pixel must be a 2-tuple of integers.")
@@ -222,12 +227,12 @@ def _floodFillConnectionsIter(
         nextColor = _stringify(pixels[x, y])
         if nextColor in wallColors:
             continue
-        
+
         # Base case 2: hit an object (don't do Iterative Case 1a if this triggers)
         if nextColor in roomObjectColorDict:
             if curColor not in roomObjects:
                 roomObjects[curColor] = []
-                
+
             if roomObjectColorDict[nextColor] != "door":
                 roomObjects[curColor].append((x, y, roomObjectColorDict[nextColor]))
 
@@ -237,18 +242,18 @@ def _floodFillConnectionsIter(
                 connections[curColor] = []
             if nextColor != curColor and nextColor not in connections[curColor]:
                 connections[curColor].append(nextColor)
-                
+
                 if curColor not in roomObjects:
                     roomObjects[curColor] = []
                 if nextColor not in roomObjects:
                     roomObjects[nextColor] = []
-                
+
                 # Doors
-                doorPos = _findClosestPixel((x,y), doorColor, pixels, imgsize)
-                
+                doorPos = _findClosestPixel((x, y), doorColor, pixels, imgsize)
+
                 dx = doorPos[0]
                 dy = doorPos[1]
-                
+
                 roomObjects[curColor].append((dx, dy, "door", nextColor))
                 roomObjects[nextColor].append((dx, dy, "door", curColor))
 
@@ -260,13 +265,13 @@ def _floodFillConnectionsIter(
 
         # Iterative case 1b: further iteration (basically recursion)
         for mx in range(-1, 2):
-        
+
             px = x + mx * stepSize
-        
+
             # Skip out of bounds pixels (pt 1/2)
             if (px < 0 or width <= px):
                 continue
-        
+
             for my in range(-1, 2):
 
                 # Skip identical pixels
@@ -291,8 +296,8 @@ def _floodFillConnectionsIter(
 if __name__ == "__main__":
 
     # Execute function
-    rooms = map_reader("./rooms.bmp")
-    
+    rooms = map_reader("./rooms2.bmp")
+
     # ============== Test 1: test connections ==============
     colors = {
               "cyan":  "0 255 255",
@@ -300,18 +305,18 @@ if __name__ == "__main__":
               "blue":  "72 0 255",
               "pink":  "255 0 220",
               "green": "76 255 0"
-             }     
-    
+             }
+
     # What should be connected to what
-    should_be_connected =  {
+    should_be_connected = {
               "cyan":  ["pink", "white"],
               "white": ["cyan", "pink", "green", "blue"],
               "blue":  ["white"],
               "pink":  ["green", "white", "cyan"],
               "green": ["pink", "white"]
-             }   
-             
+            }
+
     #for c1 in should_be_connected:
     #    for c2 in should_be_connected[c1]:
-        
+
     #        assert rooms[colors[c1]]
