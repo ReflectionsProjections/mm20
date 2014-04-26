@@ -17,7 +17,7 @@ class Room(object):
     def __str__(self):
         return "<id:{}, connected_rooms:{}>".format(self.name, self.connectedRooms.keys())
 
-    def to_JSON(self):
+    def output_dict(self):
         room_info = {"room": self.name,
                      "connectedRooms": self.connectedRooms.keys()}
         return room_info

@@ -1,5 +1,6 @@
 import config.handle_constants
 import unittest
+import math
 
 
 ## Holds information and functions for individual team members
@@ -22,12 +23,20 @@ class TeamMember(object):
         self.person_id = person_id
         self.energy = TeamMember.Archetypes[archetype]["energy"]
 
+    def output_dict(self):
+        my_info = dict(self.__dict__)
+        del my_info["team"]
+        my_info["location"] = self.location.name
+        return my_info
+        
     ## Moves the team member from one room to another.
     # @param destination
     #   The room (a Room object) to move to.
     def move(self, destination):
         if not self.location.isConnectedTo(destination):
-            raise ValueError("Cannot move to destination, it is not connected to current location")
+            raise ValueError(
+                "NOTCONNECTED",
+        "Cannot move to destination, it is not connected to current location")
         else:
             self.location = destination
 
@@ -38,6 +47,46 @@ class TeamMember(object):
     def sleep(self, turns):
         self.energy += turns * self.archetype["sleepEffectiveness"]
         # TODO: Make a team member unable to do anything else while sleeping!
+
+    ##  Code!
+    #
+    #   @param code_type A string containing the type of coding to be done
+    #   @param turn The turn so that the player knows how long they've been coding
+    def code(self, code_type, turn):
+        ai = self.team.ai
+        if code_type == "refactor":
+            ai.complexity -= self.archetype["refactor"]
+            if ai.complexity < ai.implementation * .25:
+                ai.complexity = ai.implementation * .25
+            if ai.complexity < 1:
+                ai.complexity = 1.0
+        elif code_type == "test":
+            amount = self.archetype["test"] / (ai.complexity / 10.0)
+            ai.stability += amount / 100.0
+            if ai.stability > 1:
+                ai.stability = 1.0
+        elif code_type == "implement":
+            amount = self.archetype["codingProwess"] / (ai.complexity / 10.0)
+            ai.implementation += amount
+            ai.complexity += amount
+            ai.optimization -= amount / 10.0
+            ai.stability -= amount / 200.0
+            if ai.implementation > ai.theory:
+                ai.implementation = ai.theory
+            if ai.stability < 0.0:
+                ai.stability = 0.0
+            if ai.optimization < 0.0:
+                ai.optimization = 0.0
+        elif code_type == "optimize":
+            amount = self.archetype["optimize"] / (ai.complexity / 10.0)
+            ai.complexity += amount
+            ai.optimization += amount
+
+    ##  Theorize!
+    #
+    #   @param turn The turn so that the player knows how long they've been theorizing
+    def theorize(self, turn):
+        self.team.ai.theory += self.archetype["theorize"]
 
 import team
 import room
@@ -52,7 +101,8 @@ class TestTeamMember(unittest.TestCase):
         TestTeamMember.PseudoTeam = PseudoTeam
         self.testRoom = room.Room("testRoom")
         self.testTeam = TestTeamMember.PseudoTeam()
-        self.testMember = TeamMember("Joe", "Coder", self.testRoom, self.testTeam, 0)
+        self.testMember = TeamMember("Joe", "Coder", self.testRoom,
+                                     self.testTeam, 0)
 
     def testInitCorrect(self):
         testRoom = room.Room("testRoom")

@@ -173,7 +173,8 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
 
     # No match found
     return None
-        
+
+
 ## [map_functions.py only] Gets the connections between rooms
 # @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
 # @param connections (Output) A dictionary of rooms used to store connections
@@ -182,7 +183,9 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
 # @param visited (Output) An array indicating which pixels have been visited
 # @param imgsize The size of the image as a tuple: (width, height).
 # @param stepSize The number of pixels the algorithm moves per step
-def _floodFillConnectionsIter(start, connections, roomObjects, pixels, visited, imgsize, stepSize=1):
+def _floodFillConnectionsIter(
+        start, connections, roomObjects, pixels,
+        visited, imgsize, stepSize=1):
 
     # Queues
     nodeQueue = Queue.Queue()

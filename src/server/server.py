@@ -22,8 +22,10 @@ class MMServer( object ):
     #   @param numPlayers number of players entering the game
     #   @param game Game object that holds the game state
     #   @param log location of the log file
-    #   @param timeLimit The amount of time to wait for a player to make their turn
-    #   @param maxDataSize The length in bytes of data received in one call to recv
+    #   @param timeLimit
+    #       The amount of time to wait for a player to make their turn
+    #   @param maxDataSize
+    #      The length in bytes of data received in one call to recv
     def __init__(self, numPlayers, game, log = constants["log"], timeLimit = constants["time"], maxDataSize = constants["maxDataSize"]):
         self.maxPlayers = numPlayers
         self.game = game
@@ -35,7 +37,7 @@ class MMServer( object ):
     ##
     #   Runs the game
     #   @param port the port number to wait on
-    def run(self, port):
+    def run(self, port, run_when_ready = None):
         #create an INET, STREAMing socket
         serversocket = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
@@ -49,12 +51,14 @@ class MMServer( object ):
         turnObjects = [None for i in range(0, self.maxPlayers)]
         validTurns = 0
         print 'connecting ...'
+        if run_when_ready:
+            run_when_ready()
         #Accept connections from correct number of players
         for i in range(0, self.maxPlayers):
             (clientsocket, address) = serversocket.accept()
             playerConnections[i] = clientsocket
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
-
+        print 'connected ...'
         #Accept starting connection first
         starting = True
         while starting:
