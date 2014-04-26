@@ -77,7 +77,6 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
     
     # Hacky transformation code
     rooms2 = {i.name: i for i in rooms}
-    print rooms2
     return rooms2
 
 # --- INTERNAL CODE - DO NOT USE OUTSIDE OF THIS FILE ---
