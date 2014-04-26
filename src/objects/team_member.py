@@ -28,6 +28,10 @@ class TeamMember(object):
         self.asleep = False
         self.acted = False
 
+
+    ## Make a seralible repesentaion room and everything in it
+    # @return
+    #    A dict that reprents the room
     def output_dict(self):
         my_info = dict(self.__dict__)
         del my_info["team"]

@@ -33,6 +33,7 @@ class Game(object):
         self.teams = {}
         self.people = []
 
+ 
     ##  Adds a new team and returns success / failure message
     # @param data
     #   The data sent by the player to set up state
@@ -100,7 +101,7 @@ class Game(object):
             if winner == client_id:
                 win = True
             return {"winner": win}
-        response = {"aiStats": [],
+        response = {"aiStats": self.teams[client_id].ai.output_dict(),
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.result_buffer[client_id]}
         self.result_buffer[client_id] = []
