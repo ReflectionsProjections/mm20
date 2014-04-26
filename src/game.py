@@ -1,6 +1,8 @@
 from objects.team import Team
+from objects.room import Room
 import map_functions
 import action_handler
+import config.handle_constants
 
 STARTING_ROOM = (72, 0, 255, 255)  # For testing purposes only
 
@@ -22,8 +24,11 @@ class Game(object):
     def __init__(self, map_file):
         self.rooms = {i.name: i for i in map_functions.map_reader(map_file)}
         self.turn = 0
-        # self.turn_limit = retrieveConstants("generalInfo")["TURNLIMIT"]
-        self.turn_limit = 80  # For testing purposes only
+        defaults = config.handle_constants.retrieveConstants('generalInfo')
+        #self.turn_limit = defaults["TURNLIMIT"]
+        self.turn_limit = 80
+        self.unoptimized_weight = defaults["UNOPTWEIGHT"]
+        self.optimized_weight = defaults["OPTWEIGHT"]
         self.action_buffer = []
         self.result_buffer = {}
         self.teams = {}
@@ -84,8 +89,35 @@ class Game(object):
     # @return
     #   A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
-        #TODO: Check for end of game, then do scoring and return the winner
-        response = {"map": self.teams[client_id].get_visible_map(),
-                    "results": self.result_buffer[client_id]}
+        #Check for end of game, then do scoring and return the winner
+        if self.turn >= self.turn_limit:
+            winner = self.find_victor()
+            win = False
+            if winner == client_id:
+                win = True
+            return {"winner": win}
+        response = {"warnings": [],
+                    "map": self.teams[client_id].get_visible_map(),
+                    "messages": self.result_buffer[client_id]}
         self.result_buffer[client_id] = []
         return response
+
+    ##  At endgame, find the winner
+    #   @return the id of the team that has won
+    def find_victor(self):
+        victor = 0
+        score = 0.0
+        for ident, team in self.teams.iteritems():
+            team_score = self.calc_score(ident)
+            if team_score > score:
+                victor = ident
+                score = team_score
+        return victor
+        
+    ##  Calculate score for a team
+    #
+    #   @param client_id the id of the team to check
+    #   @return the score for that team
+    def calc_score(self, client_id):
+        ai = self.teams[client_id].ai
+        return ((ai.implementation - ai.optimization) * self.unoptimized_weight + ai.optimization * self.optimized_weight) * ai.stability
