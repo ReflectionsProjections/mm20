@@ -65,7 +65,12 @@ class Action:
     def _eat(self, game, parameters):
         response = self._build_response(game, parameters, ['member', 'foodTable'], "eating")
         if response['success'] is True:
-            game.people[parameters['member']].eat(parameters['foodTable'])
+            try:
+                game.people[parameters['member']].eat(parameters['foodTable'])
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e.reason
+                response['message'] = e.message
         return response
 
     ## Attempts to make a member sleep
@@ -74,7 +79,12 @@ class Action:
     def _sleep(self, game, parameters):
         response = self._build_response(game, parameters, ['member'], "sleeping")
         if response['success'] is True:
-            game.people[parameters['member']].sleep()
+            try:
+                game.people[parameters['member']].sleep()
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e[0]
+                response['message'] = e[1]
         return response
 
     ## Attempts to make a member code
@@ -83,7 +93,12 @@ class Action:
     def _code(self, game, parameters):
         response = self._build_response(game, parameters, ['member', 'type'], "coding")
         if response['success'] is True:
-            game.people[parameters['member']].code(parameters['type'], game.turn)
+            try:
+                game.people[parameters['member']].code(parameters['type'], game.turn)
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e[0]
+                response['message'] = e[1]
         return response
 
     ## Attempts to make a member theorize
@@ -92,7 +107,12 @@ class Action:
     def _theorize(self, game, parameters):
         response = self._build_response(game, parameters, ['member'], "theorizing")
         if response['success'] is True:
-            game.people[parameters['member']].theorize(game.turn)
+            try:
+                game.people[parameters['member']].theorize(game.turn)
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e.reason
+                response['message'] = e.message
         return response
 
     ## Returns information about the server
