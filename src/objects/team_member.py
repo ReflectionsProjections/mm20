@@ -20,6 +20,7 @@ class TeamMember(object):
         self.name = name
         self.archetype = TeamMember.Archetypes[archetype]
         self.location = location
+        location.addMember(self)
         self.team = team
         self.person_id = person_id
         self.hunger = 0
@@ -43,6 +44,8 @@ class TeamMember(object):
                     "NOTCONNECTED",
                     "Cannot move to destination, it is not connected to current location")
             else:
+                self.location.removeMember(self)
+                destination.addMember(self)
                 self.location = destination
             self.acted = True
         else:
@@ -216,17 +219,12 @@ class TestTeamMember(unittest.TestCase):
 
     def testInvalidMove(self):
         roomTwo = room.Room("testRoomTwo")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(client_action.ActionError):
             self.testMember.move(roomTwo)
 
-    def testMoveNotARoom(self):
-        with self.assertRaises(TypeError):
-            self.testMember.move("NotARoom")
-
     def testSleep(self):
-        energy = self.testMember.energy
-        self.testMember.sleep(10)
-        self.assertEqual(self.testMember.energy, energy + 10 * TeamMember.Archetypes["Coder"]["sleepEffectiveness"])
+        # TODO
+        self.assertTrue(False)
 
 if __name__ == "__main__":
     unittest.main()
