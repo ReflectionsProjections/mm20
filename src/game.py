@@ -4,7 +4,7 @@ import map_functions
 import action_handler
 import config.handle_constants
 
-STARTING_ROOM = (72, 0, 255, 255)  # For testing purposes only
+STARTING_ROOM = "72 0 255 255"  # For testing purposes only
 
 
 ## This is the class which the server sees as representing the entire game
@@ -44,6 +44,7 @@ class Game(object):
     def add_new_team(self, data, client_id):
         response = {"status": "Success", "errors": []}
         try:
+            print data
             newTeam = Team(data["team"], data["members"],
                            self.rooms[STARTING_ROOM], self.people)
         except KeyError:
