@@ -130,6 +130,7 @@ class TeamMember(object):
         self.hunger -= 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))
         if self.hunger < 0.0:
             self.hunger = 0.0
+        self.acted = "eat"
 
     ##  Distract!
     #
