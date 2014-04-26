@@ -9,7 +9,7 @@ s.connect((HOST, PORT))
 s.sendall('{"team":"test", "members":[{"name":"test1", "class":"Coder"},{"name":"test2", "class":"Coder"},{"name":"test3", "class":"Coder"}]}')
 data = s.recv(1024)
 game_running = True
-while len(data) > 0 and game_running: #TODO: Need check for game over
+while len(data) > 0 and game_running:
     value = None
     try:
         value = json.loads(data)
