@@ -19,14 +19,10 @@ class Team(object):
         self.name = name
         self.my_id = my_id
         self.members = dict()
-        # TODO: limit the number of team members one team can have,
-        # and throw/catch an appropriate exception
         for member in members:
             newMember = team_member.TeamMember(member["name"], member["class"],
                                                startingLocation, self,
                                                len(people))
-            # TODO: check for non-unique names, then throw/catch an
-            # appropriate exception
             self.members[member["name"]] = newMember
             people.append(newMember)
         self.numMembers = len(members)
@@ -40,6 +36,8 @@ class Team(object):
             rooms[visible_room.name] = visible_room
         return [r.output_dict() for r in rooms.values()]
 
+    ## Returns a list of serializeable dictionaries of all of
+    #  the team members on this team
     def get_team_members(self):
         return [m.output_dict() for m in self.members.values()]
 
