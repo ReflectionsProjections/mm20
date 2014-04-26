@@ -1,6 +1,7 @@
 import unittest
 
 
+## Raised when an error occurs due to two rooms already being connected
 class AlreadyConnectedError(Exception):
     def __init__(self, roomOne, roomTwo):
         self.msg = "Room {0} and {1} are already connected.".format(roomOne, roomTwo)
@@ -9,6 +10,7 @@ class AlreadyConnectedError(Exception):
         return self.msg
 
 
+## Raised when an error occurs due to two rooms not being connected
 class NotConnectedError(Exception):
     def __init__(self, roomOne, roomTwo):
         self.msg = "Room {0} and {1} are not connected!".format(roomOne, roomTwo)
@@ -17,6 +19,7 @@ class NotConnectedError(Exception):
         return self.msg
 
 
+## Raised when an error occurs due to a member already being in a room
 class AlreadyInRoomError(Exception):
     def __init__(self, room, member):
         self.msg = "{0} is already in {1}.".format(member, room)
@@ -25,9 +28,28 @@ class AlreadyInRoomError(Exception):
         return self.msg
 
 
+## Raised when an error occurs due to a member not being in a room
 class NotInRoomError(Exception):
     def __init__(self, room, member):
-        self.msg = "{0} is not ins {1}.".format(member, room)
+        self.msg = "{0} is not in {1}.".format(member, room)
+
+    def __str__(self):
+        return self.msg
+
+
+## Raised when an error occurs due to a resource already being available in a room
+class AlreadyAvailableError(Exception):
+    def __init__(self, room, resource):
+        self.msg = "{0} is already available in {1}".format(resource, room)
+
+    def __str__(self):
+        return self.msg
+
+
+## Raised when an error occurs due to a resource not being available in a room
+class NotAvailableError(Exception):
+    def __init__(self, room, resource):
+        self.msg = "{0} is not an available resource in {1}".format(resource, room)
 
     def __str__(self):
         return self.msg
@@ -46,6 +68,7 @@ class Room(object):
         self.connectedRooms = dict()
         self.name = room_id
         self.people = set()
+        self.resources = set()
 
     ## Adds a member to this room
     # @param member
@@ -62,6 +85,28 @@ class Room(object):
         if not member in self.people:
             raise NotInRoomError(self, member)
         self.people.remove(member)
+
+    ## Make a resource available in this room
+    # @param resource
+    #   the resource to make available as a string.
+    def addResource(self, resource):
+        if resource in self.resources:
+            raise AlreadyAvailableError(self, resource)
+        self.resources.add(resource)
+
+    ## Remove a resource from a this room
+    # @parameter resource
+    #   The resource to remove from this room
+    def removeResource(self, resource):
+        if not (resource in self.resources):
+            raise NotAvailableError(self, resource)
+        self.resources.remove(resource)
+
+    ## Returns whether or not a given resource is available in this room
+    # @parameter resource
+    #   The resource to test the presence of
+    def isAvailable(self, resource):
+        return resource in self.resources
 
     def __str__(self):
         return "<id:{0}, connected_rooms:{1}>".format(self.name, self.connectedRooms.keys())
@@ -138,6 +183,24 @@ class TestRoom(unittest.TestCase):
     def testRemoveMemberNotInRoom(self):
         with self.assertRaises(NotInRoomError):
             self.room.removeMember('Jim')
+
+    def testAddResource(self):
+        self.room.addResource('food')
+        self.assertTrue(self.room.isAvailable('food'))
+
+    def testAddResourceAlreadyAdded(self):
+        self.room.addResource('food')
+        with self.assertRaises(AlreadyAvailableError):
+            self.room.addResource('food')
+
+    def testRemoveResource(self):
+        self.room.addResource('food')
+        self.room.removeResource('food')
+        self.assertFalse(self.room.isAvailable('food'))
+
+    def testRemoveResourceNotAvailable(self):
+        with self.assertRaises(NotAvailableError):
+            self.room.removeResource('food')
 
     def testConnectAValidRoom(self):
         roomTwo = Room("testRoom2")
