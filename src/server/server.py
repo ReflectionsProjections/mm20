@@ -22,8 +22,10 @@ class MMServer( object ):
     #   @param numPlayers number of players entering the game
     #   @param game Game object that holds the game state
     #   @param log location of the log file
-    #   @param timeLimit The amount of time to wait for a player to make their turn
-    #   @param maxDataSize The length in bytes of data received in one call to recv
+    #   @param timeLimit
+    #       The amount of time to wait for a player to make their turn
+    #   @param maxDataSize
+    #      The length in bytes of data received in one call to recv
     def __init__(self, numPlayers, game, log = constants["log"], timeLimit = constants["time"], maxDataSize = constants["maxDataSize"]):
         self.maxPlayers = numPlayers
         self.game = game
