@@ -7,7 +7,7 @@ import unittest
 class TeamMember(object):
     Archetypes = config.handle_constants.retrieveConstants("archetypes")
     ticks_in_hour = config.handle_constants.retrieveConstants("generalInfo")["TICKSINHOUR"]
-    effectiveness_drops = 60.0
+    effectiveness_drops = config.handle_constants.retrieveConstants("memberConstants")["effectiveness_drops"]
 
     ## Initializes a TeamMember with name, archetype, and team
     # @param name
@@ -24,7 +24,7 @@ class TeamMember(object):
         self.team = team
         self.person_id = person_id
         self.hunger = 0
-        self.fatigue = 50.0 #Start at 8 hours awake (halfway to passed out)
+        self.fatigue = 50.0  # Start at 8 hours awake (halfway to passed out)
         self.asleep = False
         self.acted = False
 
@@ -112,9 +112,20 @@ class TeamMember(object):
     ##  Eat!
     #
     #   @param foodTable ???
-    def eat(self, foodTable):
-        self._can_move()
-        #TODO: More stuff here
+    def eat(self):
+        if self.acted:
+            raise client_action.ActionError(
+                "ALREADYACTED",
+                "This player has already acted this turn")
+        if self.asleep:
+            raise client_action.ActionError(
+                "ASLEEP",
+                "This player is asleep")
+        if not self.location.isAvailable('FOOD'):
+            raise client_action.ActionError('NOFOODHERE', "This room does not contain food")
+        self.hunger -= 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))
+        if self.hunger < 0.0:
+            self.hunger = 0.0
 
     ##  Distract!
     #
@@ -127,9 +138,9 @@ class TeamMember(object):
     def _getEffectiveness(self):
         effective = 1.0
         if self.hunger > TeamMember.effectiveness_drops:
-            effective -= 0.5 * (100-self.hunger) / (100-TeamMember.effectiveness_drops)
+            effective -= 0.5 * (100 - self.hunger) / (100 - TeamMember.effectiveness_drops)
         if self.fatigue > TeamMember.effectiveness_drops:
-            effective -= 0.5 * (100-self.fatigue) / (100-TeamMember.effectiveness_drops)
+            effective -= 0.5 * (100 - self.fatigue) / (100 - TeamMember.effectiveness_drops)
         return effective
 
     def _can_move(self):
@@ -222,9 +233,31 @@ class TestTeamMember(unittest.TestCase):
         with self.assertRaises(client_action.ActionError):
             self.testMember.move(roomTwo)
 
+    def testEat(self):
+        self.testRoom.addResource('FOOD')
+        self.testMember.hunger = 100
+        self.testMember.eat()
+        self.assertEqual(self.testMember.hunger, (100.0 - 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))))
+
+    def testEatNoFood(self):
+        with self.assertRaises(client_action.ActionError):
+            self.testMember.eat()
+
     def testSleep(self):
         # TODO
         self.assertTrue(False)
+
+    def testTooHungry(self):
+        self.testMember.hunger = 100
+        with self.assertRaises(client_action.ActionError):
+            self.testMember.sleep()
+
+    def testAsleep(self):
+        self.testRoom.addResource('FOOD')
+        self.testMember.asleep = True
+        with self.assertRaises(client_action.ActionError):
+            self.testMember.eat()
+
 
 if __name__ == "__main__":
     unittest.main()
