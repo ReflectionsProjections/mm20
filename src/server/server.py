@@ -49,6 +49,7 @@ class MMServer( object ):
         serversocket.listen(self.maxPlayers)
         playerConnections = [None for i in range(0, self.maxPlayers)]
         turnObjects = [None for i in range(0, self.maxPlayers)]
+        recval = ["" for i in range(0, self.maxPlayers)]
         validTurns = 0
         print 'connecting ...'
         if run_when_ready:
@@ -73,22 +74,26 @@ class MMServer( object ):
             else:
                 for connection in ready[0]:
                     #Receive data
-                    data = connection.recv(self.maxDataSize)
                     player = lookupPlayer[connection]
+                    recval[player] += connection.recv(self.maxDataSize)
+                    validJson = True
                     if turnObjects[player] is None:
                         try:
-                            jsonObject = json.loads(data)
+                            jsonObject = json.loads(recval[player])
                         except ValueError, TypeError:
+                            if len(recval[player]) != 0 and len(recval[player])%self.maxDataSize == 0:
+                                validJson = False
                             jsonObject = json.loads('{}')
-                        (success, response) = self.game.add_new_team(jsonObject, player)
-                        if success:
-                            turnObjects[player] = response
-                            validTurns = validTurns+1
-                        else:
-                            try:
-                                connection.sendall(json.dumps(response, ensure_ascii=True))
-                            except IOError:
-                                pass
+                        if validJson:
+                            (success, response) = self.game.add_new_team(jsonObject, player)
+                            if success:
+                                turnObjects[player] = response
+                                validTurns = validTurns+1
+                            else:
+                                try:
+                                    connection.sendall(json.dumps(response, ensure_ascii=True))
+                                except IOError:
+                                    pass
             if validTurns == self.maxPlayers:
 
                 starting = False
@@ -103,6 +108,8 @@ class MMServer( object ):
         validTurns = 0
         for i in range(0, self.maxPlayers):
             turnObjects[i]=None
+        for i in range(0, self.maxPlayers):
+            recval[i]=""
         currTime = time.time()
         endTime = time.time() + self.timeLimit
         running = True
@@ -115,25 +122,26 @@ class MMServer( object ):
                 #Timeout
                 for i in range(0, self.maxPlayers):
                     if turnObjects[i] is None:
-                        turnObjects[i] = '{}'
+                        turnObjects[i] = json.loads('{}')
                         validTurns = validTurns + 1
             else:
                 for connection in ready[0]:
                     #Receive data
-                    data = connection.recv(self.maxDataSize)
                     player = lookupPlayer[connection]
+                    recval[player] += connection.recv(self.maxDataSize)
                     if turnObjects[player] is None:
-                        turnObjects[player] = data
-                        validTurns = validTurns+1
+                        try:
+                            turnObjects[player] = json.loads(recval[player])
+                            validTurns = validTurns+1
+                        except ValueError, TypeError:
+                            if len(recval[player]) == 0 or len(recval[player])%self.maxDataSize != 0:
+                                turnObjects[player] = json.loads('{}')
+                                validTurns = validTurns+1
             if validTurns == self.maxPlayers:
-                #Parse json and send turns to engine
+                #Send turns to engine
                 errors = ["{}" for i in turnObjects]
                 for i in range(0, self.maxPlayers):
-                    try:
-                        jsonObject = json.loads(turnObjects[i])
-                    except ValueError, TypeError:
-                        jsonObject = json.loads('{}')
-                    errors[i] = self.game.queue_turn(jsonObject, i)
+                    errors[i] = self.game.queue_turn(turnObjects[i], i)
 
                 running = self.game.execute_turn()
 
@@ -151,6 +159,8 @@ class MMServer( object ):
                 validTurns = 0
                 for i in range(0, self.maxPlayers):
                     turnObjects[i]=None
+                for i in range(0, self.maxPlayers):
+                    recval[i]=""
                 #reset endtime
                 currTime = time.time()
                 endTime = time.time() + self.timeLimit
