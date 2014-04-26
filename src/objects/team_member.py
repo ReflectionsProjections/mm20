@@ -185,10 +185,11 @@ class TeamMember(object):
         effective = self._getEffectiveness() * self.archetype["spy"]
         amount = 0
         for person in self.location.people:
-            if person.acted == "theorize":
-                amount += 2 * effective
-            if person.acted == "code":
-                amount += effective
+            if person.team != self.team:
+                if person.acted == "theorize":
+                    amount += 2 * effective
+                if person.acted == "code":
+                    amount += effective
         self.acted = "spy"
 
     ##  Wake up!
