@@ -31,20 +31,24 @@ class Team(object):
     def get_visible_map(self):
         rooms = dict()
         for m in self.members.values():
-            room = m.location
-            rooms[room.name] = room
+            visible_room = m.location
+            rooms[visible_room.name] = visible_room
         return [r.output_dict() for r in rooms.values()]
 
     def get_team_members(self):
         return [m.output_dict() for m in self.members.values()]
 
+import room
+
+
 class TestTeam(unittest.TestCase):
     def setUp(self):
+        self.testRoom = room.Room("Narnia")
         self.team = Team("testTeam",
                          [
                              {"name": "Steve", "class": "Coder"},
                              {"name": "Bob", "class": "Theorist"}
-                         ], "Narnia", [])
+                         ], self.testRoom, [])
 
     def testInit(self):
         self.assertEqual(self.team.name, "testTeam")

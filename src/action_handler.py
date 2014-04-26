@@ -77,12 +77,12 @@ class TestaActionHandler(unittest.TestCase):
 
     ## Tests that the bufferAction function correctly adds an action to the buffer.
     def testBufferAction(self):
-        validActions = config.handle_constants.retrieveConstants("actions")
+        validActions = config.handle_constants.retrieveConstants("actions")['validActions']
         pseudoBuffer = []
         pseudoAction = validActions[0]
         bufferAction(pseudoBuffer, pseudoAction, {"target": 'pseudoTarget'}, 0)
         self.assertFalse(not pseudoBuffer)
-        self.assertEquals(pseudoBuffer[0], validActions[0])
+        self.assertEquals(pseudoBuffer[0].action, validActions[0])
 
     ## Tests that the executeAction() function correctly executes the action given a valid action.
     def testExecuteActionExists(self):
