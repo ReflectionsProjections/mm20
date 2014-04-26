@@ -109,11 +109,13 @@ class Room(object):
         return resource in self.resources
 
     def __str__(self):
-        return "<id:{0}, connected_rooms:{1}>".format(self.name, self.connectedRooms.keys())
+        return "<id:{0}, connected_rooms:{1}>".format(
+            self.name, self.connectedRooms.keys())
 
     def output_dict(self):
         room_info = {"room": self.name,
-                     "connectedRooms": self.connectedRooms.keys()}
+                     "connectedRooms": self.connectedRooms.keys(),
+                     "peopleInRoom": [p.output_dict() for p in self.people]}
         return room_info
 
     ## Returns connected rooms

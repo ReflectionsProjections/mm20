@@ -45,7 +45,7 @@ class Game(object):
         try:
             print data
             newTeam = Team(data["team"], data["members"],
-                           self.rooms[STARTING_ROOM], self.people)
+                           self.rooms[STARTING_ROOM], self.people, client_id)
         except KeyError:
             return (False, {"status": "Failure", "errors": ["KeyError"]})
         # TODO: Make all error objects uniform
@@ -100,7 +100,7 @@ class Game(object):
             if winner == client_id:
                 win = True
             return {"winner": win}
-        response = {"warnings": [],
+        response = {"aiStats": [],
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.result_buffer[client_id]}
         self.result_buffer[client_id] = []
@@ -124,4 +124,6 @@ class Game(object):
     #   @return the score for that team
     def calc_score(self, client_id):
         ai = self.teams[client_id].ai
-        return ((ai.implementation - ai.optimization) * self.unoptimized_weight + ai.optimization * self.optimized_weight) * ai.stability
+        return ((ai.implementation - ai.optimization) *
+                self.unoptimized_weight + ai.optimization *
+                self.optimized_weight) * ai.stability
