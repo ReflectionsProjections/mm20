@@ -11,7 +11,8 @@ import unittest
 # @param action_buffer
 #   ?
 def handleTurn(game, action_buffer):
-    action_buffer.sort(lambda a, b: a.priority - b.priority, reverse=True)  # TODO: test this function
+
+    sortActions(action_buffer)
     for action in action_buffer:
         game.result_buffer[action.owner].append(executeAction(game, action))
     return
@@ -24,6 +25,7 @@ def sortActions(actionBuffer):
     # TODO
     # sort the actions in actionBuffer by priority, see the python
     # built-in sort function
+    actionBuffer.sort(lambda a, b: a.priority - b.priority, reverse=True)
     return
 
 
