@@ -7,6 +7,8 @@ import math
 class TeamMember(object):
     _INVALID = "Invalid Request"
     Archetypes = config.handle_constants.retrieveConstants("archetypes")
+    ticks_in_hour = config.handle_constants.retrieveConstants("generalInfo")["TICKSINHOUR"]
+    effectiveness_drops = 60.0
 
     ## Initializes a TeamMember with name, archetype, and team
     # @param name
@@ -21,7 +23,10 @@ class TeamMember(object):
         self.location = location
         self.team = team
         self.person_id = person_id
-        self.energy = TeamMember.Archetypes[archetype]["energy"]
+        self.hunger = 0
+        self.fatigue = 50.0 #Start at 8 hours awake (halfway to passed out)
+        self.asleep = False
+        self.acted = False
 
     def output_dict(self):
         my_info = dict(self.__dict__)
@@ -33,60 +38,103 @@ class TeamMember(object):
     # @param destination
     #   The room (a Room object) to move to.
     def move(self, destination):
-        if not self.location.isConnectedTo(destination):
-            raise ValueError(
-                "NOTCONNECTED",
-        "Cannot move to destination, it is not connected to current location")
+        if not self.acted and not self.asleep:
+            if not self.location.isConnectedTo(destination):
+                raise ValueError(
+                    "NOTCONNECTED",
+            "Cannot move to destination, it is not connected to current location")
+            else:
+                self.location = destination
+            self.acted = True
         else:
-            self.location = destination
+            pass #TODO: throw errors
 
     ## The team member sleeps for some time to regain energy.
     #  The amount of energy regained depends on their Archetype
     # @param turns
     #   The number of turns the team member sleeps for.
-    def sleep(self, turns):
-        self.energy += turns * self.archetype["sleepEffectiveness"]
-        # TODO: Make a team member unable to do anything else while sleeping!
+    def sleep(self):
+        if not self.acted and self.hunger < 100:
+            self.asleep = True
+        else:
+            pass #TODO: throw errors
 
     ##  Code!
     #
     #   @param code_type A string containing the type of coding to be done
     #   @param turn The turn so that the player knows how long they've been coding
     def code(self, code_type, turn):
-        ai = self.team.ai
-        if code_type == "refactor":
-            ai.complexity -= self.archetype["refactor"]
-            if ai.complexity < ai.implementation * .25:
-                ai.complexity = ai.implementation * .25
-            if ai.complexity < 1:
-                ai.complexity = 1.0
-        elif code_type == "test":
-            amount = self.archetype["test"] / (ai.complexity / 10.0)
-            ai.stability += amount / 100.0
-            if ai.stability > 1:
-                ai.stability = 1.0
-        elif code_type == "implement":
-            amount = self.archetype["codingProwess"] / (ai.complexity / 10.0)
-            ai.implementation += amount
-            ai.complexity += amount
-            ai.optimization -= amount / 10.0
-            ai.stability -= amount / 200.0
-            if ai.implementation > ai.theory:
-                ai.implementation = ai.theory
-            if ai.stability < 0.0:
-                ai.stability = 0.0
-            if ai.optimization < 0.0:
-                ai.optimization = 0.0
-        elif code_type == "optimize":
-            amount = self.archetype["optimize"] / (ai.complexity / 10.0)
-            ai.complexity += amount
-            ai.optimization += amount
+        if not self.acted and not self.asleep and self.hunger < 100:
+            ai = self.team.ai
+            effective = self._getEffectiveness()
+            if code_type == "refactor":
+                ai.complexity -= effective * self.archetype["refactor"]
+                if ai.complexity < ai.implementation * .25:
+                    ai.complexity = ai.implementation * .25
+                if ai.complexity < 1:
+                    ai.complexity = 1.0
+            elif code_type == "test":
+                amount = effective * self.archetype["test"] / (ai.complexity / 10.0)
+                ai.stability += amount / 100.0
+                if ai.stability > 1:
+                    ai.stability = 1.0
+            elif code_type == "implement":
+                amount = effective * self.archetype["codingProwess"] / (ai.complexity / 10.0)
+                ai.implementation += amount
+                ai.complexity += amount
+                ai.optimization -= amount / 10.0
+                ai.stability -= amount / 200.0
+                if ai.implementation > ai.theory:
+                    ai.implementation = ai.theory
+                if ai.stability < 0.0:
+                    ai.stability = 0.0
+                if ai.optimization < 0.0:
+                    ai.optimization = 0.0
+            elif code_type == "optimize":
+                amount = effective * self.archetype["optimize"] / (ai.complexity / 10.0)
+                ai.complexity += amount
+                ai.optimization += amount
+            self.acted = True
+        else:
+            pass #TODO: throw errors
 
     ##  Theorize!
     #
     #   @param turn The turn so that the player knows how long they've been theorizing
     def theorize(self, turn):
-        self.team.ai.theory += self.archetype["theorize"]
+        if not self.acted and not self.asleep and self.hunger < 100:
+            effective = self._getEffectiveness()
+            self.team.ai.theory += self.archetype["theorize"] * effective
+            self.acted = True
+        else:
+            pass #TODO: Throw error
+
+    ##Calculate effectiveness based on fatigue and hunger
+    def _getEffectiveness(self):
+        effective = 1.0
+        if self.hunger > TeamMember.effectiveness_drops:
+            effective -= 0.5 * (100-self.hunger) / (100-TeamMember.effectiveness_drops)
+        if self.fatigue > TeamMember.effectiveness_drops:
+            effective -= 0.5 * (100-self.fatigue) / (100-TeamMember.effectiveness_drops)
+        return effective
+
+    ##  Called every turn to reset values and make incremental changes
+    def update(self):
+        if not self.asleep:
+            self.hunger += 100.0 / (8.0 * TeamMember.ticks_in_hour)
+            self.fatigue += 100.0 / (16.0 * TeamMember.ticks_in_hour)
+            if self.hunger > 100:
+                self.hunger = 100.0
+            if self.fatigue > 100:
+                self.asleep = True
+        else:
+            self.hunger += 100.0 / (16.0 * TeamMember.ticks_in_hour)
+            self.fatigue -= 100.0 / (8.0 * TeamMember.ticks_in_hour)
+            if self.hunger > 100:
+                self.hunger = 100.0
+                self.asleep = False
+        self.acted = False
+
 
 import team
 import room
