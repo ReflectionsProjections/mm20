@@ -67,8 +67,8 @@ class Action:
                     parameters['room']])
             except ActionError as e:
                 response['success'] = False
-                response['reason'] = e[0]
-                response['message'] = e[1]
+                response['reason'] = e.reason
+                response['message'] = e.message
             except KeyError as e:
                 response['success'] = False
                 response['reason'] = 'KEYERROR'
@@ -110,8 +110,8 @@ class Action:
                 game.people[parameters['member']].sleep()
             except ActionError as e:
                 response['success'] = False
-                response['reason'] = e[0]
-                response['message'] = e[1]
+                response['reason'] = e.reason
+                response['message'] = e.message
         return response
 
     ## Have a team member code
@@ -134,8 +134,8 @@ class Action:
                                                        game.turn)
             except ActionError as e:
                 response['success'] = False
-                response['reason'] = e[0]
-                response['message'] = e[1]
+                response['reason'] = e.reason
+                response['message'] = e.message
         return response
 
     ## Have a member develop theory for that teams AI
