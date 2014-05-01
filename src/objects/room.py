@@ -1,25 +1,24 @@
 import unittest
 
 
-## Raised when an error occurs due to two rooms already being connected
 class AlreadyConnectedError(Exception):
     def __init__(self, roomOne, roomTwo):
-        self.msg = "Room {0} and {1} are already connected.".format(roomOne, roomTwo)
+        self.msg = "Room {0} and {1} are already connected.".format(roomOne,
+                                                                    roomTwo)
 
     def __str__(self):
         return self.msg
 
 
-## Raised when an error occurs due to two rooms not being connected
 class NotConnectedError(Exception):
     def __init__(self, roomOne, roomTwo):
-        self.msg = "Room {0} and {1} are not connected!".format(roomOne, roomTwo)
+        self.msg = "Room {0} and {1} are not connected!".format(roomOne,
+                                                                roomTwo)
 
     def __str__(self):
         return self.msg
 
 
-## Raised when an error occurs due to a member already being in a room
 class AlreadyInRoomError(Exception):
     def __init__(self, room, member):
         self.msg = "{0} is already in {1}.".format(member, room)
@@ -28,7 +27,6 @@ class AlreadyInRoomError(Exception):
         return self.msg
 
 
-## Raised when an error occurs due to a member not being in a room
 class NotInRoomError(Exception):
     def __init__(self, room, member):
         self.msg = "{0} is not in {1}.".format(member, room)
@@ -37,7 +35,6 @@ class NotInRoomError(Exception):
         return self.msg
 
 
-## Raised when an error occurs due to a resource already being available in a room
 class AlreadyAvailableError(Exception):
     def __init__(self, room, resource):
         self.msg = "{0} is already available in {1}".format(resource, room)
@@ -46,10 +43,10 @@ class AlreadyAvailableError(Exception):
         return self.msg
 
 
-## Raised when an error occurs due to a resource not being available in a room
 class NotAvailableError(Exception):
     def __init__(self, room, resource):
-        self.msg = "{0} is not an available resource in {1}".format(resource, room)
+        self.msg = "{0} is not an available resource in {1}".format(resource,
+                                                                    room)
 
     def __str__(self):
         return self.msg
@@ -154,7 +151,6 @@ class Room(object):
         return room.name in self.connectedRooms
 
 
-## ## Tests all of the functionality in Room
 class TestRoom(unittest.TestCase):
     def setUp(self):
         self.room = Room("testRoom")

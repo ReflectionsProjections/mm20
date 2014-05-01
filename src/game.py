@@ -6,14 +6,15 @@ import config.handle_constants
 STARTING_ROOM = "72 0 255 255"  # For testing purposes only
 
 
-## This is the class which the server sees as representing the entire game
+## Holds the gamestate and represents the game to the server
 class Game(object):
     # Objects:
     # rooms: A list of all of the rooms
     # turn: Which turn it is
     # turn_limit: The maximum length the game will run
     # action_buffer: A list of actions to be performed at the next 'tick'
-    # result_buffer: A dictionary, indexed by client, of lists of responses to actions
+    # result_buffer: A dictionary, indexed by client, of
+    #   lists of responses to actions
     # teams: A list of all of the teams
     # people: A list of all of the people
 
@@ -27,6 +28,7 @@ class Game(object):
         self.turn_limit = defaults["TICKSINHOUR"] * 24
         self.unoptimized_weight = defaults["UNOPTWEIGHT"]
         self.optimized_weight = defaults["OPTWEIGHT"]
+        self.team_limit = defaults["TEAMSIZE"]
         self.action_buffer = []
         self.result_buffer = {}
         self.teams = {}
@@ -43,7 +45,8 @@ class Game(object):
     def add_new_team(self, data, client_id):
         response = {"status": "Success", "errors": []}
         try:
-            print data
+            if len(data["members"]) > self.team_limit:
+                return (False, {"status": "Failure", "errors": ["Number of team members exceeds team size"]})
             newTeam = Team(data["team"], data["members"],
                            self.rooms[STARTING_ROOM], self.people, client_id)
         except KeyError:
@@ -55,10 +58,13 @@ class Game(object):
 
         return (True, response)
 
-    ## Execute queued actions
+    ## Processes a turn, executing all client queued actions, incrementing
+    #  the turn and running the turn tick behavior
     # @return
     #   True if the game is running, False if the game ended
     def execute_turn(self):
+        if len(self.people) == 0:
+            return False
         action_handler.handleTurn(self, self.action_buffer)
         self.action_buffer = []
         for person in self.people:
@@ -86,14 +92,13 @@ class Game(object):
                                    "action": action["action"]})
         return error_list
 
-    ## Provides the information to be sent to a client each turn
+    ## Provides the information to be sent to a client each turn.
     #  If the game is over, send end-of-game stuff
     # @param client_id
     #   the client to which the information will be provided
     # @return
     #   A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
-        #Check for end of game, then do scoring and return the winner
         if self.turn >= self.turn_limit:
             winner = self.find_victor()
             win = False
@@ -107,21 +112,23 @@ class Game(object):
         return response
 
     ##  At endgame, find the winner
-    #   @return the id of the team that has won
+    # @return
+    #   the id of the team that has won
     def find_victor(self):
         victor = 0
-        score = 0.0
+        score = -1
         for ident, team in self.teams.iteritems():
             team_score = self.calc_score(ident)
             if team_score > score:
                 victor = ident
                 score = team_score
         return victor
-        
+
     ##  Calculate score for a team
-    #
-    #   @param client_id the id of the team to check
-    #   @return the score for that team
+    # @param client_id
+    #   the id of the team to check
+    # @return
+    #   the score for that team
     def calc_score(self, client_id):
         ai = self.teams[client_id].ai
         return ((ai.implementation - ai.optimization) *

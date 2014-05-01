@@ -50,6 +50,7 @@ class MMServer( object ):
         playerConnections = [None for i in range(0, self.maxPlayers)]
         turnObjects = [None for i in range(0, self.maxPlayers)]
         recval = ["" for i in range(0, self.maxPlayers)]
+        forfeit = [False for i in range(0, self.maxPlayers)]
         validTurns = 0
         print 'connecting ...'
         if run_when_ready:
@@ -70,6 +71,7 @@ class MMServer( object ):
                 for i in range(0, self.maxPlayers):
                     if turnObjects[i] is None:
                         turnObjects[i] = '{ "error" : "Timeout on initial connection, auto-forfeit" }'
+                        forfeit[i] = True
                         validTurns = validTurns + 1
             else:
                 for connection in ready[0]:
@@ -141,19 +143,21 @@ class MMServer( object ):
                 #Send turns to engine
                 errors = ["{}" for i in turnObjects]
                 for i in range(0, self.maxPlayers):
-                    errors[i] = self.game.queue_turn(turnObjects[i], i)
+                    if not forfeit[i]:
+                        errors[i] = self.game.queue_turn(turnObjects[i], i)
 
                 running = self.game.execute_turn()
 
                 #Return turn info back to the clients
                 for i in range(0, self.maxPlayers):
-                    try:
-                        data = self.game.get_info(i)
-                        if running:
-                            data["errors"] = errors[i]
-                        playerConnections[i].sendall(json.dumps(data, ensure_ascii=True))
-                    except IOError:
-                        pass
+                    if not forfeit[i]:
+                        try:
+                            data = self.game.get_info(i)
+                            if running:
+                                data["errors"] = errors[i]
+                            playerConnections[i].sendall(json.dumps(data, ensure_ascii=True))
+                        except IOError:
+                            pass
 
                 #clear turn objects
                 validTurns = 0

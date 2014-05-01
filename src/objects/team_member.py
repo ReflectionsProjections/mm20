@@ -32,16 +32,20 @@ class TeamMember(object):
                            # (True) or None (False)
 
     ## Each person should have a unique person_id that will never change once a
-    #  person has been created
+    #  person has been created.
+    #  This makes the hash function dependent on the person_id
     def __hash__(self):
         return hash(self.person_id)
 
+    ## Each person should have a unique person_id that will never change once a
+    #  person has been created.
+    #  This makes the hash function dependent on the person_id
     def __eq__(self, other):
         return self.person_id == other.person_id
 
-    ## Make a seralible repesentaion room and everything in it
+    ## Make a seralible repesentaion of this team member and everything in it
     # @return
-    #    A dict that reprents the room
+    #    A dict that reprents the team member
     def output_dict(self):
         my_info = dict(self.__dict__)
         del my_info["team"]
@@ -208,7 +212,7 @@ class TeamMember(object):
         victim.asleep = False
         self.acted = "wake"
 
-    ##Calculate effectiveness based on fatigue and hunger
+    ## Calculate effectiveness based on fatigue and hunger
     def _getEffectiveness(self):
         effective = 1.0
         if self.hunger > TeamMember.effectiveness_drops:
@@ -259,7 +263,6 @@ import team
 import room
 
 
-## Tests all of the functionality in Team Member
 class TestTeamMember(unittest.TestCase):
     def setUp(self):
         class PseudoTeam(team.Team):
@@ -325,6 +328,7 @@ class TestTeamMember(unittest.TestCase):
         with self.assertRaises(client_action.ActionError):
             self.testMember.eat()
 
+    @unittest.skip("Not yet implemented")
     def testSleep(self):
         # TODO
         self.assertTrue(False)
