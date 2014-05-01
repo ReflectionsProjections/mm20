@@ -62,6 +62,9 @@ class Room(object):
     # @param furniture
     #   Test
     def __init__(self, room_id):
+        if room_id is None:
+            raise TypeError(
+                "Attempted to initialize Room with room_id of None")
         self.connectedRooms = dict()
         self.name = room_id
         self.people = set()

@@ -25,8 +25,9 @@ class AI(object):
     # @param amount
     #   The value to set it to
     def setAttribute(self, attribute, amount):
+        if amount < 0:
+            amount = 0
         self.__dict__[attribute] = amount
-        # TODO Do we want to allow negative values here?
 
 
 class TestAI(unittest.TestCase):
@@ -49,7 +50,6 @@ class TestAI(unittest.TestCase):
         self.assertEqual(self.ai.complexity, 300)
         self.ai.setAttribute('implementation', -500)
         self.assertEqual(self.ai.implementation, 0)
-        pass
 
 if __name__ == '__main__':
     unittest.main()
