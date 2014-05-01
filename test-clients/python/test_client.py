@@ -26,14 +26,19 @@ while len(data) > 0 and game_running:
             for m in members:
                 act = {}
                 act["member"] = m["person_id"]
-                if m["archetype"]["theorize"] == 10:
-                    act["action"] = "theorize"
-                elif m["archetype"]["test"] == 10:
-                    act["action"] = "code"
-                    act["type"] = "test"
-                else:
-                    act["action"] = "code"
-                    act["type"] = "implement"
+                if "messages" in value:
+                    for message in value["messages"]:
+                        if message["success"] == False and message["reason"] == "HUNGRY":
+                            act["action"] = "eat"
+                if "action" not in act:
+                    if m["archetype"]["theorize"] == 10:
+                        act["action"] = "theorize"
+                    elif m["archetype"]["test"] == 10:
+                        act["action"] = "code"
+                        act["type"] = "test"
+                    else:
+                        act["action"] = "code"
+                        act["type"] = "implement"
                 actions.append(act)
             s.sendall(json.dumps(actions))
             data = s.recv(1024)
