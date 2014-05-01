@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 
+
 SCREEN_WIDTH = 1300
 SCREEN_HEIGHT = 700
 
@@ -11,6 +12,7 @@ GameClock = None
 
 TITLE = "Visualizer"
 
+running = True
 
 def setup():
     pygame.display.set_caption(TITLE)
