@@ -28,7 +28,8 @@ class Action:
         self.action = action
         if not action in actions_data['validActions']:
             self.action = "INVALID"
-        self.priority = actions_data['priorities'][action]
+        else:
+            self.priority = actions_data['priorities'][action]
         self.parameters = parameters
         self.owner = client_id
 
@@ -281,54 +282,66 @@ class Action:
 class TestaClientActions(unittest.TestCase):
     def testUnavailableAction(self):
         Action.actions = {}
-        with self.assertRaises(KeyError):
-            Action('move', {'team_member': 'banjos'}, 0)
+        test = Action('Not-An-Action', {'team_member': 'banjos'}, 0)
+        result = test.execute(None)
+        self.assertFalse(result['success'])
+        self.assertEqual(result['reason'], 'INVALID')
 
     ## Tests that the _movePlayer function returns the same thing as
     #  the player.move function given valid parameters.
+    @unittest.skip("Not yet implemented")
     def test_movePlayerValid(self):
         self.assertTrue(False)
 
     ## Tests that the _movePlayer function returns _INVALID
     #  given invalid parameters.
+    @unittest.skip("Not yet implemented")
     def test_movePlayerInvalid(self):
         self.assertTrue(False)
 
     ## Tests that the _eatFood function returns the same thing as
     #  the player.eat function given valid parameters.
+    @unittest.skip("Not yet implemented")
     def test_eatFoodValid(self):
         self.assertTrue(False)
 
     ## Tests that the _eatFood function returns _INVALID
     #  given invalid parameters.
+    @unittest.skip("Not yet implemented")
     def test_eatFoodInvalid(self):
         self.assertTrue(False)
 
     ## Tests that the _sleep function returns the same thing as
     #  the player.sleep function given valid parameters.
+    @unittest.skip("Not yet implemented")
     def test_sleepValid(self):
         self.assertTrue(False)
 
     ## Tests that the _sleep function returns _INVALID given invalid parameters
+    @unittest.skip("Not yet implemented")
     def test_sleepInvalid(self):
         self.assertTrue(False)
 
     ## Tests that the _code function returns the same thing as
     #  the player.code function given valid parameters.
+    @unittest.skip("Not yet implemented")
     def test_codeValid(self):
         self.assertTrue(False)
 
     ## Tests that the _code function returns _INVALID given invalid parameters
+    @unittest.skip("Not yet implemented")
     def test_codeInvalid(self):
         self.assertTrue(False)
 
     ## Tests that the _getMap function returns the same thing as
     #  the loggers mapToJson function
+    @unittest.skip("Not yet implemented")
     def test_getMap(self):
         self.assertTrue(False)
 
     ## Tests that the _serverInfo function returns correct
     #  information on the server from constants.json
+    @unittest.skip("Not yet implemented")
     def test_serverInfo(self):
         self.assertTrue(False)
 

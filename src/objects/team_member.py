@@ -328,6 +328,7 @@ class TestTeamMember(unittest.TestCase):
         with self.assertRaises(client_action.ActionError):
             self.testMember.eat()
 
+    @unittest.skip("Not yet implemented")
     def testSleep(self):
         # TODO
         self.assertTrue(False)

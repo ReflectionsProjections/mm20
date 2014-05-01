@@ -60,6 +60,7 @@ class TestaActionHandler(unittest.TestCase):
         pass
 
     ## Test that the response() function formats the response correctly.
+    @unittest.skip("Not yet implemented")
     def testResponse(self):
         self.assertTrue(False)
 
@@ -90,15 +91,18 @@ class TestaActionHandler(unittest.TestCase):
 
     ## Tests that the executeAction() function correctly executes
     #  the action given a valid action.
+    @unittest.skip("Not yet implemented")
     def testExecuteActionExists(self):
         self.assertTrue(False)
 
     ## Tests that the executeAction() function correctly
     #  responds given an invalid action.
+    @unittest.skip("Not yet implemented")
     def testExecuteActionNotExists(self):
         self.assertTrue(False)
 
     ## Test that handleTurn returns the correct list of responses.
+    @unittest.skip("Not yet implemented")
     def testHandleTurn(self):
         self.assertTrue(True)
 
