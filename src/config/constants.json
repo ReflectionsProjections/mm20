@@ -19,7 +19,8 @@
     "port": 8080,
     "time": 0.01,
     "initialConnectTime": 1,
-    "maxDataSize": 1024
+    "maxDataSize": 1024,
+    "defaultClient": "../test-clients/python/test_client.py"
   },
   "actions": {
     "validActions": [
