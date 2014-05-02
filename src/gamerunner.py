@@ -77,6 +77,21 @@ def parse_args():
         const=None,
         default=FNULL,
         action="store_const")
+    parser.add_argument(
+        "-s", "--show",
+        help="Set this to make the game be visualized in a window." +
+        "Fun to watch and helpful for debuging!",
+        const=True,
+        default=False,
+        action="store_const")
+    parser.add_argument(
+        "-C", "--cached-map",
+        help="Speeds up the lunch time of the server by using a cached map." +
+        "If you have having any sort of problem try lunching with out this!",
+        const=True,
+        default=False,
+        action="store_const")
+    
     args = parser.parse_args()
     if args.teams < 2:
         sys.stdout.write(parser.format_usage())
@@ -119,7 +134,7 @@ def main():
     with open(parameters.log, 'w'):
         pass
     fileLog = FileLogger(parameters.log)
-    if os.path.isfile(map_cache_str) and True:
+    if os.path.isfile(map_cache_str) and parameters.cached_map:
         with open(map_cache_str, 'r') as f:
             rooms = pickle.load(f)
         my_game = game.Game(parameters.map, rooms)
@@ -129,7 +144,7 @@ def main():
         with open(map_cache_str, 'w') as f:
             f.write(rooms_str)
         rooms = pickle.loads(rooms_str)
-    if True:
+    if parameters.show:
         fileLog.vis = vis.visualizer.Visualizer(rooms)
     serv = MMServer(parameters.teams,
                     my_game,
