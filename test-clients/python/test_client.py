@@ -57,16 +57,21 @@ if __name__ == "__main__":
     members = None
     while len(data) > 0 and game_running:
         value = None
-        try:
-            value = json.loads(data)
-            print 'Received', repr(data)
-            if 'winner' in value:
-                game_running = False
+        if "\n" in data:
+            data = data.split('\n')
+            if len(data) > 1 and data[1] != "":
+                data = data[1]
+                data += s.recv(1024)
             else:
-                members = updateMembers(members, value)
-                actions = setActions(members, value)
-                s.sendall(json.dumps(actions))
-                data = s.recv(1024)
-        except ValueError:
+                value = json.loads(data[0])
+                print 'Received', repr(data[0])
+                if 'winner' in value:
+                    game_running = False
+                else:
+                    members = updateMembers(members, value)
+                    actions = setActions(members, value)
+                    s.sendall(json.dumps(actions))
+                    data = s.recv(1024)
+        else:
             data += s.recv(1024)
     s.close()

@@ -113,7 +113,7 @@ class MMServer( object ):
                                 validTurns = validTurns+1
                             else:
                                 try:
-                                    connection.sendall(json.dumps(response, ensure_ascii=True))
+                                    connection.sendall(json.dumps(response, ensure_ascii=True)+"\n")
                                 except IOError:
                                     pass
             if validTurns == self.maxPlayers:
@@ -123,7 +123,7 @@ class MMServer( object ):
                 #Return turn info back to the clients
                 for i in range(0, self.maxPlayers):
                     try:
-                        playerConnections[i].sendall(json.dumps(turnObjects[i], ensure_ascii=True))
+                        playerConnections[i].sendall(json.dumps(turnObjects[i], ensure_ascii=True)+"\n")
                     except IOError:
                         pass
 
@@ -179,7 +179,7 @@ class MMServer( object ):
                                 data["errors"] = errors[i]
                             player_data_for_turn[i] = data
                             playerConnections[i].sendall(
-                                json.dumps(player_data_for_turn[i]))
+                                json.dumps(player_data_for_turn[i], ensure_ascii = True) + "\n")
                         except IOError:
                             pass
                 #log what infomation is sent to the clients
