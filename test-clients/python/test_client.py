@@ -14,6 +14,12 @@ def updateMembers(members, value):
                     members[person["person_id"]] = person
     return members
 
+#This function determines what actions to be performed each turn
+#
+#Edit this to change the behavior of the client
+#
+#@param members A dictionary of team member's current state indexed by their person_id
+#@param value The dictionary with turn info sent by the server 
 def setActions(members, value):
     actions = []
     for m_id, m in members.iteritems():
@@ -37,27 +43,27 @@ def setActions(members, value):
         actions.append(act)
     return actions
 
-
-HOST = 'localhost'
-PORT = 8080
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
-s.sendall('{"team":"test", "members":[{"name":"test1", "class":"Coder"},{"name":"test2", "class":"Architect"},{"name":"test3", "class":"Theorist"}]}')
-data = s.recv(1024)
-game_running = True
-members = None
-while len(data) > 0 and game_running:
-    value = None
-    try:
-        value = json.loads(data)
-        print 'Received', repr(data)
-        if 'winner' in value:
-            game_running = False
-        else:
-            members = updateMembers(members, value)
-            actions = setActions(members, value)
-            s.sendall(json.dumps(actions))
-            data = s.recv(1024)
-    except ValueError:
-        data += s.recv(1024)
-s.close()
+if __name__ == "__main__":
+    HOST = 'localhost'
+    PORT = 8080
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, PORT))
+    s.sendall('{"team":"test", "members":[{"name":"test1", "class":"Coder"},{"name":"test2", "class":"Architect"},{"name":"test3", "class":"Theorist"}]}')
+    data = s.recv(1024)
+    game_running = True
+    members = None
+    while len(data) > 0 and game_running:
+        value = None
+        try:
+            value = json.loads(data)
+            print 'Received', repr(data)
+            if 'winner' in value:
+                game_running = False
+            else:
+                members = updateMembers(members, value)
+                actions = setActions(members, value)
+                s.sendall(json.dumps(actions))
+                data = s.recv(1024)
+        except ValueError:
+            data += s.recv(1024)
+    s.close()
