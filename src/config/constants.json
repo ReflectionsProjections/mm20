@@ -28,7 +28,13 @@
     "SCREEN_WIDTH": 1300,
     "SCREEN_HEIGHT": 700,
     "MAX_FPS": 60,
-    "TITLE": "Visualizer"
+    "TITLE": "Visualizer",
+    "TEAMCOLORS": [
+      [255, 0, 0],
+      [0, 255, 0],
+      [0, 0, 255],
+      [0, 0, 0]
+    ]
   },
   "actions": {
     "validActions": [
