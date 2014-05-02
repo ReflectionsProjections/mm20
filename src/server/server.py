@@ -71,7 +71,7 @@ class MMServer( object ):
         recval = ["" for i in range(0, self.maxPlayers)]
         forfeit = [False for i in range(0, self.maxPlayers)]
         validTurns = 0
-        self.logger.print_stuff('connecting ...')
+        print 'connecting ...'
         if run_when_ready:
             run_when_ready()
         #Accept connections from correct number of players
@@ -79,7 +79,7 @@ class MMServer( object ):
             (clientsocket, address) = serversocket.accept()
             playerConnections[i] = clientsocket
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
-        self.logger.print_stuff('connecting ...')
+        print 'connecting ...'
         #Accept starting connection first
         starting = True
         while starting:
@@ -168,7 +168,7 @@ class MMServer( object ):
                 running = self.game.execute_turn()
 
                 # set up a buffer to hold what we need to send players
-                player_output = [None] * self.maxPlayers
+                player_data_for_turn = [None] * self.maxPlayers
                 #Return turn info back to the clients
                 for i in range(0, self.maxPlayers):
                     if not forfeit[i]:
@@ -176,13 +176,13 @@ class MMServer( object ):
                             data = self.game.get_info(i)
                             if running:
                                 data["errors"] = errors[i]
-                            player_output[i] = json.dumps(
-                                data, ensure_ascii=True)
-                            playerConnections[i].sendall(player_output[i])
+                            player_data_for_turn[i] = data
+                            playerConnections[i].sendall(
+                                json.dumps(player_data_for_turn[i]))
                         except IOError:
                             pass
                 #log what infomation is sent to the clients
-                self.logger.print_stuff(player_output)
+                self.logger.print_stuff(player_data_for_turn)
                 
                 #clear turn objects
                 validTurns = 0
