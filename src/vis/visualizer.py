@@ -12,6 +12,9 @@ class Visualizer( object ):
         self.MAX_FPS = self.constants["MAX_FPS"]
         self.TITLE = self.constants["TITLE"]
         self.running = True
+        self.colors = self.constants["TEAMCOLORS"]
+        for i in range(len(self.colors)):
+            self.colors[i] = tuple(self.colors[i])
         pygame.init()
         self.setup()
 
@@ -27,16 +30,18 @@ class Visualizer( object ):
             self.frame()
 
     def frame(self, turn=None):
-        self.draw()
-        self.GameClock.tick(self.MAX_FPS)
-        for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    self.running = False
+        if self.running:
+            self.draw()
+            self.GameClock.tick(self.MAX_FPS)
+            for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        self.running = False
 
 
     def draw(self):
         self.ScreenSurface.blit(self.background, (0, 0))
+        pygame.draw.circle(self.ScreenSurface, self.colors[0], (20,20), 4, 0)
         pygame.display.flip()
 
 
