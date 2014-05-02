@@ -14,12 +14,10 @@ def launch_clients():
         numberOfClients = len(parameters.client)
         for client in parameters.client:
             launch_client(client)
-        if numberOfClients < parameters.players:
-            for x in xrange(numberOfClients, parameters.players):
-                launch_client(parameters.defaultClient)
     else:
-        for x in xrange(0, parameters.players):
-                launch_client(parameters.defaultClient)
+        numberOfClients = 0
+    for x in xrange(numberOfClients, parameters.players):
+        launch_client(parameters.defaultClient)
 
 
 def launch_client(client):
