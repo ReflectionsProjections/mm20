@@ -8,7 +8,6 @@ import sys
 import os
 
 FNULL = open(os.devnull, 'w')
-PLAYERONESTDOUT = FNULL
 constants = config.handle_constants.retrieveConstants("serverDefaults")
 parameters = None
 client_list = list()
@@ -68,6 +67,12 @@ def parse_args():
         help="The default client to launch when no specific clients " +
         "are given. Defaults to {0}".format(constants["defaultClient"]),
         default=constants["defaultClient"])
+    parser.add_argument(
+        "-v", "--verbose",
+        help="When present prints player one's standard output to the screen.",
+        const=None,
+        default=FNULL,
+        action="store_const")
     args = parser.parse_args()
     if args.teams < 2:
         sys.stdout.write(parser.format_usage())
@@ -131,7 +136,7 @@ class client_program(object):
         """
         try:
             self.bot = Popen(os.path.join(self.client_path, "run.sh"),
-                                stdout=PLAYERONESTDOUT, cwd=self.client_path)
+                             stdout=parameters.verbose, cwd=self.client_path)
         except OSError as e:
             msg = "the player {} failed to start with error {}".format(
                 self.client_path, e)
@@ -154,7 +159,6 @@ class client_program(object):
 class ClientFailedToRun(Exception):
     def __init__(self, msg):
         self.msg = msg
-
 
     def __str__(self):
         return self.msg

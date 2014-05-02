@@ -46,7 +46,8 @@ class Game(object):
         response = {"status": "Success", "errors": []}
         try:
             if len(data["members"]) > self.team_limit:
-                return (False, {"status": "Failure", "errors": ["Number of team members exceeds team size"]})
+                return (False, {"status": "Failure", "errors": [
+                    "Number of team members exceeds team size"]})
             newTeam = Team(data["team"], data["members"],
                            self.rooms[STARTING_ROOM], self.people, client_id)
         except KeyError:
@@ -54,7 +55,8 @@ class Game(object):
         # TODO: Make all error objects uniform
         self.result_buffer[client_id] = []
         self.teams[client_id] = newTeam
-        response = {"status": "Success", "team": newTeam.get_team_members()}
+        response = {"status": "Success", "team": newTeam.get_team_members(),
+                    "team_name": newTeam.name}
 
         return (True, response)
 
@@ -83,9 +85,9 @@ class Game(object):
     #   A list of errors for invalid actions
     def queue_turn(self, action_list, client_id):
         error_list = []
-        if action_list == None:
+        if action_list is None:
             return [{"error": "no actions",
-                                   "action": None}]
+                     "action": None}]
         for action in action_list:
             try:
                 action_handler.bufferAction(

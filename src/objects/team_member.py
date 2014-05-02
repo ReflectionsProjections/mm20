@@ -20,15 +20,17 @@ class TeamMember(object):
     #   The location (a Room object) that the TeamMember will start in.
     def __init__(self, name, archetype, location, team, person_id):
         constants = config.handle_constants.retrieveConstants(
-        "memberConstants")
+            "memberConstants")
         self.person_id = person_id
         self.name = name
-        self.archetype = TeamMember.Archetypes[archetype]
+        self.stats = TeamMember.Archetypes[archetype]
+        self.archetype = archetype
         self.location = location
         location.addMember(self)
         self.team = team
         self.hunger = constants["hunger"]
-        self.fatigue = constants["fatigue"]  # Start at 8 hours awake (halfway to passed out)
+        self.fatigue = constants["fatigue"]  # Start at 8 hours awake
+            # (halfway to passed out)
         self.asleep = False
         self.acted = None  # acted is the string of the action performed.
                            # (True) or None (False)
@@ -50,7 +52,7 @@ class TeamMember(object):
     #    A dict that reprents the team member
     def output_dict(self):
         my_info = dict(self.__dict__)
-        del my_info["team"]
+        my_info["team"] = self.team.my_id
         my_info["location"] = self.location.name
         return my_info
 
@@ -100,19 +102,19 @@ class TeamMember(object):
         ai = self.team.ai
         effective = self._getEffectiveness()
         if code_type == "refactor":
-            ai.complexity -= effective * self.archetype["refactor"]
+            ai.complexity -= effective * self.stats["refactor"]
             if ai.complexity < ai.implementation * .25:
                 ai.complexity = ai.implementation * .25
             if ai.complexity < 1:
                 ai.complexity = 1.0
         elif code_type == "test":
-            amount = effective * self.archetype["test"] /\
+            amount = effective * self.stats["test"] /\
                 (ai.complexity / 10.0)
             ai.stability += amount / 100.0
             if ai.stability > 1:
                 ai.stability = 1.0
         elif code_type == "implement":
-            amount = effective * self.archetype["codingProwess"] /\
+            amount = effective * self.stats["codingProwess"] /\
                 (ai.complexity / 10.0)
             ai.implementation += amount
             ai.complexity += amount
@@ -125,7 +127,7 @@ class TeamMember(object):
             if ai.optimization < 0.0:
                 ai.optimization = 0.0
         elif code_type == "optimize":
-            amount = effective * self.archetype["optimize"] /\
+            amount = effective * self.stats["optimize"] /\
                 (ai.complexity / 10.0)
             ai.complexity += amount
             ai.optimization += amount
@@ -138,7 +140,7 @@ class TeamMember(object):
     def theorize(self, turn):
         self._can_move()
         effective = self._getEffectiveness()
-        self.team.ai.theory += self.archetype["theorize"] * effective
+        self.team.ai.theory += self.stats["theorize"] * effective
         self.acted = "theorize"
 
     ##  Eat!
@@ -188,7 +190,7 @@ class TeamMember(object):
     ##  Spy!
     def spy(self):
         self._can_move()
-        effective = self._getEffectiveness() * self.archetype["spy"]
+        effective = self._getEffectiveness() * self.stats["spy"]
         amount = 0
         for person in self.location.people:
             if person.team != self.team:
@@ -281,7 +283,8 @@ class TestTeamMember(unittest.TestCase):
         testTeam = TestTeamMember.PseudoTeam()
         testMember = TeamMember("Joe", "Coder", testRoom, testTeam, 0)
         self.assertEqual(testMember.name, "Joe")
-        self.assertEqual(testMember.archetype, TeamMember.Archetypes["Coder"])
+        self.assertEqual(testMember.archetype, "Coder")
+        self.assertEqual(testMember.stats, TeamMember.Archetypes["Coder"])
         self.assertEqual(testMember.location, testRoom)
         self.assertEqual(testMember.team, testTeam)
 
