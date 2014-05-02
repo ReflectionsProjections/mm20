@@ -13,6 +13,7 @@ constants = config.handle_constants.retrieveConstants("serverDefaults")
 parameters = None
 client_list = list()
 
+
 def launch_clients():
     if parameters.client:
         numberOfClients = len(parameters.client)
@@ -20,14 +21,13 @@ def launch_clients():
             launch_client(client)
     else:
         numberOfClients = 0
-    for x in xrange(numberOfClients, parameters.players):
-        launch_client(parameters.defaultClient)
+    for x in xrange(numberOfClients, parameters.teams):
+        launch_client(os.getcwd() + "/" + parameters.defaultClient)
 
 
 def launch_client(client):
         c = client_program(client)
         c.run()
-
 
 
 def parse_args():
@@ -51,8 +51,8 @@ def parse_args():
         "Defaults to {0}".format(constants["log"]),
         default=constants["log"])
     parser.add_argument(
-        "-p", "--players",
-        help="Specifies the number of players. Defaults to {0}."
+        "-t", "--teams",
+        help="Specifies the number of teams. Defaults to {0}."
         .format(constants["players"]),
         default=constants["players"],
         type=int)
@@ -69,12 +69,12 @@ def parse_args():
         "are given. Defaults to {0}".format(constants["defaultClient"]),
         default=constants["defaultClient"])
     args = parser.parse_args()
-    if args.players < 2:
+    if args.teams < 2:
         sys.stdout.write(parser.format_usage())
         print "{0}: error: Cannot run with less than two players".format(
             parser.prog)
         exit(1)
-    if args.client and len(args.client) > args.players:
+    if args.client and len(args.client) > args.teams:
         sys.stdout.write(parser.format_usage())
         print "{0}: error: More clients specified than players".format(
             parser.prog)
@@ -92,14 +92,14 @@ class FileLogger(object):
     #   The stuff to be printed
     def print_stuff(self, stuff):
         with open(self.file, 'a') as f:
-            f.write(stuff)
+            f.write(str(stuff) + '\n')
 
 
 def main():
     global parameters
     parameters = parse_args()
     sys.stdout.write("Creating server with {0} players, ".format(
-        parameters.players))
+        parameters.teams))
     print "and {0} as the map\n".format(parameters.map)
     print "Running server on port {0}\n".format(parameters.port)
     print "Writing log to {0}".format(parameters.log)
@@ -108,7 +108,7 @@ def main():
         pass
     fileLog = FileLogger(parameters.log)
 
-    serv = MMServer(parameters.players,
+    serv = MMServer(parameters.teams,
                     game.Game(parameters.map),
                     logger=fileLog)
     serv.run(parameters.port, launch_clients)
@@ -119,38 +119,38 @@ class client_program(object):
     This object holds and manages the prosses for the
     connecting teams
     """
-    
+
     def __init__(self, client_path):
         """
         path of the client to run
         """
         self.client_path = client_path
-        
+
     def run(self):
         """
         """
         try:
-            self.bot = Popen(os.path.join(self.client_path, "run.sh"), 
+            self.bot = Popen(os.path.join(self.client_path, "run.sh"),
                                 stdout=PLAYERONESTDOUT, cwd=self.client_path)
         except OSError as e:
             msg = "the player {} failed to start with error {}".format(
                 self.client_path, e)
             print msg
             raise ClientFailedToRun(msg)
-        
+
     def kill(self):
         if not self.bot.poll():
             try:
                 self.bot.kill()
             except OSError:
                 pass
-            
+
     def stop(self):
         """
         """
         self.bot.terminate()
-        
-            
+
+
 class ClientFailedToRun(Exception):
     def __init__(self, msg):
         self.msg = msg
@@ -159,6 +159,6 @@ class ClientFailedToRun(Exception):
     def __str__(self):
         return self.msg
 
-        
+
 if __name__ == "__main__":
     main()
