@@ -83,6 +83,9 @@ class Game(object):
     #   A list of errors for invalid actions
     def queue_turn(self, action_list, client_id):
         error_list = []
+        if action_list == None:
+            return [{"error": "no actions",
+                                   "action": None}]
         for action in action_list:
             try:
                 action_handler.bufferAction(

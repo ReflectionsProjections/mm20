@@ -2,6 +2,42 @@
 import socket
 import json
 
+def updateMembers(members, value):
+    if members == None:
+        members = {}
+        for person in value["team"]:
+            members[person["person_id"]]=person
+    if "map" in value:
+        for room in value["map"]:
+            for person in room["peopleInRoom"]:
+                if person["person_id"] in members:
+                    members[person["person_id"]] = person
+    return members
+
+def setActions(members, value):
+    actions = []
+    for m_id, m in members.iteritems():
+        act = {}
+        act["member"] = m["person_id"]
+        if "messages" in value:
+            for message in value["messages"]:
+                if message["success"] == False and message["reason"] == "HUNGRY":
+                    act["action"] = "eat"
+        if "action" not in act:
+            if m["hunger"] > 75:
+                act["action"] = "eat"
+            if m["archetype"]["theorize"] == 10:
+                act["action"] = "theorize"
+            elif m["archetype"]["test"] == 10:
+                act["action"] = "code"
+                act["type"] = "test"
+            else:
+                act["action"] = "code"
+                act["type"] = "implement"
+        actions.append(act)
+    return actions
+
+
 HOST = 'localhost'
 PORT = 8080
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,28 +54,8 @@ while len(data) > 0 and game_running:
         if 'winner' in value:
             game_running = False
         else:
-            if members == None:
-                members = []
-                for person in value["team"]:
-                    members.append(person)
-            actions = []
-            for m in members:
-                act = {}
-                act["member"] = m["person_id"]
-                if "messages" in value:
-                    for message in value["messages"]:
-                        if message["success"] == False and message["reason"] == "HUNGRY":
-                            act["action"] = "eat"
-                if "action" not in act:
-                    if m["archetype"]["theorize"] == 10:
-                        act["action"] = "theorize"
-                    elif m["archetype"]["test"] == 10:
-                        act["action"] = "code"
-                        act["type"] = "test"
-                    else:
-                        act["action"] = "code"
-                        act["type"] = "implement"
-                actions.append(act)
+            members = updateMembers(members, value)
+            actions = setActions(members, value)
             s.sendall(json.dumps(actions))
             data = s.recv(1024)
     except ValueError:
