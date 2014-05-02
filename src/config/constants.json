@@ -21,7 +21,7 @@
     "initialConnectTime": 1,
     "maxDataSize": 1024,
     "defaultClient": "../test-clients/python/",
-    "log": "a.out"
+    "log": "serverlog.json"
   },
   "actions": {
     "validActions": [

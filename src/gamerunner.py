@@ -47,7 +47,8 @@ def parse_args():
     parser.add_argument(
         "-l", "--log",
         help="Specifies a log file where the game log will be written. " +
-        "Defaults to {0}".format(constants["log"]),
+        "For example, ./gamerunner.py --log BUTT.out, Defaults to {0}".
+        format(constants["log"]),
         default=constants["log"])
     parser.add_argument(
         "-t", "--teams",

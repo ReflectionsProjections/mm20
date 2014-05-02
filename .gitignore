@@ -60,4 +60,4 @@ latex
 *.sublime-workspace
 
 # Default log file
-a.out
+serverlog.json
