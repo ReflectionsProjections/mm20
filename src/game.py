@@ -3,8 +3,6 @@ import map_functions
 import action_handler
 import config.handle_constants
 
-STARTING_ROOM = "72 0 255 255"  # For testing purposes only
-
 
 ## Holds the gamestate and represents the game to the server
 class Game(object):
@@ -25,6 +23,7 @@ class Game(object):
         self.rooms = map_functions.map_reader(map_file)
         self.turn = 0
         defaults = config.handle_constants.retrieveConstants('generalInfo')
+        self.starting_room = defaults["STARTROOM"]
         self.turn_limit = defaults["TICKSINHOUR"] * 24
         self.unoptimized_weight = defaults["UNOPTWEIGHT"]
         self.optimized_weight = defaults["OPTWEIGHT"]
@@ -49,7 +48,7 @@ class Game(object):
                 return (False, {"status": "Failure", "errors": [
                     "Number of team members exceeds team size"]})
             newTeam = Team(data["team"], data["members"],
-                           self.rooms[STARTING_ROOM], self.people, client_id)
+                           self.rooms[self.starting_room], self.people, client_id)
         except KeyError:
             return (False, {"status": "Failure", "errors": ["KeyError"]})
         # TODO: Make all error objects uniform
