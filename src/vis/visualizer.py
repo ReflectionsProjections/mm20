@@ -4,20 +4,8 @@ import os
 import config.handle_constants
 
 class Visualizer( object ):
-    SCREEN_WIDTH = 1300
-    SCREEN_HEIGHT = 700
 
-    MAX_FPS = 60
-
-    GameClock = None
-
-    background = None
-
-    TITLE = "Visualizer"
-
-    running = True
-
-    def __init__(self):
+    def __init__(self, rooms=None):
         self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
         self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
@@ -34,11 +22,11 @@ class Visualizer( object ):
         image = pygame.image.load(config.handle_constants.retrieveConstants("serverDefaults")["map"]).convert()
         self.background = pygame.transform.scale(image,(self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
 
-    def main(self):
+    def run_from_file(self, file_name=""):
         while(self.running):
             self.frame()
 
-    def frame(self):
+    def frame(self, turn=None):
         self.step()
         self.draw()
         self.GameClock.tick(self.MAX_FPS)
@@ -58,5 +46,5 @@ class Visualizer( object ):
 
 if __name__ == "__main__":
     vis = Visualizer()
-    vis.main()
+    vis.run_from_file()
 
