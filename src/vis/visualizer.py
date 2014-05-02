@@ -27,7 +27,6 @@ class Visualizer( object ):
             self.frame()
 
     def frame(self, turn=None):
-        self.step()
         self.draw()
         self.GameClock.tick(self.MAX_FPS)
         for event in pygame.event.get():
@@ -35,9 +34,6 @@ class Visualizer( object ):
                     pygame.quit()
                     self.running = False
 
-
-    def step(self):
-        pass
 
     def draw(self):
         self.ScreenSurface.blit(self.background, (0, 0))
