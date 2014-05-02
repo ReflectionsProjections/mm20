@@ -7,6 +7,7 @@ import game
 import sys
 import os
 import pickle
+import vis.visualizer
 
 
 FNULL = open(os.devnull, 'w')
@@ -94,13 +95,16 @@ def parse_args():
 class FileLogger(object):
     def __init__(self, fileName):
         self.file = fileName
+        self.vis = False
 
     ## The function that logs will be sent to
     # @param stuff
     #   The stuff to be printed
     def print_stuff(self, stuff):
         with open(self.file, 'a') as f:
-            f.write(str(stuff) + '\n')
+            f.write(stuff + '\n')
+        if self.vis:
+            self.vis.frame(stuff)
 
 
 def main():
@@ -125,6 +129,8 @@ def main():
         with open(map_cache_str, 'w') as f:
             f.write(rooms_str)
         rooms = pickle.loads(rooms_str)
+    if True:
+        fileLog.vis = vis.visualizer.Visualizer(rooms)
     serv = MMServer(parameters.teams,
                     my_game,
                     logger=fileLog)
