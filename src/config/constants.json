@@ -8,7 +8,9 @@
     "OPTWEIGHT": 0.8
   },
   "memberConstants": {
-    "effectiveness_drops": 60.0
+    "effectiveness_drops": 60.0,
+    "hunger": 0.0,
+    "fatigue": 50.0
   },
   "serverDefaults": {
     "players": 2,
