@@ -2,11 +2,12 @@
 import socket
 import json
 
+
 def updateMembers(members, value):
-    if members == None:
+    if members is None:
         members = {}
         for person in value["team"]:
-            members[person["person_id"]]=person
+            members[person["person_id"]] = person
     if "map" in value:
         for room in value["map"]:
             for person in room["peopleInRoom"]:
@@ -14,27 +15,29 @@ def updateMembers(members, value):
                     members[person["person_id"]] = person
     return members
 
+
 #This function determines what actions to be performed each turn
 #
 #Edit this to change the behavior of the client
 #
 #@param members A dictionary of team member's current state indexed by their person_id
-#@param value The dictionary with turn info sent by the server 
+#@param value The dictionary with turn info sent by the server
 def setActions(members, value):
     actions = []
     for m_id, m in members.iteritems():
         act = {}
-        act["member"] = m["person_id"]
+        act["person_id"] = m["person_id"]
         if "messages" in value:
             for message in value["messages"]:
-                if message["success"] == False and message["reason"] == "HUNGRY":
+                if message["success"] is False and\
+                        message["reason"] == "HUNGRY":
                     act["action"] = "eat"
         if "action" not in act:
             if m["hunger"] > 75:
                 act["action"] = "eat"
-            if m["archetype"]["theorize"] == 10:
+            if m["stats"]["theorize"] == 10:
                 act["action"] = "theorize"
-            elif m["archetype"]["test"] == 10:
+            elif m["stats"]["test"] == 10:
                 act["action"] = "code"
                 act["type"] = "test"
             else:
