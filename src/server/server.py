@@ -16,6 +16,24 @@ import game
 
 constants = json.loads(open("config/constants.json").read())["serverDefaults"]
 
+
+class _logger(object):
+    """
+    A simple logger that prints stuff out 
+    """
+    
+    def __init__(self, ):
+        """
+        Does nothing
+        """
+            
+    def print_stuff(self, stuff):
+        """
+        prints stuff
+        """
+        print str(stuff)
+        
+
 class MMServer( object ):
     ##
     #   Constructs the server
@@ -26,10 +44,11 @@ class MMServer( object ):
     #       The amount of time to wait for a player to make their turn
     #   @param maxDataSize
     #      The length in bytes of data received in one call to recv
-    def __init__(self, numPlayers, game, log = constants["log"], timeLimit = constants["time"], maxDataSize = constants["maxDataSize"]):
+    def __init__(self, numPlayers, game, logger=_logger(),
+                 timeLimit=constants["time"], maxDataSize=constants["maxDataSize"]):
         self.maxPlayers = numPlayers
         self.game = game
-        self.log = log
+        self.logger = logger
         self.timeLimit = timeLimit
         self.maxDataSize = maxDataSize
         self.initialTimeLimit = constants["initialConnectTime"]
@@ -37,7 +56,7 @@ class MMServer( object ):
     ##
     #   Runs the game
     #   @param port the port number to wait on
-    def run(self, port, run_when_ready = None):
+    def run(self, port, run_when_ready=None):
         #create an INET, STREAMing socket
         serversocket = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
@@ -52,7 +71,7 @@ class MMServer( object ):
         recval = ["" for i in range(0, self.maxPlayers)]
         forfeit = [False for i in range(0, self.maxPlayers)]
         validTurns = 0
-        print 'connecting ...'
+        self.logger.print_stuff('connecting ...')
         if run_when_ready:
             run_when_ready()
         #Accept connections from correct number of players
@@ -60,7 +79,7 @@ class MMServer( object ):
             (clientsocket, address) = serversocket.accept()
             playerConnections[i] = clientsocket
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
-        print 'connected ...'
+        self.logger.print_stuff('connecting ...')
         #Accept starting connection first
         starting = True
         while starting:
@@ -148,6 +167,8 @@ class MMServer( object ):
 
                 running = self.game.execute_turn()
 
+                # set up a buffer to hold what we need to send players
+                player_output = [None] * self.maxPlayers
                 #Return turn info back to the clients
                 for i in range(0, self.maxPlayers):
                     if not forfeit[i]:
@@ -155,10 +176,14 @@ class MMServer( object ):
                             data = self.game.get_info(i)
                             if running:
                                 data["errors"] = errors[i]
-                            playerConnections[i].sendall(json.dumps(data, ensure_ascii=True))
+                            player_output[i] = json.dumps(
+                                data, ensure_ascii=True)
+                            playerConnections[i].sendall(player_output[i])
                         except IOError:
                             pass
-
+                #log what infomation is sent to the clients
+                self.logger.print_stuff(player_output)
+                
                 #clear turn objects
                 validTurns = 0
                 for i in range(0, self.maxPlayers):
