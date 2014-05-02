@@ -7,6 +7,7 @@
 #   and send a message back to the player to take their next turn.
 #   If a connection is dropped, that player automatically 'forfeits'
 #   When the game ends, the server should send a final status to all players and then shut down gracefully.
+import config.handle_constants
 import sys
 import select
 import socket
@@ -14,25 +15,25 @@ import time
 import json
 import game
 
-constants = json.loads(open("config/constants.json").read())["serverDefaults"]
+constants = config.handle_constants.retrieveConstants("serverDefaults")
 
 
 class _logger(object):
     """
-    A simple logger that prints stuff out 
+    A simple logger that prints stuff out
     """
-    
+
     def __init__(self, ):
         """
         Does nothing
         """
-            
+
     def print_stuff(self, stuff):
         """
         prints stuff
         """
         print str(stuff)
-        
+
 
 class MMServer( object ):
     ##
@@ -183,7 +184,7 @@ class MMServer( object ):
                             pass
                 #log what infomation is sent to the clients
                 self.logger.print_stuff(json.dumps(player_data_for_turn))
-                
+
                 #clear turn objects
                 validTurns = 0
                 for i in range(0, self.maxPlayers):
