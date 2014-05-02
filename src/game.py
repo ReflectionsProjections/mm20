@@ -21,8 +21,11 @@ class Game(object):
     ## Called by the server to have the game set itself up
     # @param map_file
     #   the file in which the map is located
-    def __init__(self, map_file):
-        self.rooms = map_functions.map_reader(map_file)
+    def __init__(self, map_file, rooms=None):
+        if rooms:
+            self.rooms = rooms
+        else:
+            self.rooms = map_functions.map_reader(map_file)
         self.turn = 0
         defaults = config.handle_constants.retrieveConstants('generalInfo')
         self.turn_limit = defaults["TICKSINHOUR"] * 24

@@ -6,6 +6,8 @@ import argparse
 import game
 import sys
 import os
+import pickle
+
 
 FNULL = open(os.devnull, 'w')
 constants = config.handle_constants.retrieveConstants("serverDefaults")
@@ -109,13 +111,22 @@ def main():
     print "and {0} as the map\n".format(parameters.map)
     print "Running server on port {0}\n".format(parameters.port)
     print "Writing log to {0}".format(parameters.log)
-
+    map_cache_str = "map.cache"
     with open(parameters.log, 'w'):
         pass
     fileLog = FileLogger(parameters.log)
-
+    if os.path.isfile(map_cache_str) and True:
+        with open(map_cache_str, 'r') as f:
+            rooms = pickle.load(f)
+        my_game = game.Game(parameters.map, rooms)
+    else:
+        my_game = game.Game(parameters.map)
+        rooms_str = pickle.dumps(my_game.rooms)
+        with open(map_cache_str, 'w') as f:
+            f.write(rooms_str)
+        rooms = pickle.loads(rooms_str)
     serv = MMServer(parameters.teams,
-                    game.Game(parameters.map),
+                    my_game,
                     logger=fileLog)
     serv.run(parameters.port, launch_clients)
 
