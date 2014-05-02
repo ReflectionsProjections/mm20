@@ -13,18 +13,22 @@ def launch_clients():
     if parameters.client:
         numberOfClients = len(parameters.client)
         for client in parameters.client:
-            print client
+            launch_client(client)
         if numberOfClients < parameters.players:
             for x in xrange(numberOfClients, parameters.players):
-                print x
+                launch_client(parameters.defaultClient)
     else:
         for x in xrange(0, parameters.players):
-                print x
+                launch_client(parameters.defaultClient)
+
+
+def launch_client(client):
+    print client
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Launches the server p clients which"
+        description="Launches the server with p clients which "
         + "connect to it.")
     parser.add_argument(
         "-u", "--port",
@@ -50,6 +54,11 @@ def parse_args():
         "client.py -c ../test_clients/java/test_client.jar\n" +
         "Any clients not specified will be replaced by the python test client",
         action="append")
+    parser.add_argument(
+        "-d", "--defaultClient",
+        help="The default client to launch when no specific clients " +
+        "are given. Defaults to {0}".format(constants["defaultClient"]),
+        default=constants["defaultClient"])
     args = parser.parse_args()
     if args.players < 2:
         sys.stdout.write(parser.format_usage())
