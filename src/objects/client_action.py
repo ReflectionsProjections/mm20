@@ -53,7 +53,7 @@ class Action:
     # @param parameters
     #   The parameters needed to move a member
     #   (See the next two parameters)
-    # @param member
+    # @param person_id
     #   The team member to move
     # @param room
     #   The room to move the team member to
@@ -82,7 +82,7 @@ class Action:
     # @param parameters
     #   The parameters necessary to tell a team member to eat food
     #   (See the next parameter)
-    # @param member
+    # @param person_id
     #   The team member that will eat food
     def eat(self, game, parameters):
         response = self._build_response(game, parameters, ['person_id'], "eating")
@@ -101,7 +101,7 @@ class Action:
     # @param parameters
     #   The parameters necessary to tell a team member to fall asleep
     #   (See the next parameter)
-    # @param member
+    # @param person_id
     #   The team member which should fall asleep
     def sleep(self, game, parameters):
         response = self._build_response(game, parameters, ['person_id'],
@@ -121,7 +121,7 @@ class Action:
     # @param parameters
     #   The parameters necessary to tell a team member to code
     #   (See the next two parameters)
-    # @param member
+    # @param person_id
     #   The team member which should code
     # @param type
     #   The type of coding the team member should perform
@@ -145,7 +145,7 @@ class Action:
     # @param parameters
     #   The parameters necessary to have a team member theorize
     #   (See the next parameter)
-    # @param member
+    # @param person_id
     #   The member to tell to theorize
     def theorize(self, game, parameters):
         response = self._build_response(game, parameters, ['person_id'],
@@ -168,7 +168,7 @@ class Action:
     #   The parameters necessary to have your team member distract
     #   another person
     #   (See the next two parameters)
-    # @param member
+    # @param person_id
     #   Your team member distracting another person
     # @param victim
     #   The person your team member is distracting
@@ -191,7 +191,7 @@ class Action:
     # @param parameters
     #   The parameters necessary to have a team member to wake up a person
     #   (See the next two parameters)
-    # @param member
+    # @param person_id
     #   Your team member waking up another person
     # @param victim
     #   The person being awoken
@@ -214,10 +214,11 @@ class Action:
     # @param parameters
     #   The parameters necessary to have your team member spy on others
     #   (See the next parameter)
-    # @param member
+    # @param person_id
     #   The team member which will be doing the spying
     def spy(self, game, parameters):
-        response = self._build_response(game, parameters, ['person_id'], "spying")
+        response = self._build_response(game, parameters, ['person_id'],
+                                        "spying")
         if response['success'] is True:
             try:
                 game.people[parameters['person_id']].theorize()
@@ -259,21 +260,23 @@ class Action:
         else:
             response['reason'] = 'SUCCESS'
             if 'person_id' in parameters:
-                response['message'] = "Member {0} is "\
-                    .format(parameters['person_id']) + message
+                response['message'] = "{0} is "\
+                    .format(
+                        game.people[parameters['person_id']].name) + message
             else:
                 response['message'] = message
         if 'person_id' in parameters:
             if not isinstance(parameters['person_id'], int)\
                     or parameters['person_id'] > len(game.people):
                 response['success'] = False
-                response['message'] = "KeyError: {0} not a valid member"\
+                response['message'] =\
+                    "KeyError: {0} not a valid team member id"\
                     .format(parameters['person_id'])
                 response['reason'] = 'KEYERROR'
             elif game.people[parameters['person_id']].team.my_id != self.owner:
                 response['success'] = False
                 response['message'] = "{0} is not a member of your team"\
-                    .format(parameters['person_id'])
+                    .format(game.people[parameters['person_id']].name)
                 response['reason'] = 'NOTTEAMMEMBER'
 
         return response
