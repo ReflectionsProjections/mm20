@@ -1,13 +1,17 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 from server.server import MMServer
+from subprocess import Popen
 import config.handle_constants
 import argparse
 import game
 import sys
+import os
 
+FNULL = open(os.devnull, 'w')
+PLAYERONESTDOUT = FNULL
 constants = config.handle_constants.retrieveConstants("serverDefaults")
 parameters = None
-
+client_list = list()
 
 def launch_clients():
     if parameters.client:
@@ -23,7 +27,9 @@ def launch_clients():
 
 
 def launch_client(client):
-    print client
+        c = client_program(client)
+        c.run()
+
 
 
 def parse_args():
@@ -110,5 +116,51 @@ def main():
     serv.run(parameters.port, launch_clients)
 
 
+class client_program(object):
+    """
+    This object holds and manages the prosses for the
+    connecting teams
+    """
+    
+    def __init__(self, client_path):
+        """
+        path of the client to run
+        """
+        self.client_path = client_path
+        
+    def run(self):
+        """
+        """
+        try:
+            self.bot = Popen(os.path.join(self.client_path, "run.sh"), 
+                                stdout=PLAYERONESTDOUT, cwd=self.client_path)
+        except OSError as e:
+            msg = "the player {} failed to start with error {}".format(
+                self.client_path, e)
+            print msg
+            raise ClientFailedToRun(msg)
+        
+    def kill(self):
+        if not self.bot.poll():
+            try:
+                self.bot.kill()
+            except OSError:
+                pass
+            
+    def stop(self):
+        """
+        """
+        self.bot.terminate()
+        
+            
+class ClientFailedToRun(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+
+    def __str__(self):
+        return self.msg
+
+        
 if __name__ == "__main__":
     main()
