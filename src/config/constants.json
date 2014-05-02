@@ -5,7 +5,8 @@
     "TICKSINHOUR": 4,
     "TEAMSIZE": 4,
     "UNOPTWEIGHT": 0.2,
-    "OPTWEIGHT": 0.8
+    "OPTWEIGHT": 0.8,
+    "STARTROOM": "72 0 255 255"
   },
   "memberConstants": {
     "effectiveness_drops": 60.0,
@@ -22,6 +23,12 @@
     "maxDataSize": 1024,
     "defaultClient": "../test-clients/python/",
     "log": "serverlog.json"
+  },
+  "visualizerDefaults": {
+    "SCREEN_WIDTH": 1300,
+    "SCREEN_HEIGHT": 700,
+    "MAX_FPS": 60,
+    "TITLE": "Visualizer"
   },
   "actions": {
     "validActions": [

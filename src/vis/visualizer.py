@@ -1,52 +1,62 @@
 import pygame
 import sys
 import os
+import config.handle_constants
+
+class Visualizer( object ):
+    SCREEN_WIDTH = 1300
+    SCREEN_HEIGHT = 700
+
+    MAX_FPS = 60
+
+    GameClock = None
+
+    background = None
+
+    TITLE = "Visualizer"
+
+    running = True
+
+    def __init__(self):
+        self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
+        self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
+        self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
+        self.MAX_FPS = self.constants["MAX_FPS"]
+        self.TITLE = self.constants["TITLE"]
+        self.running = True
+        pygame.init()
+        self.setup()
+
+    def setup(self):
+        pygame.display.set_caption(self.TITLE)
+        self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        self.GameClock = pygame.time.Clock()
+        image = pygame.image.load(config.handle_constants.retrieveConstants("serverDefaults")["map"]).convert()
+        self.background = pygame.transform.scale(image,(self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+
+    def main(self):
+        while(self.running):
+            self.frame()
+
+    def frame(self):
+        self.step()
+        self.draw()
+        self.GameClock.tick(self.MAX_FPS)
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    self.running = False
 
 
-SCREEN_WIDTH = 1300
-SCREEN_HEIGHT = 700
+    def step(self):
+        pass
 
-MAX_FPS = 60
-
-GameClock = None
-
-TITLE = "Visualizer"
-
-running = True
-
-def setup():
-    pygame.display.set_caption(TITLE)
-    global ScreenSurface
-    ScreenSurface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    global GameClock
-    GameClock = pygame.time.Clock()
-
-def main():
-    while(running):
-        frame()
-
-def frame():
-    step()
-    draw()
-    GameClock.tick(MAX_FPS)
-    for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-    frame()
+    def draw(self):
+        self.ScreenSurface.blit(self.background, (0, 0))
+        pygame.display.flip()
 
 
-def step():
-    pass
-
-def draw():
-    image = pygame.image.load("siebel-basement-map.bmp").convert()
-    image = pygame.transform.scale(image,(SCREEN_WIDTH, SCREEN_HEIGHT))
-    ScreenSurface.blit(image, (0, 0))
-    pygame.display.flip()
-
-
-pygame.init()
-setup()
 if __name__ == "__main__":
-    main()
+    vis = Visualizer()
+    vis.main()
 
