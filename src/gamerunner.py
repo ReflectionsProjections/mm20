@@ -42,6 +42,11 @@ def parse_args():
         "Defaults to {0}".format(constants["map"]),
         default=constants["map"])
     parser.add_argument(
+        "-l", "--log",
+        help="Specifies a log file where the game log will be written. " +
+        "Defaults to {0}".format(constants["log"]),
+        default=constants["log"])
+    parser.add_argument(
         "-p", "--players",
         help="Specifies the number of players. Defaults to {0}."
         .format(constants["players"]),
@@ -50,9 +55,9 @@ def parse_args():
     parser.add_argument(
         "-c", "--client",
         help="Signifies this client to be run. " +
-        "As an example ./gamerunner.py -p 2 -c ../test-clients/python/test_" +
-        "client.py -c ../test_clients/java/test_client.jar\n" +
-        "Any clients not specified will be replaced by the python test client",
+        "As an example ./gamerunner.py -p 3 -c myClient.py -c jimsClient.py " +
+        "The gamerunner will run a number of test clients (which can be " +
+        "specified with -d) equal to players - specified clients",
         action="append")
     parser.add_argument(
         "-d", "--defaultClient",
@@ -73,6 +78,19 @@ def parse_args():
     return args
 
 
+## A simple logger that writes things to a file
+class FileLogger(object):
+    def __init__(self, fileName):
+        self.file = fileName
+
+    ## The function that logs will be sent to
+    # @param stuff
+    #   The stuff to be printed
+    def print_stuff(self, stuff):
+        with open(self.file, 'a') as f:
+            f.write(stuff)
+
+
 def main():
     global parameters
     parameters = parse_args()
@@ -80,9 +98,15 @@ def main():
         parameters.players))
     print "and {0} as the map\n".format(parameters.map)
     print "Running server on port {0}\n".format(parameters.port)
+    print "Writing log to {0}".format(parameters.log)
+
+    with open(parameters.log, 'w'):
+        pass
+    fileLog = FileLogger(parameters.log)
 
     serv = MMServer(parameters.players,
-                    game.Game(parameters.map))
+                    game.Game(parameters.map),
+                    logger=fileLog)
     serv.run(parameters.port, launch_clients)
 
 

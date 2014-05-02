@@ -58,3 +58,6 @@ latex
 # Sublime
 *.sublime-project
 *.sublime-workspace
+
+# Default log file
+a.out
