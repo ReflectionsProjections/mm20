@@ -24,7 +24,8 @@ def launch_clients():
     else:
         numberOfClients = 0
     for x in xrange(numberOfClients, parameters.teams):
-        launch_client(os.getcwd() + "/" + parameters.defaultClient)
+        print parameters.defaultClient
+        launch_client(os.path.join(os.getcwd(), parameters.defaultClient))
 
 
 def launch_client(client):
@@ -66,11 +67,12 @@ def parse_args():
         "The gamerunner will run a number of test clients (which can be " +
         "specified with -d) equal to players - specified clients",
         action="append")
+
     parser.add_argument(
         "-d", "--defaultClient",
         help="The default client to launch when no specific clients " +
         "are given. Defaults to {0}".format(constants["defaultClient"]),
-        default=constants["defaultClient"])
+        default=os.path.join(*constants["defaultClient"].split("/")))
     parser.add_argument(
         "-v", "--verbose",
         help="When present prints player one's standard output to the screen.",
