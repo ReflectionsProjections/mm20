@@ -80,7 +80,7 @@ class MMServer( object ):
             (clientsocket, address) = serversocket.accept()
             playerConnections[i] = clientsocket
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
-        print 'connecting ...'
+        print 'sockets connected ...'
         #Accept starting connection first
         starting = True
         while starting:
@@ -126,7 +126,7 @@ class MMServer( object ):
                         playerConnections[i].sendall(json.dumps(turnObjects[i], ensure_ascii=True)+"\n")
                     except IOError:
                         pass
-
+        self.logger.print_stuff(json.dumps(turnObjects))
         validTurns = 0
         for i in range(0, self.maxPlayers):
             turnObjects[i]=None

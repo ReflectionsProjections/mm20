@@ -74,9 +74,9 @@ class Visualizer( object ):
             self.game_done = True
             self.game_result = turn
             return
-        #make the need structures
-        self.ai = [None] * len(turn)
-        self.people = [VisPerson for _ in xrange (len(turn) * 3)]
+        if "team_name" in turn[0]:
+            self.add_teams(turn)
+
         #reshape data
         for i, player in enumerate(turn):
             self.ai[i] = player["aiStatus"]
@@ -89,7 +89,22 @@ class Visualizer( object ):
                             person["room"], pos,
                             person["acted"] or
                             ("asleep" if person["sleep"] else None),
-                            person["team"])
+                            person["team"], person["name"])
+                        
+    def add_teams(self, teams):
+        """
+        set up the visualizer to view the teams
+        """
+        self.ai = [None] * len(teams)
+        self.team_names = list(self.ai)
+        number_of_people = 0
+        
+        for i, player in enumerate(teams):
+            self.team_names[i] = player["team_name"]
+            number_of_people += len(player["team"])
+        self.people = [VisPerson for _ in xrange(number_of_people)]
+       
+            
 
             
                 
@@ -98,7 +113,7 @@ class VisPerson(object):
     A object that will hold the data for a person to be drawn
     """
     
-    def set_data(self, room, pos, act, team):
+    def set_data(self, room, pos, act, team, name):
         """
         Fields to be used
         """
@@ -106,6 +121,7 @@ class VisPerson(object):
         self.pos = pos                  # (x, y) coordinats
         self.action = act
         self.team = team
+        self.name = name
         
         
 
