@@ -65,6 +65,7 @@ class Visualizer( object ):
             color = self.colors[-1]
             if p.team < len(self.colors):
                 color = self.colors[p.team]
+            pygame.draw.circle(self.ScreenSurface, (0,0,0), p.pos, 5, 0)
             pygame.draw.circle(self.ScreenSurface, color, p.pos, 4, 0)
 
         #Draw AI info
@@ -72,9 +73,8 @@ class Visualizer( object ):
         aifont = pygame.font.SysFont("monospace", 20)
         x_pos = 0
         for i in range(len(self.ai)):
-            if i >= len(self.colors):
-                color = self.colors[len(self.colors)-1]
-            else:
+            color = self.colors[-1]
+            if i < len(self.colors):
                 color = self.colors[i]
             label = namefont.render(self.team_names[i], 2, color)
             self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
