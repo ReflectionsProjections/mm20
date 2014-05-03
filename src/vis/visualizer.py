@@ -18,6 +18,7 @@ class Visualizer( object ):
         self.rooms = rooms
         self.people = list()
         self.ai = list()
+        self.team_names = list()
         self.messages = list()
         self.game_done = False
         self.game_result = None
@@ -66,7 +67,7 @@ class Visualizer( object ):
         aifont = pygame.font.SysFont("monospace", 20)
         x_pos = 0
         for i in range(len(self.ai)):
-            label = namefont.render("Team"+str(i), 2, self.colors[i])
+            label = namefont.render(self.team_names[i], 2, self.colors[i])
             self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
             x_pos +=40
             for key, val in self.ai[i].iteritems():
@@ -81,7 +82,7 @@ class Visualizer( object ):
             for i in range(len(self.game_result)):
                 if self.game_result[i]["winner"]:
                     gameoverfont = pygame.font.SysFont("monospace", 100)
-                    label = gameoverfont.render("TEAM" + str(i)+ " WINS!", 40, (12, 12, 12))
+                    label = gameoverfont.render(self.team_names[i]+ " WINS!", 40, (12, 12, 12))
                     self.ScreenSurface.blit(label, (0, 0))
 
         #flip display
