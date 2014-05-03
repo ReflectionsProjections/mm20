@@ -1,6 +1,4 @@
 import pygame
-import sys
-import os
 import config.handle_constants
 
 class Visualizer( object ):
@@ -49,7 +47,11 @@ class Visualizer( object ):
         self.ScreenSurface.blit(self.background, (0, 0))
 
         #Draw people in rooms
-        pygame.draw.circle(self.ScreenSurface, self.colors[0], (20,20), 4, 0)
+        for p in self.people:
+            color = self.colors[-1]
+            if p["team"] < len(colors):
+                color = self.colors[p["team"]]
+            pygame.draw.circle(self.ScreenSurface, color, p["pos"], 4, 0)
 
         #Draw AI info
 

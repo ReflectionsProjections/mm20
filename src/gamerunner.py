@@ -62,7 +62,7 @@ def parse_args():
     parser.add_argument(
         "-c", "--client",
         help="Signifies this client to be run. " +
-        "As an example ./gamerunner.py -p 3 -c myClient.py -c jimsClient.py " +
+        "As an example ./gamerunner.py -p 3 -c myClient -c test_clients/python " +
         "The gamerunner will run a number of test clients (which can be " +
         "specified with -d) equal to players - specified clients",
         action="append")
@@ -86,8 +86,8 @@ def parse_args():
         action="store_const")
     parser.add_argument(
         "-C", "--cached-map",
-        help="Speeds up the lunch time of the server by using a cached map." +
-        "If you have having any sort of problem try lunching with out this!",
+        help="Speeds up the launch time of the server by using a cached map." +
+        "If you are having any sort of problem try launching without this!",
         const=True,
         default=False,
         action="store_const")
