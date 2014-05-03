@@ -29,6 +29,7 @@
     "SCREEN_HEIGHT": 700,
     "MAX_FPS": 60,
     "TITLE": "Visualizer",
+    "STATSBARWIDTH": 200,
     "TEAMCOLORS": [
       [255, 0, 0],
       [0, 255, 0],
