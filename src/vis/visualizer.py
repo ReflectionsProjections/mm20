@@ -3,6 +3,8 @@ import config.handle_constants
 import json
 import random
 
+NO_CHAIR = (-100, -100)
+
 class Visualizer( object ):
 
     def __init__(self, rooms=None):
@@ -16,6 +18,9 @@ class Visualizer( object ):
         for i in range(len(self.colors)):
             self.colors[i] = tuple(self.colors[i])
         self.rooms = rooms
+        # suffule seat assinment
+        for r in self.rooms.values():
+            random.shuffle(r.chairs)
         self.people = list()
         self.ai = list()
         self.team_names = list()
@@ -103,8 +108,7 @@ class Visualizer( object ):
             for room in player["map"]:
                 for person in room["peopleInRoom"]:
                     if person["team"] == i:
-                        pos = random.choice(
-                            self.rooms[person["location"]].chairs)
+
                         self.people[person["person_id"]].set_data(
                             person["location"],
                             person["acted"] or
@@ -150,8 +154,13 @@ class VisPerson(object):
         Fields to be used
         """
         if not self.room or not self.pos or self.room != room:
-            self.pos = random.choice(
-                visualizer.rooms[room].chairs)  # (x, y) coordinats
+            if self.room and self.room is not NO_CHAIR:
+                visualizer.rooms[self.room].chairs.append(self.pos)
+            chair_list = visualizer.rooms[room].chairs
+            if chair_list:
+                self.pos = chair_list.pop()  # (x, y) coordinats
+            else:
+                self.pos = NO_CHAIR
         self.room = room
         self.action = act
         self.team = team
