@@ -15,6 +15,7 @@ class Visualizer( object ):
         self.colors = self.constants["TEAMCOLORS"]
         for i in range(len(self.colors)):
             self.colors[i] = tuple(self.colors[i])
+        self.rooms = rooms
         pygame.init()
         self.setup()
 
@@ -31,6 +32,7 @@ class Visualizer( object ):
 
     def frame(self, turn=None):
         if self.running:
+            self.update_state(turn)
             self.draw()
             self.GameClock.tick(self.MAX_FPS)
             for event in pygame.event.get():
@@ -39,11 +41,22 @@ class Visualizer( object ):
                         self.running = False
 
 
-    def draw(self):
+    def draw(self, ai = None):
+        #Draw background
         self.ScreenSurface.blit(self.background, (0, 0))
+
+        #Draw people in rooms
         pygame.draw.circle(self.ScreenSurface, self.colors[0], (20,20), 4, 0)
+
+        #Draw AI info
+
+        #Draw actions (move animations? failure prompts?)
+
+        #flip display
         pygame.display.flip()
 
+    def update_state(self, turn):
+        pass
 
 if __name__ == "__main__":
     vis = Visualizer()
