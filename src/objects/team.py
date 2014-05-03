@@ -20,7 +20,8 @@ class Team(object):
         self.my_id = my_id
         self.members = dict()
         for member in members:
-            newMember = team_member.TeamMember(member["name"], member["class"],
+            newMember = team_member.TeamMember(member["name"],
+                                               member["archetype"],
                                                startingLocation, self,
                                                len(people))
             self.members[member["name"]] = newMember
