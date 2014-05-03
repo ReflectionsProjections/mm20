@@ -111,7 +111,7 @@ class Game(object):
             win = False
             if winner == client_id:
                 win = True
-            return {"winner": win}
+            return {"winner": win, "score": self.calc_score(client_id)}
         response = {"aiStats": self.teams[client_id].ai.output_dict(),
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.result_buffer[client_id]}
