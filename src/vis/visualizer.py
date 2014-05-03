@@ -62,11 +62,11 @@ class Visualizer( object ):
             pygame.draw.circle(self.ScreenSurface, color, p.pos, 4, 0)
 
         #Draw AI info
-        namefont = pygame.font.SysFont("monospace", 20)
+        namefont = pygame.font.SysFont("monospace", 40)
         aifont = pygame.font.SysFont("monospace", 20)
         x_pos = 0
         for i in range(len(self.ai)):
-            label = namefont.render("Team"+str(i), 1, self.colors[i])
+            label = namefont.render("Team"+str(i), 2, self.colors[i])
             self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
             x_pos +=40
             for key, val in self.ai[i].iteritems():
@@ -78,9 +78,11 @@ class Visualizer( object ):
 
         #If game is over, do stuff
         if self.game_done:
-            gameoverfont = pygame.font.SysFont("monospace", 200)
-            label = namefont.render("GAME OVER!", 1, (255, 255, 255))
-            self.ScreenSurface.blit(label, (0, 0))
+            for i in range(len(self.game_result)):
+                if self.game_result[i]["winner"]:
+                    gameoverfont = pygame.font.SysFont("monospace", 100)
+                    label = gameoverfont.render("TEAM" + str(i)+ " WINS!", 40, (12, 12, 12))
+                    self.ScreenSurface.blit(label, (0, 0))
 
         #flip display
         pygame.display.flip()
