@@ -18,7 +18,7 @@ colorDict = {
 
 # Furniture
 roomObjectColorDict = {
-    "0 1 2 255":          "chair",
+    "125 125 2 255":          "chair",
     "4 5 6 255":          "desk",
     "255 180 0 255":    "door",
     "3 2 1 255":          "snacktable"
@@ -59,7 +59,6 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms.append(room)
     for i in range(0, len(rooms)):
         rooms[i].connectedRooms = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
-        print rooms[i].name
 
         # Room objects
         rooms[i].chairs = [(r[0], r[1])      for r in roomObjects[rooms[i].name] if r[2] == "chair"]
@@ -68,6 +67,7 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
         if rooms[i].snacktables:
             rooms[i].addResource('FOOD')  # For now, this is how we are treating food
+        print "room {0} has chairs {1}".format(rooms[i].name, rooms[i].chairs)
 
     # Done!
     """

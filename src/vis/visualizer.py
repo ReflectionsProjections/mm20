@@ -37,13 +37,16 @@ class Visualizer( object ):
 
     def frame(self, turn=None):
         if self.running:
-            self.update_state(json.loads(turn))
-            self.draw()
-            self.GameClock.tick(self.MAX_FPS)
-            for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        self.running = False
+            d = self.update_state(json.loads(turn))
+            while True and d:
+                self.draw()
+                self.GameClock.tick(self.MAX_FPS)
+                for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            self.running = False
+                if not self.game_done or not self.running:
+                    break
 
 
     def draw(self):
@@ -54,16 +57,32 @@ class Visualizer( object ):
         #Draw people in rooms
         for p in self.people:
             color = self.colors[-1]
-            if p["team"] < len(colors):
-                color = self.colors[p["team"]]
-            pygame.draw.circle(self.ScreenSurface, color, p["pos"], 4, 0)
+            if p.team < len(self.colors):
+                color = self.colors[p.team]
+            pygame.draw.circle(self.ScreenSurface, color, p.pos, 4, 0)
 
         #Draw AI info
-        myfont = pygame.font.SysFont("monospace", 40)
-        label = myfont.render("AI!", 1, (255,255,255))
-        self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], 0))
+        namefont = pygame.font.SysFont("monospace", 40)
+        aifont = pygame.font.SysFont("monospace", 20)
+        x_pos = 0
+        for i in range(len(self.ai)):
+            label = namefont.render("Team"+str(i), 2, self.colors[i])
+            self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
+            x_pos +=40
+            for key, val in self.ai[i].iteritems():
+                label = aifont.render(key+": "+str(val), 1, (255,255,255))
+                self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
+                x_pos +=20
 
         #Draw actions (move animations? failure prompts?)
+
+        #If game is over, do stuff
+        if self.game_done:
+            for i in range(len(self.game_result)):
+                if self.game_result[i]["winner"]:
+                    gameoverfont = pygame.font.SysFont("monospace", 100)
+                    label = gameoverfont.render("TEAM" + str(i)+ " WINS!", 40, (12, 12, 12))
+                    self.ScreenSurface.blit(label, (0, 0))
 
         #flip display
         pygame.display.flip()
@@ -73,23 +92,24 @@ class Visualizer( object ):
         if "winner" in turn[0]:
             self.game_done = True
             self.game_result = turn
-            return
+            return True
         if "team_name" in turn[0]:
             self.add_teams(turn)
-
+            return False
         #reshape data
         for i, player in enumerate(turn):
-            self.ai[i] = player["aiStatus"]
+            self.ai[i] = player["aiStats"]
             for room in player["map"]:
                 for person in room["peopleInRoom"]:
                     if person["team"] == i:
                         pos = random.choice(
                             self.rooms[person["location"]].chairs)
                         self.people[person["person_id"]].set_data(
-                            person["room"], pos,
+                            person["location"], pos,
                             person["acted"] or
-                            ("asleep" if person["sleep"] else None),
+                            ("asleep" if person["asleep"] else None),
                             person["team"], person["name"])
+        return True
                         
     def add_teams(self, teams):
         """
@@ -102,7 +122,17 @@ class Visualizer( object ):
         for i, player in enumerate(teams):
             self.team_names[i] = player["team_name"]
             number_of_people += len(player["team"])
-        self.people = [VisPerson for _ in xrange(number_of_people)]
+        self.people = [VisPerson() for _ in xrange(number_of_people)]
+        for player in teams:
+            for person in player["team"]:
+                pos = random.choice(
+                    self.rooms[person["location"]].chairs)
+                self.people[person["person_id"]].set_data(
+                    person["location"], pos,
+                    person["acted"] or
+                    ("asleep" if person["asleep"] else None),
+                    person["team"], person["name"])
+        
        
             
 
