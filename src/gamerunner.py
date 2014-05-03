@@ -20,11 +20,10 @@ def launch_clients():
     if parameters.client:
         numberOfClients = len(parameters.client)
         for client in parameters.client:
-            launch_client(client)
+            launch_client(os.path.join(os.getcwd(), client))
     else:
         numberOfClients = 0
     for x in xrange(numberOfClients, parameters.teams):
-        print parameters.defaultClient
         launch_client(os.path.join(os.getcwd(), parameters.defaultClient))
 
 
