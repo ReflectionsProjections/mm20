@@ -2,6 +2,8 @@ import pygame
 import sys
 import os
 import config.handle_constants
+import json
+import random
 
 class Visualizer( object ):
 
@@ -19,6 +21,8 @@ class Visualizer( object ):
         self.people = list()
         self.ai = list()
         self.messages = list()
+        self.game_done = False
+        self.game_result = None
         pygame.init()
         self.setup()
 
@@ -35,7 +39,7 @@ class Visualizer( object ):
 
     def frame(self, turn=None):
         if self.running:
-            self.update_state(turn)
+            self.update_state(json.loads(turn))
             self.draw()
             self.GameClock.tick(self.MAX_FPS)
             for event in pygame.event.get():
@@ -59,7 +63,45 @@ class Visualizer( object ):
         pygame.display.flip()
 
     def update_state(self, turn):
-        pass
+        # check to see if the game as ended 
+        if "winner" in turn[0]:
+            self.game_done = True
+            self.game_result = turn
+            return
+        #make the need structures
+        self.ai = [None] * len(turn)
+        self.people = [VisPerson for _ in xrange (len(turn) * 3)]
+        #reshape data
+        for i, player in enumerate(turn):
+            self.ai[i] = player["aiStatus"]
+            for room in player["map"]:
+                for person in room["peopleInRoom"]:
+                    if person["team"] == i:
+                        pos = random.choice(
+                            self.rooms[person["location"]].chairs)
+                        self.people[person["person_id"]].set_data(
+                            person["room"], pos,
+                            person["acted"] or
+                            ("asleep" if person["sleep"] else None),
+                            person["team"])
+
+            
+                
+class VisPerson(object):
+    """
+    A object that will hold the data for a person to be drawn
+    """
+    
+    def set_data(self, room, pos, act, team):
+        """
+        Fields to be used
+        """
+        self.room = room
+        self.pos = pos                  # (x, y) coordinats
+        self.action = act
+        self.team = team
+        
+        
 
 if __name__ == "__main__":
     vis = Visualizer()
