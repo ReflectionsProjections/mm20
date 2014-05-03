@@ -25,8 +25,8 @@
     "log": "serverlog.json"
   },
   "visualizerDefaults": {
-    "SCREEN_WIDTH": 1300,
-    "SCREEN_HEIGHT": 700,
+    "SCREEN_WIDTH": 721,
+    "SCREEN_HEIGHT": 454,
     "MAX_FPS": 60,
     "TITLE": "Visualizer",
     "STATSBARWIDTH": 200,

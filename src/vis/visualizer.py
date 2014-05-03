@@ -54,9 +54,9 @@ class Visualizer( object ):
         #Draw people in rooms
         for p in self.people:
             color = self.colors[-1]
-            if p["team"] < len(colors):
-                color = self.colors[p["team"]]
-            pygame.draw.circle(self.ScreenSurface, color, p["pos"], 4, 0)
+            if p.team < len(self.colors):
+                color = self.colors[p.team]
+            pygame.draw.circle(self.ScreenSurface, color, p.pos, 4, 0)
 
         #Draw AI info
         myfont = pygame.font.SysFont("monospace", 40)
@@ -76,19 +76,19 @@ class Visualizer( object ):
             return
         #make the need structures
         self.ai = [None] * len(turn)
-        self.people = [VisPerson for _ in xrange (len(turn) * 3)]
+        self.people = [VisPerson() for _ in xrange (len(turn) * 3)]
         #reshape data
         for i, player in enumerate(turn):
-            self.ai[i] = player["aiStatus"]
+            self.ai[i] = player["aiStats"]
             for room in player["map"]:
                 for person in room["peopleInRoom"]:
                     if person["team"] == i:
                         pos = random.choice(
                             self.rooms[person["location"]].chairs)
                         self.people[person["person_id"]].set_data(
-                            person["room"], pos,
+                            person["location"], pos,
                             person["acted"] or
-                            ("asleep" if person["sleep"] else None),
+                            ("asleep" if person["asleep"] else None),
                             person["team"])
 
             
