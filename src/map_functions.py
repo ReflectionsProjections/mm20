@@ -237,7 +237,7 @@ def _floodFillConnectionsIter(
                 roomObjects[curColor].append((x, y, roomObjectColorDict[nextColor]))
 
         # Iterative case 1a: hit another color (not black), so record the connection
-        else:
+        elif curColor not in roomObjectColorDict:
             if curColor not in connections:
                 connections[curColor] = []
             if nextColor != curColor and nextColor not in connections[curColor]:
