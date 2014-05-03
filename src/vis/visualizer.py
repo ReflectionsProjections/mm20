@@ -38,12 +38,15 @@ class Visualizer( object ):
     def frame(self, turn=None):
         if self.running:
             self.update_state(json.loads(turn))
-            self.draw()
-            self.GameClock.tick(self.MAX_FPS)
-            for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        pygame.quit()
-                        self.running = False
+            while True:
+                self.draw()
+                self.GameClock.tick(self.MAX_FPS)
+                for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            self.running = False
+                if not self.game_done or not self.running:
+                    break
 
 
     def draw(self):
@@ -59,11 +62,25 @@ class Visualizer( object ):
             pygame.draw.circle(self.ScreenSurface, color, p.pos, 4, 0)
 
         #Draw AI info
-        myfont = pygame.font.SysFont("monospace", 40)
-        label = myfont.render("AI!", 1, (255,255,255))
-        self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], 0))
+        namefont = pygame.font.SysFont("monospace", 20)
+        aifont = pygame.font.SysFont("monospace", 20)
+        x_pos = 0
+        for i in range(len(self.ai)):
+            label = namefont.render("Team"+str(i), 1, self.colors[i])
+            self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
+            x_pos +=40
+            for key, val in self.ai[i].iteritems():
+                label = aifont.render(key+": "+str(val), 1, (255,255,255))
+                self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
+                x_pos +=20
 
         #Draw actions (move animations? failure prompts?)
+
+        #If game is over, do stuff
+        if self.game_done:
+            gameoverfont = pygame.font.SysFont("monospace", 200)
+            label = namefont.render("GAME OVER!", 1, (255, 255, 255))
+            self.ScreenSurface.blit(label, (0, 0))
 
         #flip display
         pygame.display.flip()
