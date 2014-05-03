@@ -16,6 +16,9 @@ class Visualizer( object ):
         for i in range(len(self.colors)):
             self.colors[i] = tuple(self.colors[i])
         self.rooms = rooms
+        self.people = list()
+        self.ai = list()
+        self.messages = list()
         pygame.init()
         self.setup()
 
