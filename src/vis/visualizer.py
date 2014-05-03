@@ -67,7 +67,11 @@ class Visualizer( object ):
         aifont = pygame.font.SysFont("monospace", 20)
         x_pos = 0
         for i in range(len(self.ai)):
-            label = namefont.render(self.team_names[i], 2, self.colors[i])
+            if i >= len(self.colors):
+                color = self.colors[len(self.colors)-1]
+            else:
+                color = self.colors[i]
+            label = namefont.render(self.team_names[i], 2, color)
             self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
             x_pos +=40
             for key, val in self.ai[i].iteritems():
