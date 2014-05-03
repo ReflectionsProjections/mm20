@@ -1,6 +1,4 @@
 import pygame
-import sys
-import os
 import config.handle_constants
 import json
 import random
@@ -31,7 +29,7 @@ class Visualizer( object ):
         self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.GameClock = pygame.time.Clock()
         image = pygame.image.load(config.handle_constants.retrieveConstants("serverDefaults")["map"]).convert()
-        self.background = pygame.transform.scale(image,(self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        self.background = pygame.transform.scale(image,(self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], self.SCREEN_HEIGHT))
 
     def run_from_file(self, file_name=""):
         while(self.running):
@@ -48,14 +46,22 @@ class Visualizer( object ):
                         self.running = False
 
 
-    def draw(self, ai = None):
+    def draw(self):
         #Draw background
+        self.ScreenSurface.fill((0,0,0))
         self.ScreenSurface.blit(self.background, (0, 0))
 
         #Draw people in rooms
-        pygame.draw.circle(self.ScreenSurface, self.colors[0], (20,20), 4, 0)
+        for p in self.people:
+            color = self.colors[-1]
+            if p["team"] < len(colors):
+                color = self.colors[p["team"]]
+            pygame.draw.circle(self.ScreenSurface, color, p["pos"], 4, 0)
 
         #Draw AI info
+        myfont = pygame.font.SysFont("monospace", 40)
+        label = myfont.render("AI!", 1, (255,255,255))
+        self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], 0))
 
         #Draw actions (move animations? failure prompts?)
 
