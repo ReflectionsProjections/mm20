@@ -1,2 +1,2 @@
 #!/bin/bash
-./test_client.py
+./client.py
