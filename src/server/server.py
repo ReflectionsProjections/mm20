@@ -90,7 +90,7 @@ class MMServer( object ):
                 #TODO: How to handle timeout when connecting? Forfeit?
                 for i in range(0, self.maxPlayers):
                     if turnObjects[i] is None:
-                        turnObjects[i] = '{ "error" : "Timeout on initial connection, auto-forfeit" }'
+                        turnObjects[i] = '{ "error" : "Timeout on initial connection, auto-forfeit", "team_name": false }'
                         forfeit[i] = True
                         validTurns = validTurns + 1
             else:

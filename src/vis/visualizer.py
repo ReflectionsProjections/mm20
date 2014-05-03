@@ -105,10 +105,10 @@ class Visualizer( object ):
                         pos = random.choice(
                             self.rooms[person["location"]].chairs)
                         self.people[person["person_id"]].set_data(
-                            person["location"], pos,
+                            person["location"],
                             person["acted"] or
                             ("asleep" if person["asleep"] else None),
-                            person["team"], person["name"])
+                            person["team"], person["name"], self)
         return True
                         
     def add_teams(self, teams):
@@ -125,30 +125,33 @@ class Visualizer( object ):
         self.people = [VisPerson() for _ in xrange(number_of_people)]
         for player in teams:
             for person in player["team"]:
-                pos = random.choice(
-                    self.rooms[person["location"]].chairs)
                 self.people[person["person_id"]].set_data(
-                    person["location"], pos,
+                    person["location"],
                     person["acted"] or
                     ("asleep" if person["asleep"] else None),
-                    person["team"], person["name"])
+                    person["team"], person["name"], self)
         
-       
-            
 
-            
-                
+
 class VisPerson(object):
     """
     A object that will hold the data for a person to be drawn
     """
-    
-    def set_data(self, room, pos, act, team, name):
+    def __init__(self, ):
+        self.room = None
+        self.pos = None
+        self.action = None
+        self.team = None
+        self.name = None
+        
+    def set_data(self, room, act, team, name, visualizer):
         """
         Fields to be used
         """
+        if not self.room or not self.pos or self.room != room:
+            self.pos = random.choice(
+                visualizer.rooms[room].chairs)  # (x, y) coordinats
         self.room = room
-        self.pos = pos                  # (x, y) coordinats
         self.action = act
         self.team = team
         self.name = name
