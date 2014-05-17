@@ -56,6 +56,30 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         return my_info
 
+    ## Make a seralible repesentaion of this team member with limited in it
+    # @return
+    #    A dict that reprents the team member
+    def output_dict_limited(self):
+        my_info = dict()
+        my_info["team"] = self.team.my_id
+        my_info["person_id"] = self.person_id
+        my_info["name"] = self.name
+        self.asleep = False
+        
+        return my_info
+
+    def output_dict_same_room(self):
+        my_info = dict()
+        my_info["team"] = self.team.my_id
+        my_info["person_id"] = self.person_id
+        my_info["name"] = self.name
+        my_info["location"] = self.location.name
+        my_info["acted"] = self.acted
+        my_info["asleep"] = self.asleep
+        self.asleep = False
+        
+        return my_info
+
     ## Moves the team member from one room to another.
     # @param destination
     #   The room (a Room object) to move to.

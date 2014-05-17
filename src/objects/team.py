@@ -42,6 +42,10 @@ class Team(object):
     def get_team_members(self):
         return [m.output_dict() for m in self.members.values()]
 
+    def get_info_on_people(self, people_list):
+        return [p.output_dict90 if p.team.my_id == self.my_id
+                else p.output_dict_limited() for p in people_list]
+
 import room
 
 

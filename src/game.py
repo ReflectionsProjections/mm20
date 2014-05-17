@@ -114,7 +114,8 @@ class Game(object):
             return {"winner": win, "score": self.calc_score(client_id)}
         response = {"aiStats": self.teams[client_id].ai.output_dict(),
                     "map": self.teams[client_id].get_visible_map(),
-                    "messages": self.result_buffer[client_id]}
+                    "messages": self.result_buffer[client_id],
+                    "people": self.teams[client_id].get_info_on_people(self.people)}
         self.result_buffer[client_id] = []
         return response
 
