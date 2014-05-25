@@ -50,7 +50,7 @@ if __name__ == "__main__":
     PORT = 8080
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
-    s.sendall('{"team":"test", "members":[{"name":"test1", "archetype":"Coder"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Theorist"}]}')
+    s.sendall('{"team":"test", "members":[{"name":"test1", "archetype":"Coder"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Theorist"}]}\n')
     data = s.recv(1024)
     game_running = True
     members = None
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 else:
                     members = updateMembers(members, value)
                     actions = setActions(members, value)
-                    s.sendall(json.dumps(actions))
+                    s.sendall(json.dumps(actions)+'\n')
                     data = s.recv(1024)
         else:
             data += s.recv(1024)
