@@ -8,11 +8,10 @@ def updateMembers(members, value):
         members = {}
         for person in value["team"]:
             members[person["person_id"]] = person
-    if "map" in value:
-        for room in value["map"]:
-            for person in room["peopleInRoom"]:
-                if person["person_id"] in members:
-                    members[person["person_id"]] = person
+    if "people" in value:
+        for person in value["people"]:
+            if person["person_id"] in members:
+                members[person["person_id"]] = person
     return members
 
 
