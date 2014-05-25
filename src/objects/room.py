@@ -119,7 +119,7 @@ class Room(object):
     def output_dict(self):
         room_info = {"room": self.name,
                      "connectedRooms": self.connectedRooms.keys(),
-                     "peopleInRoom": [p.output_dict() for p in self.people]}
+                     "peopleInRoom": [p.person_id for p in self.people]}
         return room_info
 
     ## Returns connected rooms
