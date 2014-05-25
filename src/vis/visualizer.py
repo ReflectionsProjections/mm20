@@ -109,15 +109,14 @@ class Visualizer( object ):
         #reshape data
         for i, player in enumerate(turn):
             self.ai[i] = player["aiStats"]
-            for room in player["map"]:
-                for person in room["peopleInRoom"]:
-                    if person["team"] == i:
+            for person in player["people"]:
+                if person["team"] == i:
 
-                        self.people[person["person_id"]].set_data(
-                            person["location"],
-                            person["acted"] or
-                            ("asleep" if person["asleep"] else None),
-                            person["team"], person["name"], self)
+                    self.people[person["person_id"]].set_data(
+                        person["location"],
+                        person["acted"] or
+                        ("asleep" if person["asleep"] else None),
+                        person["team"], person["name"], self)
         return True
                         
     def add_teams(self, teams):
