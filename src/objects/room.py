@@ -51,6 +51,10 @@ class NotAvailableError(Exception):
     def __str__(self):
         return self.msg
 
+class Position(object):
+    def __init__(self, position):
+        self.coord = position
+        self.owner = None
 
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
@@ -70,6 +74,7 @@ class Room(object):
         self.people = set()
         self.resources = set()
         self.chairs = list()
+        self.stand = list()
         self.desks = list()
         self.doors = list()
         self.snacktable = list()
@@ -81,6 +86,11 @@ class Room(object):
         if member in self.people:
             raise AlreadyInRoomError(self, member)
         self.people.add(member)
+        for pos in self.stand:
+            if pos.owner is None:
+                pos.owner = member
+                member.position = pos.coord
+                break
 
     ## Removes a member from this room
     # @param member
@@ -89,6 +99,13 @@ class Room(object):
         if not member in self.people:
             raise NotInRoomError(self, member)
         self.people.remove(member)
+        for pos in self.stand:
+            if pos.owner is not None and pos.owner == member:
+                pos.owner = None
+        for pos in self.chairs:
+            if pos.owner is not None and pos.owner == member:
+                pos.owner = None
+        member.position = None
 
     ## Make a resource available in this room
     # @param resource
@@ -163,7 +180,7 @@ class Room(object):
     # @return
     #   boolean value stating whether adding them is possible or not
     def canAdd(self, num_people):
-        return num_people <= len(self.chairs) - len(self.people)
+        return num_people <= len(self.stand) - len(self.people)
 
 class TestRoom(unittest.TestCase):
     def setUp(self):

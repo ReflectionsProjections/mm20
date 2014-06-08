@@ -114,6 +114,7 @@ class Visualizer( object ):
 
                     self.people[person["person_id"]].set_data(
                         person["location"],
+                        person["position"],
                         person["acted"] or
                         ("asleep" if person["asleep"] else None),
                         person["team"], person["name"], self)
@@ -135,6 +136,7 @@ class Visualizer( object ):
             for person in player["team"]:
                 self.people[person["person_id"]].set_data(
                     person["location"],
+                    person["position"],
                     person["acted"] or
                     ("asleep" if person["asleep"] else None),
                     person["team"], person["name"], self)
@@ -152,18 +154,11 @@ class VisPerson(object):
         self.team = None
         self.name = None
         
-    def set_data(self, room, act, team, name, visualizer):
+    def set_data(self, room, pos, act, team, name, visualizer):
         """
         Fields to be used
         """
-        if not self.room or not self.pos or self.room != room:
-            if self.room and self.room is not NO_CHAIR:
-                visualizer.rooms[self.room].chairs.append(self.pos)
-            chair_list = visualizer.rooms[room].chairs
-            if chair_list:
-                self.pos = chair_list.pop()  # (x, y) coordinats
-            else:
-                self.pos = NO_CHAIR
+        self.pos = pos
         self.room = room
         self.action = act
         self.team = team

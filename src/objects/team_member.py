@@ -26,6 +26,7 @@ class TeamMember(object):
         self.stats = TeamMember.Archetypes[archetype]
         self.archetype = archetype
         self.location = location
+        self.position = None
         location.addMember(self)
         self.team = team
         self.hunger = constants["hunger"]

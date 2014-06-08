@@ -1,6 +1,7 @@
 from PIL import Image
 import Queue
 import objects.room
+from objects.room import Position
 
 # Colors used for walls
 # TODO move to constants.py or something like that
@@ -18,8 +19,9 @@ colorDict = {
 
 # Furniture
 roomObjectColorDict = {
-    "125 125 2 255":          "chair",
+    "125 125 2 255":          "stand",
     "4 5 6 255":          "desk",
+    "150 12 100 255":          "chair",
     "255 180 0 255":    "door",
     "3 2 1 255":          "snacktable"
 }
@@ -61,7 +63,8 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].connectedRooms = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
 
         # Room objects
-        rooms[i].chairs = [(r[0], r[1])      for r in roomObjects[rooms[i].name] if r[2] == "chair"]
+        rooms[i].stand = [Position((r[0], r[1]))      for r in roomObjects[rooms[i].name] if r[2] == "stand"]
+        rooms[i].chairs = [Position((r[0], r[1]))      for r in roomObjects[rooms[i].name] if r[2] == "chair"]
         rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
         rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
         rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
