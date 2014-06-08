@@ -18,7 +18,7 @@
     "map": "rooms.bmp",
     "log": "log.txt",
     "port": 8080,
-    "time": 0.01,
+    "time": 0.1,
     "initialConnectTime": 1,
     "maxDataSize": 1024,
     "defaultClient": "../test-clients/python/",
