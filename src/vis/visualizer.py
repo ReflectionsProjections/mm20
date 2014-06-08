@@ -1,6 +1,6 @@
 import pygame
 import config.handle_constants
-import json
+import dson
 import random
 
 NO_CHAIR = (-100, -100)
@@ -43,7 +43,7 @@ class Visualizer( object ):
 
     def frame(self, turn=None):
         if self.running:
-            d = self.update_state(json.loads(turn))
+            d = self.update_state(dson.loads(turn))
             while True and d:
                 self.draw()
                 self.GameClock.tick(self.MAX_FPS)

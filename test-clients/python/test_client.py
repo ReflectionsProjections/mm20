@@ -1,5 +1,6 @@
 #!/usr/bin/python2
 import socket
+import dson
 import json
 
 
@@ -50,7 +51,7 @@ if __name__ == "__main__":
     PORT = 8080
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
-    s.sendall('{"team":"test", "members":[{"name":"test1", "archetype":"Coder"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Theorist"}]}\n')
+    s.sendall(dson.dumps(json.loads('{"team":"test", "members":[{"name":"test1", "archetype":"Coder"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Theorist"}]}'))+'\n')
     data = s.recv(1024)
     game_running = True
     members = None
@@ -62,14 +63,14 @@ if __name__ == "__main__":
                 data = data[1]
                 data += s.recv(1024)
             else:
-                value = json.loads(data[0])
+                value = dson.loads(data[0])
                 print 'Received', repr(data[0])
                 if 'winner' in value:
                     game_running = False
                 else:
                     members = updateMembers(members, value)
                     actions = setActions(members, value)
-                    s.sendall(json.dumps(actions)+'\n')
+                    s.sendall(dson.dumps(actions)+'\n')
                     data = s.recv(1024)
         else:
             data += s.recv(1024)
