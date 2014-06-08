@@ -157,6 +157,13 @@ class Room(object):
     def isConnectedTo(self, room):
         return room.name in self.connectedRooms
 
+    ## Reports whether there are room for the specified number of people in the room
+    # @param num_people
+    #   The number of people to add to the room
+    # @return
+    #   boolean value stating whether adding them is possible or not
+    def canAdd(self, num_people):
+        return num_people <= len(self.chairs) - len(self.people)
 
 class TestRoom(unittest.TestCase):
     def setUp(self):

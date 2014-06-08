@@ -2,6 +2,7 @@ from objects.team import Team
 import map_functions
 import action_handler
 import config.handle_constants
+import random
 
 
 ## Holds the gamestate and represents the game to the server
@@ -50,8 +51,13 @@ class Game(object):
             if len(data["members"]) > self.team_limit:
                 return (False, {"status": "Failure", "errors": [
                     "Number of team members exceeds team size"]})
+            start_room = self.rooms[self.starting_room]
+            try_limit = 10
+            while(try_limit > 0 and not start_room.canAdd(len(data["members"]))):
+                start_room = self.rooms[random.choice(self.rooms.keys())]
+                try_limit = try_limit-1
             newTeam = Team(data["team"], data["members"],
-                           self.rooms[self.starting_room], self.people, client_id)
+                           start_room, self.people, client_id)
         except KeyError:
             return (False, {"status": "Failure", "errors": ["KeyError"]})
         # TODO: Make all error objects uniform
