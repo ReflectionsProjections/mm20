@@ -25,9 +25,9 @@
     "log": "serverlog.json"
   },
   "visualizerDefaults": {
-    "SCREEN_WIDTH": 721,
-    "SCREEN_HEIGHT": 454,
-    "MAX_FPS": 60,
+    "SCREEN_WIDTH": 1082,
+    "SCREEN_HEIGHT": 681,
+    "MAX_FPS": 10,
     "TITLE": "Visualizer",
     "STATSBARWIDTH": 200,
     "TEAMCOLORS": [
@@ -35,7 +35,8 @@
       [0, 255, 0],
       [0, 0, 255],
       [255, 255, 255]
-    ]
+    ],
+    "QUIT_WHEN_DONE": false
   },
   "actions": {
     "validActions": [
