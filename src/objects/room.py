@@ -90,6 +90,7 @@ class Room(object):
             if pos.owner is None:
                 pos.owner = member
                 member.position = pos.coord
+                print member.position
                 break
 
     ## Removes a member from this room
