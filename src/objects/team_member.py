@@ -134,7 +134,7 @@ class TeamMember(object):
             amount = effective * self.stats["test"] /\
                 (ai.complexity / 10.0)
             ai.stability += amount / 100.0
-            ai.stability = max(ai.stability, 1.0)
+            ai.stability = min(ai.stability, 1.0)
         elif code_type == "implement":
             amount = effective * self.stats["codingProwess"] /\
                 (ai.complexity / 10.0)
