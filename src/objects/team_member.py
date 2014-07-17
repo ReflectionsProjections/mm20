@@ -128,29 +128,23 @@ class TeamMember(object):
         effective = self._getEffectiveness()
         if code_type == "refactor":
             ai.complexity -= effective * self.stats["refactor"]
-            if ai.complexity < ai.implementation * .25:
-                ai.complexity = ai.implementation * .25
-            if ai.complexity < 1:
-                ai.complexity = 1.0
+            ai.complexity = max(ai.complexity, ai.implementation * .25)
+            ai.complexity = max(ai.complexity, 1.0)
         elif code_type == "test":
             amount = effective * self.stats["test"] /\
                 (ai.complexity / 10.0)
             ai.stability += amount / 100.0
-            if ai.stability > 1:
-                ai.stability = 1.0
+            ai.stability = min(ai.stability, 1.0)
         elif code_type == "implement":
             amount = effective * self.stats["codingProwess"] /\
                 (ai.complexity / 10.0)
             ai.implementation += amount
+            ai.implementation = min(ai.implementation, ai.theory)
             ai.complexity += amount
             ai.optimization -= amount / 10.0
+            ai.optimization = max(ai.optimization, 0.0)
             ai.stability -= amount / 200.0
-            if ai.implementation > ai.theory:
-                ai.implementation = ai.theory
-            if ai.stability < 0.0:
-                ai.stability = 0.0
-            if ai.optimization < 0.0:
-                ai.optimization = 0.0
+            ai.stability = max(ai.stability, 0.0)
         elif code_type == "optimize":
             amount = effective * self.stats["optimize"] /\
                 (ai.complexity / 10.0)
@@ -187,6 +181,7 @@ class TeamMember(object):
         if self.hunger < 0.0:
             self.hunger = 0.0
         self.acted = "eat"
+        self.position = self.location.snacktables[0]
 
     ##  Distract!
     #

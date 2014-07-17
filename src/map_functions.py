@@ -9,12 +9,12 @@ wallColors = ["0 0 0 255"]
 
 # For debugging
 colorDict = {
-    "0 0 0":        "black",
-    "0 255 255":    "cyan",
-    "255 255 255":  "white",
-    "72 0 255":     "blue",
-    "255 0 220":    "pink",
-    "76 255 0":     "green"
+    "0 0 0 255":        "black",
+    "0 255 255 255":    "cyan",
+    "255 255 255 255":  "white",
+    "72 0 255 255":     "blue",
+    "255 0 220 255":    "pink",
+    "76 255 0 255":     "green"
 }
 
 # Furniture
@@ -68,9 +68,9 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
         rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
         rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
-        if rooms[i].snacktables:
+        if len(rooms[i].snacktables) != 0:
             rooms[i].addResource('FOOD')  # For now, this is how we are treating food
-        print "room {0} has chairs {1}".format(rooms[i].name, rooms[i].chairs)
+        print "The {0} room has chairs {1} and snacktables {2}".format(colorDict[rooms[i].name], rooms[i].chairs, rooms[i].snacktables)
 
     # Done!
     """
@@ -299,7 +299,7 @@ def _floodFillConnectionsIter(
 if __name__ == "__main__":
 
     # Execute function
-    rooms = map_reader("./rooms2.bmp")
+    rooms = map_reader("./rooms.bmp")
 
     # ============== Test 1: test connections ==============
     colors = {

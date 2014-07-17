@@ -16,6 +16,8 @@
   "serverDefaults": {
     "players": 2,
     "map": "rooms.bmp",
+    "mapWidth": 521,
+    "mapHeight": 454,
     "log": "log.txt",
     "port": 8080,
     "time": 0.1,
@@ -36,7 +38,8 @@
       [0, 0, 255],
       [255, 255, 255]
     ],
-    "QUIT_WHEN_DONE": false
+    "QUIT_WHEN_DONE": false,
+    "PERSON_SIZE": 8
   },
   "actions": {
     "validActions": [
