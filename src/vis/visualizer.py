@@ -13,6 +13,7 @@ class Visualizer(object):
         self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
         self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
+        self.SCREEN_MAP_WIDTH = self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]
         self.MAP_WIDTH = self.serverDefaults["mapWidth"]
         self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
         self.MAP_HEIGHT = self.serverDefaults["mapHeight"]
@@ -30,7 +31,7 @@ class Visualizer(object):
         self.game_result = None
         self.rooms = rooms
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
-        self.scaleFactor = (float(self.SCREEN_WIDTH) / self.MAP_WIDTH, float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT)
+        self.scaleFactor = (float(self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]) / self.MAP_WIDTH, float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT)
         
         # shuffle seat assignment
         if self.rooms:
@@ -48,7 +49,7 @@ class Visualizer(object):
         self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.GameClock = pygame.time.Clock()
         image = pygame.image.load(self.serverDefaults["map"]).convert()
-        self.background = pygame.transform.scale(image, (self.MAP_WIDTH, self.SCREEN_HEIGHT))
+        self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
 
     def run_from_file(self, file_name=""):
 
@@ -106,11 +107,11 @@ class Visualizer(object):
             if i < len(self.colors):
                 color = self.colors[i]
             label = namefont.render(self.team_names[i], 2, color)
-            self.ScreenSurface.blit(label, (self.MAP_WIDTH, x_pos))
+            self.ScreenSurface.blit(label, (self.SCREEN_MAP_WIDTH, x_pos))
             x_pos += 40
             for key, val in self.ai[i].iteritems():
                 label = aifont.render(key + ": " + str(val), 1, (255, 255, 255))
-                self.ScreenSurface.blit(label, (self.MAP_WIDTH, x_pos))
+                self.ScreenSurface.blit(label, (self.SCREEN_MAP_WIDTH, x_pos))
                 x_pos += 20
 
         #Draw actions (move animations? failure prompts?)
