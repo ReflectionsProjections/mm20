@@ -14,7 +14,6 @@ class Visualizer(object):
         self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
         self.MAP_WIDTH = self.serverDefaults["mapWidth"]
-        self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
         self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
         self.MAP_HEIGHT = self.serverDefaults["mapHeight"]
         self.MAX_FPS = self.constants["MAX_FPS"]
@@ -31,7 +30,7 @@ class Visualizer(object):
         self.game_result = None
         self.rooms = rooms
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
-        self.scaleFactor = scaleFactor = (float(self.MAP_WIDTH) / self.serverDefaults["mapWidth"], float(self.SCREEN_HEIGHT) / self.serverDefaults["mapHeight"])
+        self.scaleFactor = (float(self.SCREEN_WIDTH) / self.MAP_WIDTH, float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT)
         
         # shuffle seat assignment
         if self.rooms:
