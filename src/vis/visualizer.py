@@ -6,7 +6,8 @@ import time
 
 NO_CHAIR = (-100, -100)
 
-class Visualizer( object ):
+
+class Visualizer(object):
 
     def __init__(self, rooms=None):
         self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
@@ -46,21 +47,20 @@ class Visualizer( object ):
         self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.GameClock = pygame.time.Clock()
         image = pygame.image.load(self.serverDefaults["map"]).convert()
-        self.background = pygame.transform.scale(image,(self.MAP_WIDTH, self.SCREEN_HEIGHT))
+        self.background = pygame.transform.scale(image, (self.MAP_WIDTH, self.SCREEN_HEIGHT))
 
     def run_from_file(self, file_name=""):
 
         # Load game log
         json_file = None
         try:
-    		json_file = open(file_name)
+            json_file = open(file_name)
         except:
             self.running = False
             print "ERROR: Invalid game logfile."
             return
 
         # Run the game
-        i = 0
         for turn_str in json_file:
             json_turn = json.loads(turn_str)
             self.frame(json_turn)
@@ -84,10 +84,9 @@ class Visualizer( object ):
                 if not self.game_done or not self.running:
                     break
 
-
     def draw(self):
         #Draw background
-        self.ScreenSurface.fill((0,0,0))
+        self.ScreenSurface.fill((0, 0, 0))
         self.ScreenSurface.blit(self.background, (0, 0))
 
         #Draw people in rooms
@@ -95,8 +94,8 @@ class Visualizer( object ):
             color = self.colors[-1]
             if p.team < len(self.colors):
                 color = self.colors[p.team]
-            pygame.draw.circle(self.ScreenSurface, (0,0,0), self.scale(p.pos), self.constants["PERSON_SIZE"], 0)
-            pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"]-2, 0)
+            pygame.draw.circle(self.ScreenSurface, (0, 0, 0), self.scale(p.pos), self.constants["PERSON_SIZE"], 0)
+            pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"] - 2, 0)
 
         #Draw AI info
         namefont = pygame.font.SysFont("monospace", 40)
@@ -108,11 +107,11 @@ class Visualizer( object ):
                 color = self.colors[i]
             label = namefont.render(self.team_names[i], 2, color)
             self.ScreenSurface.blit(label, (self.MAP_WIDTH, x_pos))
-            x_pos +=40
+            x_pos += 40
             for key, val in self.ai[i].iteritems():
-                label = aifont.render(key+": "+str(val), 1, (255,255,255))
+                label = aifont.render(key + ": " + str(val), 1, (255, 255, 255))
                 self.ScreenSurface.blit(label, (self.MAP_WIDTH, x_pos))
-                x_pos +=20
+                x_pos += 20
 
         #Draw actions (move animations? failure prompts?)
 
@@ -121,7 +120,7 @@ class Visualizer( object ):
             for i in range(len(self.game_result)):
                 if self.game_result[i]["winner"]:
                     gameoverfont = pygame.font.SysFont("monospace", 100)
-                    label = gameoverfont.render(self.team_names[i]+ " WINS!", 35, (12, 12, 12))
+                    label = gameoverfont.render(self.team_names[i] + " WINS!", 35, (12, 12, 12))
                     self.ScreenSurface.blit(label, (0, 0))
 
         #flip display
@@ -172,7 +171,6 @@ class Visualizer( object ):
                     person["team"], person["name"], self)
         
 
-
 class VisPerson(object):
     """
     A object that will hold the data for a person to be drawn
@@ -195,7 +193,6 @@ class VisPerson(object):
         self.name = name
         
         
-
 if __name__ == "__main__":
     vis = Visualizer()
     vis.run_from_file("../serverlog.json")
