@@ -10,13 +10,13 @@ NO_CHAIR = (-100, -100)
 class Visualizer(object):
 
     def __init__(self, rooms=None):
+        self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
         self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
+        self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
+        self.MAP_WIDTH = self.serverDefaults["mapWidth"]
         self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
         self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
-        self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
         self.MAP_HEIGHT = self.serverDefaults["mapHeight"]
-        self.MAP_WIDTH = self.serverDefaults["mapWidth"]
-        self.SCALE_FACTOR = scaleFactor = (float(self.MAP_WIDTH) / self.serverDefaults["mapWidth"], float(self.SCREEN_HEIGHT) / self.serverDefaults["mapHeight"])
         self.MAX_FPS = self.constants["MAX_FPS"]
         self.TITLE = self.constants["TITLE"]
         self.running = True
@@ -31,6 +31,7 @@ class Visualizer(object):
         self.game_result = None
         self.rooms = rooms
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
+        self.scaleFactor = scaleFactor = (float(self.MAP_WIDTH) / self.serverDefaults["mapWidth"], float(self.SCREEN_HEIGHT) / self.serverDefaults["mapHeight"])
         
         # shuffle seat assignment
         if self.rooms:
@@ -41,7 +42,7 @@ class Visualizer(object):
         self.setup()
 
     def scale(self, pos):
-        return (int(pos[0] * self.SCALE_FACTOR[0]), int(pos[1] * self.SCALE_FACTOR[1]))
+        return (int(pos[0] * self.scaleFactor[0]), int(pos[1] * self.scaleFactor[1]))
 
     def setup(self):
         pygame.display.set_caption(self.TITLE)
@@ -135,10 +136,8 @@ class Visualizer(object):
         if "team_name" in turn[0]:
             self.add_teams(turn)
             return False
-
         #reshape data
         for i, player in enumerate(turn):
-            print "XXXXX " + str(turn)
             self.ai[i] = player["aiStats"]
             for person in player["people"]:
                 if person["team"] == i:
