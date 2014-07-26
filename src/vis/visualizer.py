@@ -13,8 +13,9 @@ class Visualizer(object):
         self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
         self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
-        self.MAP_WIDTH = self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]
+        self.MAP_WIDTH = self.serverDefaults["mapWidth"]
         self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
+        self.MAP_HEIGHT = self.serverDefaults["mapHeight"]
         self.MAX_FPS = self.constants["MAX_FPS"]
         self.TITLE = self.constants["TITLE"]
         self.running = True
@@ -29,7 +30,7 @@ class Visualizer(object):
         self.game_result = None
         self.rooms = rooms
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
-        self.scaleFactor = (float(self.MAP_WIDTH) / self.serverDefaults["mapWidth"], float(self.SCREEN_HEIGHT) / self.serverDefaults["mapHeight"])
+        self.scaleFactor = (float(self.SCREEN_WIDTH) / self.MAP_WIDTH, float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT)
         
         # shuffle seat assignment
         if self.rooms:
@@ -62,8 +63,7 @@ class Visualizer(object):
 
         # Run the game
         for turn_str in json_file:
-            json_turn = json.loads(turn_str)
-            self.frame(json_turn)
+            self.frame(turn_str)
 
         # If game is done and we're supposed to quit on exit, wait a while then exit
         if self.quitWhenDone:
@@ -73,7 +73,7 @@ class Visualizer(object):
 
     def frame(self, turn=None):
         if self.running:
-            d = self.update_state(turn)
+            d = self.update_state(json.loads(turn))
             while d:
                 self.draw()
                 self.GameClock.tick(self.MAX_FPS)
@@ -140,7 +140,6 @@ class Visualizer(object):
             self.ai[i] = player["aiStats"]
             for person in player["people"]:
                 if person["team"] == i:
-
                     self.people[person["person_id"]].set_data(
                         person["location"],
                         person["position"],
