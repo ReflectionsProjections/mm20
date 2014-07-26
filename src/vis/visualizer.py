@@ -9,10 +9,8 @@ NO_CHAIR = (-100, -100)
 class Visualizer( object ):
 
     def __init__(self, rooms=None):
-        self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
         self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
-        self.MAP_WIDTH = self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]
         self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
         self.MAX_FPS = self.constants["MAX_FPS"]
         self.TITLE = self.constants["TITLE"]
@@ -28,7 +26,6 @@ class Visualizer( object ):
         self.game_result = None
         self.rooms = rooms
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
-        self.scaleFactor = (float(self.MAP_WIDTH) / self.serverDefaults["mapWidth"], float(self.SCREEN_HEIGHT) / self.serverDefaults["mapHeight"])
         
         # shuffle seat assignment
         if self.rooms:
@@ -38,15 +35,12 @@ class Visualizer( object ):
         pygame.init()
         self.setup()
 
-    def scale(self, pos):
-        return (int(pos[0] * self.scaleFactor[0]), int(pos[1] * self.scaleFactor[1]))
-
     def setup(self):
         pygame.display.set_caption(self.TITLE)
         self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.GameClock = pygame.time.Clock()
-        image = pygame.image.load(self.serverDefaults["map"]).convert()
-        self.background = pygame.transform.scale(image,(self.MAP_WIDTH, self.SCREEN_HEIGHT))
+        image = pygame.image.load(config.handle_constants.retrieveConstants("serverDefaults")["map"]).convert()
+        self.background = pygame.transform.scale(image,(self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], self.SCREEN_HEIGHT))
 
     def run_from_file(self, file_name=""):
 
@@ -62,8 +56,7 @@ class Visualizer( object ):
         # Run the game
         i = 0
         for turn_str in json_file:
-            json_turn = json.loads(turn_str)
-            self.frame(json_turn)
+            self.frame(turn_str)
 
         # If game is done and we're supposed to quit on exit, wait a while then exit
         if self.quitWhenDone:
@@ -73,7 +66,7 @@ class Visualizer( object ):
 
     def frame(self, turn=None):
         if self.running:
-            d = self.update_state(turn)
+            d = self.update_state(json.loads(turn))
             while d:
                 self.draw()
                 self.GameClock.tick(self.MAX_FPS)
@@ -95,8 +88,8 @@ class Visualizer( object ):
             color = self.colors[-1]
             if p.team < len(self.colors):
                 color = self.colors[p.team]
-            pygame.draw.circle(self.ScreenSurface, (0,0,0), self.scale(p.pos), self.constants["PERSON_SIZE"], 0)
-            pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"]-2, 0)
+            pygame.draw.circle(self.ScreenSurface, (0,0,0), p.pos, 5, 0)
+            pygame.draw.circle(self.ScreenSurface, color, p.pos, 4, 0)
 
         #Draw AI info
         namefont = pygame.font.SysFont("monospace", 40)
@@ -107,11 +100,11 @@ class Visualizer( object ):
             if i < len(self.colors):
                 color = self.colors[i]
             label = namefont.render(self.team_names[i], 2, color)
-            self.ScreenSurface.blit(label, (self.MAP_WIDTH, x_pos))
+            self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
             x_pos +=40
             for key, val in self.ai[i].iteritems():
                 label = aifont.render(key+": "+str(val), 1, (255,255,255))
-                self.ScreenSurface.blit(label, (self.MAP_WIDTH, x_pos))
+                self.ScreenSurface.blit(label, (self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"], x_pos))
                 x_pos +=20
 
         #Draw actions (move animations? failure prompts?)
@@ -136,12 +129,13 @@ class Visualizer( object ):
         if "team_name" in turn[0]:
             self.add_teams(turn)
             return False
+
         #reshape data
         for i, player in enumerate(turn):
+            print "XXXXX " + str(turn)
             self.ai[i] = player["aiStats"]
             for person in player["people"]:
                 if person["team"] == i:
-
                     self.people[person["person_id"]].set_data(
                         person["location"],
                         person["position"],
