@@ -140,11 +140,17 @@ class Visualizer(object):
             self.ai[i] = player["aiStats"]
             for person in player["people"]:
                 if person["team"] == i:
+
+                    action = person.get("action", "asleep" if person["asleep"] else None)
+
+                    # Determine player position
+                    if action == "eat":
+                        print self.rooms[person["location"]]
+
                     self.people[person["person_id"]].set_data(
                         person["location"],
                         person["position"],
-                        person["acted"] or
-                        ("asleep" if person["asleep"] else None),
+                        action,
                         person["team"], person["name"], self)
         return True
                         
@@ -165,8 +171,7 @@ class Visualizer(object):
                 self.people[person["person_id"]].set_data(
                     person["location"],
                     person["position"],
-                    person["acted"] or
-                    ("asleep" if person["asleep"] else None),
+                    None,
                     person["team"], person["name"], self)
         
 
