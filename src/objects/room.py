@@ -86,11 +86,18 @@ class Room(object):
         if member in self.people:
             raise AlreadyInRoomError(self, member)
         self.people.add(member)
-        for pos in self.stand:
-            if pos.owner is None:
+        found = False
+        for pos in self.chairs:
+            if pos.owner is None and not found:
                 pos.owner = member
                 member.position = pos.coord
-                break
+                found = True
+        for pos in self.stand:
+            if pos.owner is None and not found:
+                pos.owner = member
+                member.position = pos.coord
+                found = True
+        
 
     ## Removes a member from this room
     # @param member

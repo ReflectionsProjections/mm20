@@ -19,9 +19,9 @@ colorDict = {
 
 # Furniture
 roomObjectColorDict = {
-    "125 125 2 255":          "stand",
+    "125 125 2 255":          "chair",
     "4 5 6 255":          "desk",
-    "150 12 100 255":          "chair",
+    "150 12 100 255":          "stand",
     "255 180 0 255":    "door",
     "3 2 1 255":          "snacktable"
 }
