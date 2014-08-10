@@ -57,7 +57,7 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         return my_info
 
-    ## Make a seralible repesentaion of this team member with limited in it
+    ## Make a serializable repesentaion of this team member with limited in it
     # @return
     #    A dict that reprents the team member
     def output_dict_limited(self):
@@ -280,7 +280,6 @@ class TeamMember(object):
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
-        self.acted = None
 
 
 import team
