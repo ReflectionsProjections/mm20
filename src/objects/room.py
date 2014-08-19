@@ -86,19 +86,7 @@ class Room(object):
         if member in self.people:
             raise AlreadyInRoomError(self, member)
         self.people.add(member)
-        found = False
-        for pos in self.chairs:
-            if pos.owner is None and not found:
-                pos.owner = member
-                member.position = pos.coord
-                found = True
-        for pos in self.stand:
-            if pos.owner is None and not found:
-                pos.owner = member
-                member.position = pos.coord
-                found = True
         
-
     ## Removes a member from this room
     # @param member
     #   The member to remove from this room
@@ -106,13 +94,6 @@ class Room(object):
         if not member in self.people:
             raise NotInRoomError(self, member)
         self.people.remove(member)
-        for pos in self.stand:
-            if pos.owner is not None and pos.owner == member:
-                pos.owner = None
-        for pos in self.chairs:
-            if pos.owner is not None and pos.owner == member:
-                pos.owner = None
-        member.position = None
 
     ## Make a resource available in this room
     # @param resource

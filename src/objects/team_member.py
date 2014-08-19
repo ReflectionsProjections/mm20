@@ -181,7 +181,6 @@ class TeamMember(object):
         if self.hunger < 0.0:
             self.hunger = 0.0
         self.acted = "eat"
-        self.position = self.location.snacktables[0]
 
     ##  Distract!
     #
