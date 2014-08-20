@@ -3,6 +3,7 @@ import config.handle_constants
 import json
 import random
 import time
+from map_functions import map_reader
 
 NO_CHAIR = (-100, -100)
 
@@ -142,16 +143,17 @@ class Visualizer(object):
             for person in player["people"]:
                 if person["team"] == i:
 
-                    action = person.get("action", "asleep" if person["asleep"] else None)
+                    acted = person.get("acted", "asleep" if person["asleep"] else None)
 
                     # Determine player position
-                    if action == "eat":
-                        print self.rooms[person["location"]]
+                    if acted == "eat":
+                        print acted
 
-                    self.people[person["person_id"]].set_data(
+                    visPlayer = self.people[person["person_id"]]
+                    visPlayer.set_data(
                         person["location"],
-                        person["position"],
-                        action,
+                        visPlayer.pos,
+                        acted,
                         person["team"], person["name"], self)
         return True
                         
@@ -169,7 +171,20 @@ class Visualizer(object):
         self.people = [VisPerson() for _ in xrange(number_of_people)]
         for player in teams:
             for person in player["team"]:
-                self.people[person["person_id"]].set_data(
+
+                visPlayer = self.people[person["person_id"]]
+                room = self.rooms[person["location"]]
+
+                # Assign people positions
+                room.visPeople.add(visPlayer)
+                numPeople = len(room.visPeople)
+                if numPeople <= len(room.chairs):
+                    person["position"] = room.chairs[numPeople - 1].coord
+                else:
+                    print str(numPeople) + " out of " + str(len(room.chairs) )
+                    person["position"] = room.stand[numPeople - len(room.chairs) - 1].coord
+
+                visPlayer.set_data(
                     person["location"],
                     person["position"],
                     None,
@@ -199,6 +214,6 @@ class VisPerson(object):
         
         
 if __name__ == "__main__":
-    vis = Visualizer()
+    vis = Visualizer(map_reader("rooms.bmp"))
     vis.run_from_file("../serverlog.json")
 

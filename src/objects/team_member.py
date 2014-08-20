@@ -26,7 +26,6 @@ class TeamMember(object):
         self.stats = TeamMember.Archetypes[archetype]
         self.archetype = archetype
         self.location = location
-        self.position = None
         location.addMember(self)
         self.team = team
         self.hunger = constants["hunger"]
@@ -48,7 +47,7 @@ class TeamMember(object):
     def __eq__(self, other):
         return self.person_id == other.person_id
 
-    ## Make a seralible repesentaion of this team member and everything in it
+    ## Make a serializable repesentaion of this team member and everything in it
     # @return
     #    A dict that reprents the team member
     def output_dict(self):
@@ -57,7 +56,7 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         return my_info
 
-    ## Make a seralible repesentaion of this team member with limited in it
+    ## Make a serializable repesentaion of this team member with limited in it
     # @return
     #    A dict that reprents the team member
     def output_dict_limited(self):
@@ -279,8 +278,6 @@ class TeamMember(object):
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
-        self.acted = None
-
 
 import team
 import room
