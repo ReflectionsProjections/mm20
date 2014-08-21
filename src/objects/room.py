@@ -72,7 +72,7 @@ class Room(object):
         self.connectedRooms = dict()
         self.name = room_id
         self.people = set()
-        self.visPeople = set()
+        self.sittingVisPeople = set()
         self.resources = set()
         self.chairs = list()
         self.stand = list()

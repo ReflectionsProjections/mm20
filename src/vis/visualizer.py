@@ -143,16 +143,22 @@ class Visualizer(object):
             for person in player["people"]:
                 if person["team"] == i:
 
+                    visPlayer = self.people[person["person_id"]]
                     acted = person.get("acted", "asleep" if person["asleep"] else None)
+
+                    currentRoom = self.rooms.get(person["location"], None)
+                    newRoom = self.rooms[person["location"]]
 
                     # Determine player position
                     if acted == "eat":
-                        print acted
+                        visPlayer.pos = currentRoom.snacktables[0]
+                        if visPlayer in currentRoom.sittingVisPeople:
+                            currentRoom.sittingVisPeople.remove(visPlayer)
+                    elif acted in ["code", "move", "theorize"]:
+                        visPlayer.sit_in_room(newRoom, currentRoom)
 
-                    visPlayer = self.people[person["person_id"]]
                     visPlayer.set_data(
                         person["location"],
-                        visPlayer.pos,
                         acted,
                         person["team"], person["name"], self)
         return True
@@ -175,18 +181,10 @@ class Visualizer(object):
                 visPlayer = self.people[person["person_id"]]
                 room = self.rooms[person["location"]]
 
-                # Assign people positions
-                room.visPeople.add(visPlayer)
-                numPeople = len(room.visPeople)
-                if numPeople <= len(room.chairs):
-                    person["position"] = room.chairs[numPeople - 1].coord
-                else:
-                    print str(numPeople) + " out of " + str(len(room.chairs) )
-                    person["position"] = room.stand[numPeople - len(room.chairs) - 1].coord
+                visPlayer.sit_in_room(room)
 
                 visPlayer.set_data(
                     person["location"],
-                    person["position"],
                     None,
                     person["team"], person["name"], self)
         
@@ -201,12 +199,33 @@ class VisPerson(object):
         self.action = None
         self.team = None
         self.name = None
+
+    def sit_in_room(self, newRoom, currentRoom = None):
+
+        # No-op case
+        if self in newRoom.sittingVisPeople:
+           return 
+
+        # Assign person a new spot
+        numPeople = len(newRoom.sittingVisPeople)
+        numChairs = len(newRoom.chairs)
+        if numPeople <= numChairs:
+            self.pos = newRoom.chairs[numPeople].coord
+        else:
+            self.pos = newRoom.stand[numPeople - numChairs].coord
+
+        # Add person to room if they aren't there already
+        if currentRoom and self in currentRoom.sittingVisPeople:
+            currentRoom.sittingVisPeople.remove(self)
+        newRoom.sittingVisPeople.add(self)
+        self.room = newRoom.name
+
+        return
         
-    def set_data(self, room, pos, act, team, name, visualizer):
+    def set_data(self, room, act, team, name, visualizer):
         """
         Fields to be used
         """
-        self.pos = pos
         self.room = room
         self.action = act
         self.team = team
