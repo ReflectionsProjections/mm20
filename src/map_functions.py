@@ -70,7 +70,6 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
         if len(rooms[i].snacktables) != 0:
             rooms[i].addResource('FOOD')  # For now, this is how we are treating food
-        #print "The {0} room has chairs {1} and snacktables {2}".format(colorDict[rooms[i].name], rooms[i].chairs, rooms[i].snacktables)
 
     # Done!
     """
