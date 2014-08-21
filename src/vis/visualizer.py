@@ -3,6 +3,7 @@ import config.handle_constants
 import json
 import random
 import time
+import math
 from map_functions import map_reader
 
 NO_CHAIR = (-100, -100)
@@ -73,18 +74,42 @@ class Visualizer(object):
             time.sleep(5)
             pygame.quit()
 
+    def movementIsComplete(self):
+        for p in self.people:
+            if p.targetPos != p.pos:
+                return False
+        return True
+
     def frame(self, turn=None):
-        if self.running:
-            d = self.update_state(json.loads(turn))
-            while d:
+        while self.running and self.update_state(json.loads(turn)):
+
+            # Smooth moving
+            movementFinalized = False
+            frameCount = 0
+            while not movementFinalized or frameCount < self.constants["MIN_FRAMES"]:
+                frameCount += 1
+                movementFinalized = self.movementIsComplete()
+
                 self.draw()
                 self.GameClock.tick(self.MAX_FPS)
-                for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            pygame.quit()
-                            self.running = False
-                if not self.game_done or not self.running:
-                    break
+
+                for p in self.people:
+                    if p.targetPos != p.pos:
+                        length = math.sqrt(math.pow((p.targetPos[0] - p.pos[0]), 2) + math.pow((p.targetPos[1] - p.pos[1]), 2))
+                        if length > self.constants["WALK_SPEED"]:
+                            x_dir = float(p.targetPos[0] - p.pos[0]) / length
+                            y_dir = float(p.targetPos[1] - p.pos[1]) / length
+
+                            p.pos = (p.pos[0] + x_dir * self.constants["WALK_SPEED"], p.pos[1] + y_dir * self.constants["WALK_SPEED"])
+                        else:
+                            p.pos = p.targetPos # To avoid floating point errors
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    self.running = False
+            if not self.game_done:
+                break
 
     def draw(self):
         #Draw background
@@ -114,8 +139,6 @@ class Visualizer(object):
                 label = aifont.render(key + ": " + str(val), 1, (255, 255, 255))
                 self.ScreenSurface.blit(label, (self.SCREEN_MAP_WIDTH, x_pos))
                 x_pos += 20
-
-        #Draw actions (move animations? failure prompts?)
 
         #If game is over, show winner
         if self.game_done:
@@ -151,7 +174,7 @@ class Visualizer(object):
 
                     # Determine player position
                     if acted == "eat":
-                        visPlayer.pos = currentRoom.snacktables[0]
+                        visPlayer.targetPos = currentRoom.snacktables[0]
                         if visPlayer in currentRoom.sittingVisPeople:
                             currentRoom.sittingVisPeople.remove(visPlayer)
                     elif acted in ["code", "move", "theorize"]:
@@ -182,6 +205,7 @@ class Visualizer(object):
                 room = self.rooms[person["location"]]
 
                 visPlayer.sit_in_room(room)
+                visPlayer.pos = visPlayer.targetPos
                 visPlayer.set_data(
                     person["location"],
                     None,
@@ -194,6 +218,7 @@ class VisPerson(object):
     """
     def __init__(self, ):
         self.room = None
+        self.targetPos = None
         self.pos = None
         self.action = None
         self.team = None
@@ -209,9 +234,9 @@ class VisPerson(object):
         numPeople = len(newRoom.sittingVisPeople)
         numChairs = len(newRoom.chairs)
         if numPeople <= numChairs:
-            self.pos = newRoom.chairs[numPeople].coord
+            self.targetPos = newRoom.chairs[numPeople].coord
         else:
-            self.pos = newRoom.stand[numPeople - numChairs].coord
+            self.targetPos = newRoom.stand[numPeople - numChairs].coord
 
         # Add person to room if they aren't there already
         if currentRoom and self in currentRoom.sittingVisPeople:
