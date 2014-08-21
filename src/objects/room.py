@@ -51,6 +51,13 @@ class NotAvailableError(Exception):
     def __str__(self):
         return self.msg
 
+class RoomIsFullError(Exception):
+    def __init__(self, room):
+        self.msg = "Room {0} is already full of people.".format(room)
+
+    def __str__(self):
+        return self.msg
+
 class Position(object):
     def __init__(self, position):
         self.coord = position
@@ -86,6 +93,8 @@ class Room(object):
     def addMember(self, member):
         if member in self.people:
             raise AlreadyInRoomError(self, member)
+        if len(self.people) + 1 > len(self.chairs + self.stand):
+            raise RoomIsFullError(self)
         self.people.add(member)
         
     ## Removes a member from this room
@@ -174,6 +183,8 @@ class Room(object):
 class TestRoom(unittest.TestCase):
     def setUp(self):
         self.room = Room("testRoom")
+        self.room.chairs = [(1,1), (2,2), (3,3)]
+        self.room.stand = [(4,4), (5,5), (6,6)]
 
     def testInitCorrect(self):
         room = Room("testRoom")
@@ -250,6 +261,14 @@ class TestRoom(unittest.TestCase):
     def testIsConnectedNotConnected(self):
         roomTwo = Room("testRoom2")
         self.assertFalse(self.room.isConnectedTo(roomTwo))
+
+    def testAddMember(self):
+        oldRoom = self.room
+        for i in range(0, len(self.room.chairs + self.room.stand)):
+            self.room.addMember(str(i))
+        with self.assertRaises(RoomIsFullError):
+            self.room.addMember('jim')
+        self.room = oldRoom
 
 if __name__ == "__main__":
     unittest.main()
