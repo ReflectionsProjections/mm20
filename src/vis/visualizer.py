@@ -146,7 +146,7 @@ class Visualizer(object):
                     visPlayer = self.people[person["person_id"]]
                     acted = person.get("acted", "asleep" if person["asleep"] else None)
 
-                    currentRoom = self.rooms.get(person["location"], None)
+                    currentRoom = self.rooms[person["location"]]
                     newRoom = self.rooms[person["location"]]
 
                     # Determine player position
@@ -182,7 +182,6 @@ class Visualizer(object):
                 room = self.rooms[person["location"]]
 
                 visPlayer.sit_in_room(room)
-
                 visPlayer.set_data(
                     person["location"],
                     None,
