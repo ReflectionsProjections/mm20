@@ -6,10 +6,10 @@ import json
 def updateMembers(members, value):
     if members is None:
         members = {}
-        for person in value["team"]:
+        for person in value["team"].values():
             members[person["person_id"]] = person
     if "people" in value:
-        for person in value["people"]:
+        for person in value["people"].values():
             if person["person_id"] in members:
                 members[person["person_id"]] = person
     return members
@@ -32,8 +32,9 @@ def setActions(members, value):
                         message["reason"] == "HUNGRY":
                     act["action"] = "eat"
         if "action" not in act:
-            if m["hunger"] > 75:
-                act["action"] = "eat"
+            if value["map"][m["location"]]:
+                if m["hunger"] > 75:
+                    act["action"] = "eat"
             if m["stats"]["theorize"] == 10:
                 act["action"] = "theorize"
             elif m["stats"]["test"] == 10:

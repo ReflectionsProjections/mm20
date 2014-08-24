@@ -64,7 +64,7 @@ class Game(object):
         self.result_buffer[client_id] = []
         self.teams[client_id] = newTeam
         response = {"status": "Success", "team": newTeam.get_team_members(),
-                    "team_name": newTeam.name}
+                    "team_name": newTeam.name, "map": self.teams[client_id].get_visible_map()}
 
         return (True, response)
 

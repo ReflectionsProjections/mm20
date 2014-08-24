@@ -139,7 +139,7 @@ class Visualizer(object):
         #reshape data
         for i, player in enumerate(turn):
             self.ai[i] = player["aiStats"]
-            for person in player["people"]:
+            for person in player["people"].values():
                 if person["team"] == i:
                     self.people[person["person_id"]].set_data(
                         person["location"],
@@ -162,7 +162,7 @@ class Visualizer(object):
             number_of_people += len(player["team"])
         self.people = [VisPerson() for _ in xrange(number_of_people)]
         for player in teams:
-            for person in player["team"]:
+            for person in player["team"].values():
                 self.people[person["person_id"]].set_data(
                     person["location"],
                     person["position"],

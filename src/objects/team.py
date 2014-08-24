@@ -35,16 +35,16 @@ class Team(object):
         for m in self.members.values():
             visible_room = m.location
             rooms[visible_room.name] = visible_room
-        return [r.output_dict() for r in rooms.values()]
+        return {k: r.output_dict() for k, r in rooms.items()}
 
     ## Returns a list of serializeable dictionaries of all of
     #  the team members on this team
     def get_team_members(self):
-        return [m.output_dict() for m in self.members.values()]
+        return {k: m.output_dict() for k, m in self.members.items()}
 
     def get_info_on_people(self, people_list):
-        return [p.output_dict() if p.team.my_id == self.my_id
-                else p.output_dict_limited() for p in people_list]
+        return {p.person_id: p.output_dict() if p.team.my_id == self.my_id
+                else p.output_dict_limited() for p in people_list}
 
 import room
 
