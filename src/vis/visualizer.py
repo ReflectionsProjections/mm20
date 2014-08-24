@@ -3,6 +3,8 @@ import config.handle_constants
 import json
 import random
 import time
+import math
+from map_functions import map_reader
 
 NO_CHAIR = (-100, -100)
 
@@ -72,18 +74,42 @@ class Visualizer(object):
             time.sleep(5)
             pygame.quit()
 
+    def movementIsComplete(self):
+        for p in self.people:
+            if p.targetPos != p.pos:
+                return False
+        return True
+
     def frame(self, turn=None):
-        if self.running:
-            d = self.update_state(json.loads(turn))
-            while d:
+        while self.running and self.update_state(json.loads(turn)):
+
+            # Smooth moving
+            movementFinalized = False
+            frameCount = 0
+            while not movementFinalized or frameCount < self.constants["MIN_FRAMES"]:
+                frameCount += 1
+                movementFinalized = self.movementIsComplete()
+
                 self.draw()
                 self.GameClock.tick(self.MAX_FPS)
-                for event in pygame.event.get():
-                        if event.type == pygame.QUIT:
-                            pygame.quit()
-                            self.running = False
-                if not self.game_done or not self.running:
-                    break
+
+                for p in self.people:
+                    if p.targetPos != p.pos:
+                        length = math.sqrt(math.pow((p.targetPos[0] - p.pos[0]), 2) + math.pow((p.targetPos[1] - p.pos[1]), 2))
+                        if length > self.constants["WALK_SPEED"]:
+                            x_dir = float(p.targetPos[0] - p.pos[0]) / length
+                            y_dir = float(p.targetPos[1] - p.pos[1]) / length
+
+                            p.pos = (p.pos[0] + x_dir * self.constants["WALK_SPEED"], p.pos[1] + y_dir * self.constants["WALK_SPEED"])
+                        else:
+                            p.pos = p.targetPos # To avoid floating point errors
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    self.running = False
+            if not self.game_done:
+                break
 
     def draw(self):
         #Draw background
@@ -141,11 +167,24 @@ class Visualizer(object):
             self.ai[i] = player["aiStats"]
             for person in player["people"].values():
                 if person["team"] == i:
-                    self.people[person["person_id"]].set_data(
+
+                    visPlayer = self.people[person["person_id"]]
+                    acted = person.get("acted", "asleep" if person["asleep"] else None)
+
+                    currentRoom = self.rooms[person["location"]]
+                    newRoom = self.rooms[person["location"]]
+
+                    # Determine player position
+                    if acted == "eat":
+                        visPlayer.targetPos = currentRoom.snacktables[0]
+                        if visPlayer in currentRoom.sitting:
+                            currentRoom.sitting.remove(visPlayer)
+                    elif acted in ["code", "move", "theorize"]:
+                        visPlayer.sit_in_room(newRoom, currentRoom)
+
+                    visPlayer.set_data(
                         person["location"],
-                        person["position"],
-                        person["acted"] or
-                        ("asleep" if person["asleep"] else None),
+                        acted,
                         person["team"], person["name"], self)
         return True
                         
@@ -163,11 +202,15 @@ class Visualizer(object):
         self.people = [VisPerson() for _ in xrange(number_of_people)]
         for player in teams:
             for person in player["team"].values():
-                self.people[person["person_id"]].set_data(
+
+                visPlayer = self.people[person["person_id"]]
+                room = self.rooms[person["location"]]
+
+                visPlayer.sit_in_room(room)
+                visPlayer.pos = visPlayer.targetPos
+                visPlayer.set_data(
                     person["location"],
-                    person["position"],
-                    person["acted"] or
-                    ("asleep" if person["asleep"] else None),
+                    None,
                     person["team"], person["name"], self)
         
 
@@ -177,16 +220,38 @@ class VisPerson(object):
     """
     def __init__(self, ):
         self.room = None
+        self.targetPos = None
         self.pos = None
         self.action = None
         self.team = None
         self.name = None
+
+    def sit_in_room(self, newRoom, currentRoom=None):
+
+        # No-op case
+        if self in newRoom.sitting:
+            return
+
+        # Assign person a new spot
+        numPeople = len(newRoom.sitting)
+        numChairs = len(newRoom.chairs)
+        if numPeople <= numChairs:
+            self.targetPos = newRoom.chairs[numPeople]
+        else:
+            self.targetPos = newRoom.stand[numPeople - numChairs]
+
+        # Add person to room if they aren't there already
+        if currentRoom and self in currentRoom.sitting:
+            currentRoom.sitting.remove(self)
+        newRoom.sitting.add(self)
+        self.room = newRoom.name
+
+        return
         
-    def set_data(self, room, pos, act, team, name, visualizer):
+    def set_data(self, room, act, team, name, visualizer):
         """
         Fields to be used
         """
-        self.pos = pos
         self.room = room
         self.action = act
         self.team = team
@@ -194,6 +259,6 @@ class VisPerson(object):
         
         
 if __name__ == "__main__":
-    vis = Visualizer()
+    vis = Visualizer(map_reader("rooms.bmp"))
     vis.run_from_file("../serverlog.json")
 

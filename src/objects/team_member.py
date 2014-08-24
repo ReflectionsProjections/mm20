@@ -26,7 +26,7 @@ class TeamMember(object):
         self.stats = TeamMember.Archetypes[archetype]
         self.archetype = archetype
         self.location = location
-        self.position = None
+        self.sitting = False
         location.addMember(self)
         self.team = team
         self.hunger = constants["hunger"]
@@ -48,7 +48,7 @@ class TeamMember(object):
     def __eq__(self, other):
         return self.person_id == other.person_id
 
-    ## Make a seralible repesentaion of this team member and everything in it
+    ## Make a serializable repesentaion of this team member and everything in it
     # @return
     #    A dict that reprents the team member
     def output_dict(self):
@@ -57,7 +57,7 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         return my_info
 
-    ## Make a seralible repesentaion of this team member with limited in it
+    ## Make a serializable repesentaion of this team member with limited in it
     # @return
     #    A dict that reprents the team member
     def output_dict_limited(self):
@@ -114,7 +114,8 @@ class TeamMember(object):
     ## The team member sleeps for some time to regain energy.
     def sleep(self):
         self._can_move()
-        self.asleep = True
+        if self.sitting:
+            self.asleep = True
 
     ##  Code!
     #
@@ -125,7 +126,10 @@ class TeamMember(object):
     def code(self, code_type, turn):
         self._can_move()
         ai = self.team.ai
-        effective = self._getEffectiveness()
+        effectmod = 1.0
+        if not self.sitting:
+            effectmod = 0.5
+        effective = effectmod * self._getEffectiveness()
         if code_type == "refactor":
             ai.complexity -= effective * self.stats["refactor"]
             ai.complexity = max(ai.complexity, ai.implementation * .25)
@@ -158,7 +162,10 @@ class TeamMember(object):
     #     The turn so that the player knows how long they've been theorizing
     def theorize(self, turn):
         self._can_move()
-        effective = self._getEffectiveness()
+        effectmod = 1.0
+        if not self.sitting:
+            effectmod = 0.5
+        effective = effectmod * self._getEffectiveness()
         self.team.ai.theory += self.stats["theorize"] * effective
         self.acted = "theorize"
 
@@ -181,7 +188,7 @@ class TeamMember(object):
         if self.hunger < 0.0:
             self.hunger = 0.0
         self.acted = "eat"
-        self.position = self.location.snacktables[0]
+        self.location.standUp(self)
 
     ##  Distract!
     #
@@ -280,8 +287,6 @@ class TeamMember(object):
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
-        self.acted = None
-
 
 import team
 import room

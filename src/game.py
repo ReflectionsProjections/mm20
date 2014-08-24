@@ -75,6 +75,8 @@ class Game(object):
     def execute_turn(self):
         if len(self.people) == 0:
             return False
+        for person in self.people:
+            person.acted = None
         action_handler.handleTurn(self, self.action_buffer)
         self.action_buffer = []
         for person in self.people:

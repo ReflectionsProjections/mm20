@@ -51,10 +51,12 @@ class NotAvailableError(Exception):
     def __str__(self):
         return self.msg
 
-class Position(object):
-    def __init__(self, position):
-        self.coord = position
-        self.owner = None
+class RoomIsFullError(Exception):
+    def __init__(self, room):
+        self.msg = "Room {0} is already full of people.".format(room)
+
+    def __str__(self):
+        return self.msg
 
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
@@ -72,6 +74,7 @@ class Room(object):
         self.connectedRooms = dict()
         self.name = room_id
         self.people = set()
+        self.sitting = set()
         self.resources = set()
         self.chairs = list()
         self.stand = list()
@@ -85,20 +88,15 @@ class Room(object):
     def addMember(self, member):
         if member in self.people:
             raise AlreadyInRoomError(self, member)
+        if len(self.people) + 1 > len(self.chairs + self.stand):
+            raise RoomIsFullError(self)
         self.people.add(member)
-        found = False
-        for pos in self.chairs:
-            if pos.owner is None and not found:
-                pos.owner = member
-                member.position = pos.coord
-                found = True
-        for pos in self.stand:
-            if pos.owner is None and not found:
-                pos.owner = member
-                member.position = pos.coord
-                found = True
+        if len(self.sitting) < len(self.chairs):
+            self.sitting.add(member)
+            member.sitting = True
+        else:
+            member.sitting = False
         
-
     ## Removes a member from this room
     # @param member
     #   The member to remove from this room
@@ -106,13 +104,29 @@ class Room(object):
         if not member in self.people:
             raise NotInRoomError(self, member)
         self.people.remove(member)
-        for pos in self.stand:
-            if pos.owner is not None and pos.owner == member:
-                pos.owner = None
-        for pos in self.chairs:
-            if pos.owner is not None and pos.owner == member:
-                pos.owner = None
-        member.position = None
+        if member in self.sitting:
+            self.sitting.remove(member)
+            member.sitting = False
+
+    ## This person is trying to sit down
+    # @param member
+    #   The member trying to sit
+    def sitDown(self, member):
+        if not member in self.people:
+            raise NotInRoomError(self, member)
+        if not member in self.sitting and len(self.sitting) < len(self.chairs):
+            self.sitting.add(member)
+            member.sitting = True
+
+    ## This person is trying to stand up
+    # @param member
+    #   The member trying to stand
+    def standUp(self, member):
+        if not member in self.people:
+            raise NotInRoomError(self, member)
+        if member in self.sitting:
+            self.sitting.remove(member)
+            member.sitting = False
 
     ## Make a resource available in this room
     # @param resource
@@ -187,11 +201,13 @@ class Room(object):
     # @return
     #   boolean value stating whether adding them is possible or not
     def canAdd(self, num_people):
-        return num_people <= len(self.stand) - len(self.people)
+        return num_people <= len(self.stand) + len(self.chairs) - len(self.people)
 
 class TestRoom(unittest.TestCase):
     def setUp(self):
         self.room = Room("testRoom")
+        self.room.chairs = [(1,1), (2,2), (3,3)]
+        self.room.stand = [(4,4), (5,5), (6,6)]
 
     def testInitCorrect(self):
         room = Room("testRoom")
@@ -268,6 +284,14 @@ class TestRoom(unittest.TestCase):
     def testIsConnectedNotConnected(self):
         roomTwo = Room("testRoom2")
         self.assertFalse(self.room.isConnectedTo(roomTwo))
+
+    def testAddMember(self):
+        oldRoom = self.room
+        for i in range(0, len(self.room.chairs + self.room.stand)):
+            self.room.addMember(str(i))
+        with self.assertRaises(RoomIsFullError):
+            self.room.addMember('jim')
+        self.room = oldRoom
 
 if __name__ == "__main__":
     unittest.main()

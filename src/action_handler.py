@@ -13,7 +13,7 @@ import unittest
 def handleTurn(game, action_buffer):
     sortActions(action_buffer)
     for action in action_buffer:
-        game.result_buffer[action.owner].append(executeAction(game, action))
+        game.result_buffer[action.owner].append(action.execute(game))
     return
 
 
@@ -41,17 +41,6 @@ def sortActions(actionBuffer):
 def bufferAction(actionBuffer, action, parameters, client_id):
     action = objects.client_action.Action(action, parameters, client_id)
     actionBuffer.append(action)
-
-
-## Executes an action
-# @param game
-#   The gamestate
-# @param action
-#   The action (object) to execute
-# @returns
-#   A dictionary with results (format is defined on confluence)
-def executeAction(game, action):
-    return action.execute(game)
 
 
 class TestaActionHandler(unittest.TestCase):
