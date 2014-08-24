@@ -58,11 +58,6 @@ class RoomIsFullError(Exception):
     def __str__(self):
         return self.msg
 
-class Position(object):
-    def __init__(self, position):
-        self.coord = position
-        self.owner = None
-
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
 #  Rooms contain team members and furniture (TODO)
@@ -79,7 +74,7 @@ class Room(object):
         self.connectedRooms = dict()
         self.name = room_id
         self.people = set()
-        self.sittingVisPeople = set()
+        self.sitting = set()
         self.resources = set()
         self.chairs = list()
         self.stand = list()
@@ -96,6 +91,11 @@ class Room(object):
         if len(self.people) + 1 > len(self.chairs + self.stand):
             raise RoomIsFullError(self)
         self.people.add(member)
+        if len(self.sitting) < len(self.chairs):
+            self.sitting.add(member)
+            member.sitting = True
+        else:
+            member.sitting = False
         
     ## Removes a member from this room
     # @param member
@@ -104,6 +104,29 @@ class Room(object):
         if not member in self.people:
             raise NotInRoomError(self, member)
         self.people.remove(member)
+        if member in self.sitting:
+            self.sitting.remove(member)
+            member.sitting = False
+
+    ## This person is trying to sit down
+    # @param member
+    #   The member trying to sit
+    def sitDown(self, member):
+        if not member in self.people:
+            raise NotInRoomError(self, member)
+        if not member in self.sitting and len(self.sitting) < len(self.chairs):
+            self.sitting.add(member)
+            member.sitting = True
+
+    ## This person is trying to stand up
+    # @param member
+    #   The member trying to stand
+    def standUp(self, member):
+        if not member in self.people:
+            raise NotInRoomError(self, member)
+        if member in self.sitting:
+            self.sitting.remove(member)
+            member.sitting = False
 
     ## Make a resource available in this room
     # @param resource
@@ -178,7 +201,7 @@ class Room(object):
     # @return
     #   boolean value stating whether adding them is possible or not
     def canAdd(self, num_people):
-        return num_people <= len(self.stand) - len(self.people)
+        return num_people <= len(self.stand) + len(self.chairs) - len(self.people)
 
 class TestRoom(unittest.TestCase):
     def setUp(self):

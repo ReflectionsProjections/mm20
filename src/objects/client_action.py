@@ -37,6 +37,8 @@ class Action:
     # @parameter game
     #   The game state
     def execute(self, game):
+        person = game.people[self.parameters["person_id"]]
+        person.location.sitDown(person)
         invalid = {'success': False, 'message': 'Invalid action',
                    'reason': 'INVALID'}
         if self.action == 'INVALID':

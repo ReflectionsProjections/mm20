@@ -175,8 +175,8 @@ class Visualizer(object):
                     # Determine player position
                     if acted == "eat":
                         visPlayer.targetPos = currentRoom.snacktables[0]
-                        if visPlayer in currentRoom.sittingVisPeople:
-                            currentRoom.sittingVisPeople.remove(visPlayer)
+                        if visPlayer in currentRoom.sitting:
+                            currentRoom.sitting.remove(visPlayer)
                     elif acted in ["code", "move", "theorize"]:
                         visPlayer.sit_in_room(newRoom, currentRoom)
 
@@ -227,21 +227,21 @@ class VisPerson(object):
     def sit_in_room(self, newRoom, currentRoom = None):
 
         # No-op case
-        if self in newRoom.sittingVisPeople:
+        if self in newRoom.sitting:
            return 
 
         # Assign person a new spot
-        numPeople = len(newRoom.sittingVisPeople)
+        numPeople = len(newRoom.sitting)
         numChairs = len(newRoom.chairs)
         if numPeople <= numChairs:
-            self.targetPos = newRoom.chairs[numPeople].coord
+            self.targetPos = newRoom.chairs[numPeople]
         else:
-            self.targetPos = newRoom.stand[numPeople - numChairs].coord
+            self.targetPos = newRoom.stand[numPeople - numChairs]
 
         # Add person to room if they aren't there already
-        if currentRoom and self in currentRoom.sittingVisPeople:
-            currentRoom.sittingVisPeople.remove(self)
-        newRoom.sittingVisPeople.add(self)
+        if currentRoom and self in currentRoom.sitting:
+            currentRoom.sitting.remove(self)
+        newRoom.sitting.add(self)
         self.room = newRoom.name
 
         return

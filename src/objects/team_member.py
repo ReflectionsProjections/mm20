@@ -26,6 +26,7 @@ class TeamMember(object):
         self.stats = TeamMember.Archetypes[archetype]
         self.archetype = archetype
         self.location = location
+        self.sitting = False
         location.addMember(self)
         self.team = team
         self.hunger = constants["hunger"]
@@ -113,7 +114,8 @@ class TeamMember(object):
     ## The team member sleeps for some time to regain energy.
     def sleep(self):
         self._can_move()
-        self.asleep = True
+        if self.sitting:
+            self.asleep = True
 
     ##  Code!
     #
@@ -124,7 +126,10 @@ class TeamMember(object):
     def code(self, code_type, turn):
         self._can_move()
         ai = self.team.ai
-        effective = self._getEffectiveness()
+        effectmod = 1.0
+        if not self.sitting:
+            effectmod = 0.5
+        effective = effectmod * self._getEffectiveness()
         if code_type == "refactor":
             ai.complexity -= effective * self.stats["refactor"]
             ai.complexity = max(ai.complexity, ai.implementation * .25)
@@ -157,7 +162,10 @@ class TeamMember(object):
     #     The turn so that the player knows how long they've been theorizing
     def theorize(self, turn):
         self._can_move()
-        effective = self._getEffectiveness()
+        effectmod = 1.0
+        if not self.sitting:
+            effectmod = 0.5
+        effective = effectmod * self._getEffectiveness()
         self.team.ai.theory += self.stats["theorize"] * effective
         self.acted = "theorize"
 
@@ -180,6 +188,7 @@ class TeamMember(object):
         if self.hunger < 0.0:
             self.hunger = 0.0
         self.acted = "eat"
+        self.location.standUp(self)
 
     ##  Distract!
     #
