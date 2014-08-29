@@ -129,7 +129,7 @@ class TeamMember(object):
         effectmod = 1.0
         if not self.sitting:
             effectmod = 0.5
-        effective = effectmod * self._getEffectiveness()
+        effective = effectmod * self.getEffectiveness()
         if code_type == "refactor":
             ai.complexity -= effective * self.stats["refactor"]
             ai.complexity = max(ai.complexity, ai.implementation * .25)
@@ -165,7 +165,7 @@ class TeamMember(object):
         effectmod = 1.0
         if not self.sitting:
             effectmod = 0.5
-        effective = effectmod * self._getEffectiveness()
+        effective = effectmod * self.getEffectiveness()
         self.team.ai.theory += self.stats["theorize"] * effective
         self.acted = "theorize"
 
@@ -217,7 +217,7 @@ class TeamMember(object):
     ##  Spy!
     def spy(self):
         self._can_move()
-        effective = self._getEffectiveness() * self.stats["spy"]
+        effective = self.getEffectiveness() * self.stats["spy"]
         amount = 0
         for person in self.location.people:
             if person.team != self.team:
@@ -244,7 +244,7 @@ class TeamMember(object):
         self.acted = "wake"
 
     ## Calculate effectiveness based on fatigue and hunger
-    def _getEffectiveness(self):
+    def getEffectiveness(self):
         effective = 1.0
         if self.hunger > TeamMember.effectiveness_drops:
             effective -= 0.5 * (100 - self.hunger) /\
