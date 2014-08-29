@@ -32,12 +32,13 @@ class Action:
             self.priority = actions_data['priorities'][action]
         self.parameters = parameters
         self.owner = client_id
+        self.person_id = parameters["person_id"]
 
     ## Executes this action
     # @parameter game
     #   The game state
     def execute(self, game):
-        person = game.people[self.parameters["person_id"]]
+        person = game.people[self.person_id]
         person.location.sitDown(person)
         invalid = {'success': False, 'message': 'Invalid action',
                    'reason': 'INVALID'}

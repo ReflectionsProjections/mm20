@@ -24,8 +24,17 @@ def sortActions(actionBuffer):
     # TODO
     # sort the actions in actionBuffer by priority, see the python
     # built-in sort function
-    actionBuffer.sort(lambda a, b: a.priority - b.priority, reverse=True)
+    actionBuffer.sort(sortFunction, reverse=True)
     return
+
+## Compare two actions and return >0 if a has higher priority,
+#  return <0 if b has higher priority (higher means faster)
+# @param a
+#   The action to compare with b
+# @param b
+#   The action to compare with a
+def sortFunction(a, b):
+    return a.priority - b.priority
 
 
 ## Adds the action to a buffered list of actions that will be
