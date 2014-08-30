@@ -91,11 +91,7 @@ class Room(object):
         if len(self.people) + 1 > len(self.chairs + self.stand):
             raise RoomIsFullError(self)
         self.people.add(member)
-        if len(self.sitting) < len(self.chairs):
-            self.sitting.add(member)
-            member.sitting = True
-        else:
-            member.sitting = False
+        member.sitting = False
         
     ## Removes a member from this room
     # @param member

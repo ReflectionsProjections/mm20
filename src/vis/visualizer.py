@@ -52,6 +52,11 @@ class Visualizer(object):
         self.GameClock = pygame.time.Clock()
         image = pygame.image.load(self.serverDefaults["map"]).convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
+        
+        image = pygame.image.load("person.png").convert_alpha()
+        self.personImage = pygame.transform.scale(image, (32, 32))
+        # self.teamPersonImages = []
+
 
     def run_from_file(self, file_name=""):
 
@@ -121,8 +126,12 @@ class Visualizer(object):
             color = self.colors[-1]
             if p.team < len(self.colors):
                 color = self.colors[p.team]
-            pygame.draw.circle(self.ScreenSurface, (0, 0, 0), self.scale(p.pos), self.constants["PERSON_SIZE"], 0)
-            pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"] - 2, 0)
+            # pygame.draw.circle(self.ScreenSurface, (0, 0, 0), self.scale(p.pos), self.constants["PERSON_SIZE"], 0)
+            # pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"] - 2, 0)
+            # replace(color, repcolor)
+            # toDraw = PixelArray(self.personImage).replace(Color(255, 0, 255, 255), color).surface();
+            self.ScreenSurface.blit(self.personImage, self.scale( (p.pos[0] - 8, p.pos[1] - 8) ) );
+
 
         #Draw AI info
         namefont = pygame.font.SysFont("monospace", 40)

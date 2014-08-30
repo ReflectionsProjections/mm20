@@ -11,7 +11,7 @@ import unittest
 # @param action_buffer
 #   A buffer (list) of all of the actions to be performed this turn
 def handleTurn(game, action_buffer):
-    sortActions(action_buffer)
+    sortActions(action_buffer, game)
     for action in action_buffer:
         game.result_buffer[action.owner].append(action.execute(game))
     return
@@ -20,12 +20,22 @@ def handleTurn(game, action_buffer):
 ## Sorts the actions in the action buffer by their priority.
 # @param actionBuffer
 #   A buffer (list) of actions
-def sortActions(actionBuffer):
-    # TODO
-    # sort the actions in actionBuffer by priority, see the python
-    # built-in sort function
-    actionBuffer.sort(lambda a, b: a.priority - b.priority, reverse=True)
+def sortActions(actionBuffer, game):
+    actionBuffer.sort(lambda a, b: sortFunction(game, a, b), reverse=True)
     return
+
+## Compare two actions and return >0 if a has higher priority,
+#  return <0 if b has higher priority (higher means faster)
+# @param a
+#   The action to compare with b
+# @param b
+#   The action to compare with a
+def sortFunction(game, a, b):
+    if a.person_id == -1 or b.person_id == -1:
+        return a.priority - b.priority
+    aval = int(100 * (a.priority + game.people[a.person_id].getEffectiveness()))
+    bval = int(100 * (b.priority + game.people[b.person_id].getEffectiveness()))
+    return aval - bval
 
 
 ## Adds the action to a buffered list of actions that will be

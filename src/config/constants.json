@@ -11,7 +11,9 @@
   "memberConstants": {
     "effectiveness_drops": 60.0,
     "hunger": 0.0,
-    "fatigue": 50.0
+    "fatigue": 50.0,
+    "coding_bonus": 10.0,
+    "turns_to_bonus": 10
   },
   "serverDefaults": {
     "players": 2,
@@ -56,15 +58,15 @@
       "serverInfo"
     ],
     "priorities": {
-      "serverInfo": 100,
-      "move": 80,
-      "eat": 80,
-      "distract": 70,
-      "sleep": 60,
-      "code": 60,
-      "theorize": 50,
-      "wake": 40,
-      "spy": 20
+      "serverInfo": 100.0,
+      "move": 80.0,
+      "eat": 80.0,
+      "distract": 70.0,
+      "sleep": 60.0,
+      "code": 60.0,
+      "theorize": 50.0,
+      "wake": 40.0,
+      "spy": 20.0
     }
   },
   "aiDefaults": {
