@@ -29,6 +29,7 @@
     "log": "serverlog.json"
   },
   "visualizerDefaults": {
+    "map_overlay": "rooms_overlay.png",
     "SCREEN_WIDTH": 1082,
     "SCREEN_HEIGHT": 681,
     "MAX_FPS": 60,

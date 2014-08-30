@@ -6,24 +6,14 @@ import objects.room
 # TODO move to constants.py or something like that
 wallColors = ["0 0 0 255"]
 
-# For debugging
-colorDict = {
-    "0 0 0 255":        "black",
-    "0 255 255 255":    "cyan",
-    "255 255 255 255":  "white",
-    "72 0 255 255":     "blue",
-    "255 0 220 255":    "pink",
-    "76 255 0 255":     "green"
-}
-
 # Furniture
 roomObjectColorDict = {
-    "57 234 49 255":          "chair",
-    "255 0 234 255":          "desk",
-    "150 12 100 255":          "stand",
+    "57 234 49 255":    "chair",
+    "255 0 234 255":    "desk",
+    "22 22 220 255":    "stand",
     "220 22 22 255":    "door",
-    "3 2 1 255":          "snacktable",
-    "255 168 0 255": "chair_dir"
+    "3 2 1 255":        "snacktable",
+    "255 168 0 255":    "chair_dir"
 }
 doorColor = "220 22 22 255"
 

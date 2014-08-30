@@ -110,7 +110,9 @@ class Room(object):
     def sitDown(self, member):
         if not member in self.people:
             raise NotInRoomError(self, member)
-        if not member in self.sitting and len(self.sitting) < len(self.chairs):
+        elif len(self.sitting) + 1 > len(self.chairs):
+            raise RoomIsFullError(self)
+        elif not member in self.sitting:
             self.sitting.add(member)
             member.sitting = True
 

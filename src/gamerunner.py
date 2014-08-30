@@ -119,9 +119,10 @@ class FileLogger(object):
     def print_stuff(self, stuff):
         with open(self.file, 'a') as f:
             f.write(stuff + '\n')
+            f.flush()
         if self.vis:
             self.vis.frame(stuff)
-
+            print stuff
 
 def main():
     global parameters

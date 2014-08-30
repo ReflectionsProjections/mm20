@@ -50,7 +50,7 @@ class Visualizer(object):
         pygame.display.set_caption(self.TITLE)
         self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.GameClock = pygame.time.Clock()
-        image = pygame.image.load(self.serverDefaults["map"]).convert()
+        image = pygame.image.load(self.constants["map_overlay"]).convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
         
         image = pygame.image.load("person.png").convert_alpha()
@@ -244,10 +244,13 @@ class VisPerson(object):
         # Assign person a new spot
         numPeople = len(newRoom.sitting)
         numChairs = len(newRoom.chairs)
-        if numPeople <= numChairs:
+        numStand = len(newRoom.stand)
+        if numPeople < numChairs:
             self.targetPos = newRoom.chairs[numPeople]
-        else:
+        elif numPeople < numChairs + numStand:
             self.targetPos = newRoom.stand[numPeople - numChairs]
+        else:
+            print "NOT ENOUGH ROOM!\n"
 
         # Add person to room if they aren't there already
         if currentRoom and self in currentRoom.sitting:

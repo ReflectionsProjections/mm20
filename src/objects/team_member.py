@@ -93,6 +93,11 @@ class TeamMember(object):
                     "NOTCONNECTED",
                     "Cannot move to destination, \
                     it is not connected to current location")
+            elif len(destination.people) + 1 > len(destination.chairs + destination.stand):
+                raise client_action.ActionError(
+                    "ROOMISFULL",
+                    "Cannot move to destination, \
+                    it is full.")
             else:
                 self.location.removeMember(self)
                 destination.addMember(self)

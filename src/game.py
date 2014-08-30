@@ -59,6 +59,7 @@ class Game(object):
                            start_room, self.people, client_id)
         except KeyError:
             return (False, {"status": "Failure", "errors": ["KeyError"]})
+            
         # TODO: Make all error objects uniform
         self.result_buffer[client_id] = []
         self.teams[client_id] = newTeam
