@@ -30,14 +30,18 @@ def setActions(members, value, map_dict):
         act["person_id"] = m["person_id"]
 
         # Move into room with a snacktable
-        TARGET = "252 255 0 255" # The BLUE room, which has a snacktable
-        if m["location"] != TARGET:
+        TARGET = "255 114 0 255" # Has a snacktable
+        if m["location"] != TARGET and m["name"] != "atest1":
             act["action"] = "move"
             connected_rooms = map_dict[m["location"]]["connectedRooms"]
-            act["room"] = random.choice(connected_rooms)
             
-            sys.stderr.write("moving! %s\n" % act["room"]);
-
+            sys.stderr.write(", ".join(connected_rooms) + "\n");
+            
+            if TARGET in connected_rooms:
+                act["room"] = TARGET
+            else:
+                act["room"] = random.choice(connected_rooms)
+            
         # Standard actions
         else:
             if "messages" in value:
@@ -79,7 +83,6 @@ if __name__ == "__main__":
                 data += s.recv(1024)
             else:
                 value = json.loads(data[0])
-                print 'Received', repr(data[0])
                 if 'winner' in value:
                     game_running = False
                 else:

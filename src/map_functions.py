@@ -10,9 +10,9 @@ wallColors = ["0 0 0 255"]
 roomObjectColorDict = {
     "57 234 49 255":    "chair",
     "255 0 234 255":    "desk",
-    "22 22 220 255":    "stand",
+    "0 12 255 255":     "stand",
     "220 22 22 255":    "door",
-    "3 2 1 255":        "snacktable",
+    "50 50 50 255":     "snacktable",
     "255 168 0 255":    "chair_dir"
 }
 doorColor = "220 22 22 255"

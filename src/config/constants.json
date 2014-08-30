@@ -18,8 +18,8 @@
   "serverDefaults": {
     "players": 2,
     "map": "rooms_full.bmp",
-    "mapWidth": 521,
-    "mapHeight": 454,
+    "mapWidth": 1024,
+    "mapHeight": 768,
     "log": "log.txt",
     "port": 8080,
     "time": 0.1,
@@ -30,8 +30,8 @@
   },
   "visualizerDefaults": {
     "map_overlay": "rooms_overlay.png",
-    "SCREEN_WIDTH": 1082,
-    "SCREEN_HEIGHT": 681,
+    "SCREEN_WIDTH": 1224,
+    "SCREEN_HEIGHT": 768,
     "MAX_FPS": 60,
     "WALK_SPEED": 2,
     "MIN_FRAMES": 20,
