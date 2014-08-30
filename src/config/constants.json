@@ -15,7 +15,7 @@
   },
   "serverDefaults": {
     "players": 2,
-    "map": "rooms.bmp",
+    "map": "rooms_full.bmp",
     "mapWidth": 521,
     "mapHeight": 454,
     "log": "log.txt",

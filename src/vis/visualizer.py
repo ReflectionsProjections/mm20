@@ -259,6 +259,7 @@ class VisPerson(object):
         
         
 if __name__ == "__main__":
-    vis = Visualizer(map_reader("rooms.bmp"))
-    vis.run_from_file("../serverlog.json")
+    mapPath = config.handle_constants.retrieveConstants("serverDefaults")
+    vis = Visualizer(map_reader(mapPath))
+    vis.run_from_file(("../serverlog.json"))
 

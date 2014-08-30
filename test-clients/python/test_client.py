@@ -2,7 +2,6 @@
 import socket
 import json
 
-
 def updateMembers(members, value):
     if members is None:
         members = {}
