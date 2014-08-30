@@ -283,7 +283,7 @@ class TeamMember(object):
                 self.asleep = True
         else:
             self.hunger += 100.0 / (16.0 * TeamMember.ticks_in_hour)
-            self.fatigue -= 100.0 / (8.0 * TeamMember.ticks_in_hour)
+            self.fatigue -= 100.0 / ((5.5 + .5 * len(self.location.people)) * TeamMember.ticks_in_hour)
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
