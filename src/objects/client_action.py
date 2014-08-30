@@ -241,6 +241,30 @@ class Action:
                 response['message'] = e.message
         return response
 
+    ## View the practice games to gain info on other teams
+    # @param game
+    #   The game state
+    # @param parameters
+    #   The parameters necessary to have your team member view the practice games
+    #   (See the next parameter)
+    # @param person_id
+    #   The team member which will be doing the watching
+    def view(self, game, parameters):
+        response = self._build_response(game, parameters, ['person_id'],
+                                        "viewing")
+        if response['success'] is True:
+            try:
+                game.people[parameters['person_id']].view()
+                message = {}
+                for key, value in game.teams:
+                    message[key] = game.calc_score(key)
+                response['message'] = message
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e.reason
+                response['message'] = e.message
+        return response
+
     ## Returns information about the server
     # @param game
     #   The game state
