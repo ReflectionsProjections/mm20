@@ -21,9 +21,6 @@ def handleTurn(game, action_buffer):
 # @param actionBuffer
 #   A buffer (list) of actions
 def sortActions(actionBuffer, game):
-    # TODO
-    # sort the actions in actionBuffer by priority, see the python
-    # built-in sort function
     actionBuffer.sort(lambda a, b: sortFunction(game, a, b), reverse=True)
     return
 
@@ -34,6 +31,8 @@ def sortActions(actionBuffer, game):
 # @param b
 #   The action to compare with a
 def sortFunction(game, a, b):
+    if a.person_id == -1 or b.person_id == -1:
+        return a.priority - b.priority
     aval = int(100 * (a.priority + game.people[a.person_id].getEffectiveness()))
     bval = int(100 * (b.priority + game.people[b.person_id].getEffectiveness()))
     return aval - bval

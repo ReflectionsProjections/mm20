@@ -39,7 +39,7 @@ class Action:
             self.action = "INVALID"
             self.priority = 0
             self.reason = "Did not specify who is performing this action"
-            self.person_id = 0
+            self.person_id = -1
         else:
             self.person_id = parameters["person_id"]
 
@@ -47,8 +47,9 @@ class Action:
     # @parameter game
     #   The game state
     def execute(self, game):
-        person = game.people[self.person_id]
-        person.location.sitDown(person)
+        if self.person_id != -1 and game != None:
+            person = game.people[self.person_id]
+            person.location.sitDown(person)
         invalid = {'success': False, 'message': self.reason,
                    'reason': 'INVALID'}
         if self.action == 'INVALID':
@@ -297,7 +298,7 @@ class Action:
 class TestClientActions(unittest.TestCase):
     def testUnavailableAction(self):
         Action.actions = {}
-        test = Action('Not-An-Action', {'team_member': 'banjos', 'person_id': 3}, 0)
+        test = Action('Not-An-Action', {'team_member': 'banjos'}, 0)
         result = test.execute(None)
         self.assertFalse(result['success'])
         self.assertEqual(result['reason'], 'INVALID')
