@@ -139,6 +139,8 @@ def main():
         with open(map_cache_str, 'r') as f:
             rooms = pickle.load(f)
         my_game = game.Game(parameters.map, rooms)
+        with open(map_cache_str, 'r') as f:
+            rooms = pickle.load(f)
     else:
         my_game = game.Game(parameters.map)
         rooms_str = pickle.dumps(my_game.rooms)
