@@ -8,8 +8,11 @@ class TeamMember(object):
     Archetypes = config.handle_constants.retrieveConstants("archetypes")
     ticks_in_hour = config.handle_constants.retrieveConstants("generalInfo")[
         "TICKSINHOUR"]
-    effectiveness_drops = config.handle_constants.retrieveConstants(
-        "memberConstants")["effectiveness_drops"]
+    constants = config.handle_constants.retrieveConstants(
+            "memberConstants")
+    effectiveness_drops = constants["effectiveness_drops"]
+    coding_bonus = constants["coding_bonus"]
+    turns_to_bonus = constants["turns_to_bonus"]
 
     ## Initializes a TeamMember with name, archetype, and team
     # @param name
@@ -19,8 +22,6 @@ class TeamMember(object):
     # @param location
     #   The location (a Room object) that the TeamMember will start in.
     def __init__(self, name, archetype, location, team, person_id):
-        constants = config.handle_constants.retrieveConstants(
-            "memberConstants")
         self.person_id = person_id
         self.name = name
         self.stats = TeamMember.Archetypes[archetype]
@@ -29,8 +30,9 @@ class TeamMember(object):
         self.sitting = False
         location.addMember(self)
         self.team = team
-        self.hunger = constants["hunger"]
-        self.fatigue = constants["fatigue"]  # Start at 8 hours awake
+        self.turns_coding = 0
+        self.hunger = TeamMember.constants["hunger"]
+        self.fatigue = TeamMember.constants["fatigue"]  # Start at 8 hours awake
             # (halfway to passed out)
         self.asleep = False
         self.acted = None  # acted is the string of the action performed.
@@ -127,9 +129,11 @@ class TeamMember(object):
         self._can_move()
         ai = self.team.ai
         effectmod = 1.0
+        if self.turns_coding < TeamMember.turns_to_bonus:
+            self.turns_coding += 1
         if not self.sitting:
             effectmod = 0.5
-        effective = effectmod * self.getEffectiveness()
+        effective = effectmod * self.getEffectiveness() * (TeamMember.coding_bonus * self.turns_coding / TeamMember.turns_to_bonus)
         if code_type == "refactor":
             ai.complexity -= effective * self.stats["refactor"]
             ai.complexity = max(ai.complexity, ai.implementation * .25)
@@ -225,6 +229,7 @@ class TeamMember(object):
                     amount += 2 * effective
                 if person.acted == "code":
                     amount += effective
+        self.team.ai.theory += amount
         self.acted = "spy"
 
     ##  Wake up!
@@ -274,6 +279,8 @@ class TeamMember(object):
 
     ##  Called every turn to reset values and make incremental changes
     def update(self):
+        if self.acted != "code":
+            self.turns_coding = 0
         if not self.asleep:
             self.hunger += 100.0 / (8.0 * TeamMember.ticks_in_hour)
             self.fatigue += 100.0 / (16.0 * TeamMember.ticks_in_hour)

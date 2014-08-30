@@ -11,7 +11,9 @@
   "memberConstants": {
     "effectiveness_drops": 60.0,
     "hunger": 0.0,
-    "fatigue": 50.0
+    "fatigue": 50.0,
+    "coding_bonus": 10.0,
+    "turns_to_bonus": 10
   },
   "serverDefaults": {
     "players": 2,
