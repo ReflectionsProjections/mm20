@@ -128,9 +128,9 @@ class Visualizer(object):
                 color = self.colors[p.team]
             # pygame.draw.circle(self.ScreenSurface, (0, 0, 0), self.scale(p.pos), self.constants["PERSON_SIZE"], 0)
             # pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"] - 2, 0)
-            # replace(color, repcolor)
+            #replace(color, repcolor)
             # toDraw = PixelArray(self.personImage).replace(Color(255, 0, 255, 255), color).surface();
-            self.ScreenSurface.blit(self.personImage, self.scale( (p.pos[0] - 8, p.pos[1] - 8) ) );
+            self.ScreenSurface.blit(p.image, self.scale( (p.pos[0] - 8, p.pos[1] - 8) ) );
 
 
         #Draw AI info
@@ -210,10 +210,15 @@ class Visualizer(object):
             number_of_people += len(player["team"])
         self.people = [VisPerson() for _ in xrange(number_of_people)]
         for player in teams:
+
+            teamImage = self.personImage.copy()
+
             for person in player["team"].values():
 
                 visPlayer = self.people[person["person_id"]]
                 room = self.rooms[person["location"]]
+
+                visPlayer.set_image(teamImage)
 
                 visPlayer.sit_in_room(room)
                 visPlayer.pos = visPlayer.targetPos
@@ -221,6 +226,11 @@ class Visualizer(object):
                     person["location"],
                     None,
                     person["team"], person["name"], self)
+
+            color = self.colors[-1]
+            if visPlayer.team < len(self.colors):
+                color = self.colors[visPlayer.team]
+            pygame.PixelArray(teamImage).replace(pygame.Color(255, 0, 255, 255), color)
         
 
 class VisPerson(object):
@@ -234,6 +244,10 @@ class VisPerson(object):
         self.action = None
         self.team = None
         self.name = None
+        self.image = None
+
+    def set_image(self, image):
+        self.image = image
 
     def sit_in_room(self, newRoom, currentRoom=None):
 
