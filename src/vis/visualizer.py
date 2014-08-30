@@ -268,7 +268,7 @@ class VisPerson(object):
         
         
 if __name__ == "__main__":
-    mapPath = config.handle_constants.retrieveConstants("serverDefaults")
+    mapPath = config.handle_constants.retrieveConstants("serverDefaults")['map']
     vis = Visualizer(map_reader(mapPath))
     vis.run_from_file(("../serverlog.json"))
 
