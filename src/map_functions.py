@@ -6,26 +6,17 @@ import objects.room
 # TODO move to constants.py or something like that
 wallColors = ["0 0 0 255"]
 
-# For debugging
-colorDict = {
-    "0 0 0 255":        "black",
-    "0 255 255 255":    "cyan",
-    "255 255 255 255":  "white",
-    "72 0 255 255":     "blue",
-    "255 0 220 255":    "pink",
-    "76 255 0 255":     "green"
-}
-
 # Furniture
 roomObjectColorDict = {
-    "125 125 2 255":          "chair",
-    "4 5 6 255":          "desk",
-    "150 12 100 255":          "stand",
-    "255 180 0 255":    "door",
+    "57 234 49 255":    "chair",
+    "255 0 234 255":    "desk",
+    "0 12 255 255":     "stand",
+    "220 22 22 255":    "door",
+    "50 50 50 255":     "snacktable",
     "0 0 125 255":      "projector",
-    "3 2 1 255":          "snacktable"
+    "255 168 0 255":    "chair_dir"
 }
-doorColor = "255 180 0 255"
+doorColor = "220 22 22 255"
 
 
 ## Gets a list of Rooms (with connections) from a given map image
@@ -273,7 +264,7 @@ def _floodFillConnectionsIter(
 
             px = x + mx * stepSize
 
-            # Skip out of bounds pixels (pt 1/2)
+            # Skip out of bounds pixels (pt 1/3)
             if (px < 0 or width <= px):
                 continue
 
@@ -285,8 +276,12 @@ def _floodFillConnectionsIter(
 
                 py = y + my * stepSize
 
-                # Skip out of bounds pixels (pt 2/2)
+                # Skip out of bounds pixels (pt 2/3)
                 if (py < 0 or height <= py):
+                    continue
+
+                # Skip diagonal checks (pt 3/3)
+                if mx != 0 and my != 0:
                     continue
 
                 # Skip visited pixels
@@ -301,27 +296,15 @@ def _floodFillConnectionsIter(
 if __name__ == "__main__":
 
     # Execute function
-    rooms = map_reader("./rooms.bmp")
+    rooms = map_reader("./rooms_full.bmp")
+    for loc in rooms:
+        r = rooms[loc]
+        print '-----------------------------------'
+        print loc
+        #print r.stand
+        #print r.chairs
+        #print r.desks
+        print r.doors
+        #print r.snacktables
 
-    # ============== Test 1: test connections ==============
-    colors = {
-              "cyan":  "0 255 255",
-              "white": "255 255 255",
-              "blue":  "72 0 255",
-              "pink":  "255 0 220",
-              "green": "76 255 0"
-             }
-
-    # What should be connected to what
-    should_be_connected = {
-              "cyan":  ["pink", "white"],
-              "white": ["cyan", "pink", "green", "blue"],
-              "blue":  ["white"],
-              "pink":  ["green", "white", "cyan"],
-              "green": ["pink", "white"]
-            }
-
-    #for c1 in should_be_connected:
-    #    for c2 in should_be_connected[c1]:
-
-    #        assert rooms[colors[c1]]
+    print repr(rooms)

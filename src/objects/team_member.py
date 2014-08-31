@@ -91,8 +91,11 @@ class TeamMember(object):
             if not self.location.isConnectedTo(destination):
                 raise client_action.ActionError(
                     "NOTCONNECTED",
-                    "Cannot move to destination, \
-                    it is not connected to current location")
+                    "Cannot move to destination, it is not connected to current location")
+            elif len(destination.people) + 1 > len(destination.chairs + destination.stand):
+                raise client_action.ActionError(
+                    "ROOMISFULL",
+                    "Cannot move to destination, it is full.")
             else:
                 destination.addMember(self)
                 self.location.removeMember(self)
@@ -106,8 +109,7 @@ class TeamMember(object):
                         "You have been distracted this turn")
                 raise client_action.ActionError(
                     "ALREADYACTED",
-                    "Cannot move to destination, \
-                    this player has already acted this turn")
+                    "Cannot move to destination, this player has already acted this turn")
             if self.asleep:
                 raise client_action.ActionError(
                     "ASLEEP",

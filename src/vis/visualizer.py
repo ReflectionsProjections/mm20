@@ -50,7 +50,7 @@ class Visualizer(object):
         pygame.display.set_caption(self.TITLE)
         self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.GameClock = pygame.time.Clock()
-        image = pygame.image.load(self.serverDefaults["map"]).convert()
+        image = pygame.image.load(self.constants["map_overlay"]).convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
         
         image = pygame.image.load("person.png").convert_alpha()
@@ -130,7 +130,7 @@ class Visualizer(object):
             # pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"] - 2, 0)
             #replace(color, repcolor)
             # toDraw = PixelArray(self.personImage).replace(Color(255, 0, 255, 255), color).surface();
-            self.ScreenSurface.blit(p.image, self.scale( (p.pos[0] - 8, p.pos[1] - 8) ) );
+            self.ScreenSurface.blit(p.image, self.scale( (p.pos[0] - 16, p.pos[1] - 16) ) );
 
 
         #Draw AI info
@@ -258,10 +258,13 @@ class VisPerson(object):
         # Assign person a new spot
         numPeople = len(newRoom.sitting)
         numChairs = len(newRoom.chairs)
-        if numPeople <= numChairs:
+        numStand = len(newRoom.stand)
+        if numPeople < numChairs:
             self.targetPos = newRoom.chairs[numPeople]
-        else:
+        elif numPeople < numChairs + numStand:
             self.targetPos = newRoom.stand[numPeople - numChairs]
+        else:
+            print "NOT ENOUGH ROOM!\n"
 
         # Add person to room if they aren't there already
         if currentRoom and self in currentRoom.sitting:
@@ -282,6 +285,7 @@ class VisPerson(object):
         
         
 if __name__ == "__main__":
-    vis = Visualizer(map_reader("rooms.bmp"))
-    vis.run_from_file("../serverlog.json")
+    mapPath = config.handle_constants.retrieveConstants("serverDefaults")['map']
+    vis = Visualizer(map_reader(mapPath))
+    vis.run_from_file(("../serverlog.json"))
 

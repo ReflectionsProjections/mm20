@@ -1,5 +1,6 @@
 import config.handle_constants
 import unittest
+from objects.room import RoomIsFullError
 
 
 ## Raised when an error occurs due to something the client did
@@ -49,7 +50,10 @@ class Action:
     def execute(self, game):
         if self.person_id != -1 and game != None:
             person = game.people[self.person_id]
-            person.location.sitDown(person)
+            try:
+                person.location.sitDown(person)
+            except RoomIsFullError:
+                pass
         invalid = {'success': False, 'message': self.reason,
                    'reason': 'INVALID'}
         if self.action == 'INVALID':

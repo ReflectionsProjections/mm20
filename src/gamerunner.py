@@ -122,7 +122,6 @@ class FileLogger(object):
         if self.vis:
             self.vis.frame(stuff)
 
-
 def main():
     global parameters
     parameters = parse_args()
