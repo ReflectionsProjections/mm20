@@ -130,12 +130,13 @@ class TeamMember(object):
     def code(self, code_type, turn):
         self._can_move()
         ai = self.team.ai
+        roombonus = self.getRoomBonus(self.location)
         effectmod = 1.0
         if self.turns_coding < TeamMember.turns_to_bonus:
             self.turns_coding += 1
         if not self.sitting:
             effectmod = 0.5
-        effective = effectmod * self.getEffectiveness() * (TeamMember.coding_bonus * self.turns_coding / TeamMember.turns_to_bonus)
+        effective = roombonus * effectmod * self.getEffectiveness() * (TeamMember.coding_bonus * self.turns_coding / TeamMember.turns_to_bonus)
         if code_type == "refactor":
             ai.complexity -= effective * self.stats["refactor"]
             ai.complexity = max(ai.complexity, ai.implementation * .25)
@@ -168,10 +169,11 @@ class TeamMember(object):
     #     The turn so that the player knows how long they've been theorizing
     def theorize(self, turn):
         self._can_move()
+        roombonus = self.getRoomBonus(self.location)
         effectmod = 1.0
         if not self.sitting:
             effectmod = 0.5
-        effective = effectmod * self.getEffectiveness()
+        effective = effectmod * self.getEffectiveness() * roombonus
         self.team.ai.theory += self.stats["theorize"] * effective
         self.acted = "theorize"
 
@@ -272,6 +274,15 @@ class TeamMember(object):
                 (100 - TeamMember.effectiveness_drops)
         return effective
 
+    ## Look at room resources and calculate room bonus
+    def getRoomBonus(self, r):
+        bonus = 1.0
+        if "STAFF" in r.resources:
+            bonus += 0.5
+        if "PROFESSOR" in r.resources:
+            bonus += 1.0
+        return bonus
+
     def _can_move(self):
         if self.acted:
             if self.acted == "distracted":
@@ -306,6 +317,8 @@ class TeamMember(object):
             timetoremovefatigue = 5.5 + .5 * len(self.location.people)
             if timetoremovefatigue > 12.0:
                 timetoremovefatigue = 12.0
+            if "PROFESSOR" in self.location.resources:
+                timetoremovefatigue = timetoremovefatigue/2
             self.fatigue -= 100.0 / (timetoremovefatigue * TeamMember.ticks_in_hour)
             if self.hunger > 100:
                 self.hunger = 100.0
