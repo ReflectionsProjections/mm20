@@ -97,8 +97,8 @@ class TeamMember(object):
                     "ROOMISFULL",
                     "Cannot move to destination, it is full.")
             else:
-                self.location.removeMember(self)
                 destination.addMember(self)
+                self.location.removeMember(self)
                 self.location = destination
             self.acted = "move"
         else:
