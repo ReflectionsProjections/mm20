@@ -300,7 +300,6 @@ if __name__ == "__main__":
         #print r.stand
         #print r.chairs
         #print r.desks
-        print r.doors
+        #print r.doors
         #print r.snacktables
-
-    print repr(rooms)
+	print r.connectedRooms.keys()
