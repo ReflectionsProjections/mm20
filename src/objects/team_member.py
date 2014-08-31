@@ -250,6 +250,17 @@ class TeamMember(object):
         victim.asleep = False
         self.acted = "wake"
 
+    ##  View the projection in order to gain information about other teams
+    def view(self):
+        self._can_move()
+        if not self.location.isAvailable('PROJECTOR'):
+            raise client_action.ActionError('NOPROJECTOR',
+                                            "This room does not have a projector!")
+        if not self.location.isAvailable('PRACTICE'):
+            raise client_action.ActionError('NOPRACTICE',
+                                            "The projector is not currently running practice games.")
+        self.acted = "view"
+
     ## Calculate effectiveness based on fatigue and hunger
     def getEffectiveness(self):
         effective = 1.0

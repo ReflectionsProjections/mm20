@@ -13,6 +13,7 @@ roomObjectColorDict = {
     "0 12 255 255":     "stand",
     "220 22 22 255":    "door",
     "50 50 50 255":     "snacktable",
+    "0 0 125 255":      "projector",
     "255 168 0 255":    "chair_dir"
 }
 doorColor = "220 22 22 255"
@@ -58,6 +59,9 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
         rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
         rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
+        for r in roomObjects[rooms[i].name]:
+            if r[2] == "projector":
+                rooms[i].addResource('PROJECTOR')
         if len(rooms[i].snacktables) != 0:
             rooms[i].addResource('FOOD')  # For now, this is how we are treating food
 
