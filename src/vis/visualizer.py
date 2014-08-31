@@ -130,7 +130,7 @@ class Visualizer(object):
             # pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"] - 2, 0)
             #replace(color, repcolor)
             # toDraw = PixelArray(self.personImage).replace(Color(255, 0, 255, 255), color).surface();
-            self.ScreenSurface.blit(p.image, self.scale( (p.pos[0] - 8, p.pos[1] - 8) ) );
+            self.ScreenSurface.blit(p.image, self.scale( (p.pos[0] - 16, p.pos[1] - 16) ) );
 
 
         #Draw AI info
