@@ -57,8 +57,8 @@ class Game(object):
                 try_limit = try_limit-1
             newTeam = Team(data["team"], data["members"],
                            start_room, self.people, client_id)
-        except KeyError:
-            return (False, {"status": "Failure", "errors": ["KeyError"]})
+        except KeyError as e:
+            return (False, {"status": "Failure", "errors": [{"KeyError": e.message}]})
             
         # TODO: Make all error objects uniform
         self.result_buffer[client_id] = []
