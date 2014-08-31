@@ -94,8 +94,8 @@ class TeamMember(object):
                     "Cannot move to destination, \
                     it is not connected to current location")
             else:
-                self.location.removeMember(self)
                 destination.addMember(self)
+                self.location.removeMember(self)
                 self.location = destination
             self.acted = "move"
         else:
