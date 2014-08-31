@@ -184,12 +184,14 @@ class MMServer( object ):
                 # set up a buffer to hold what we need to send players
                 player_data_for_turn = [None] * self.maxPlayers
                 #Return turn info back to the clients
+                events = self.game.get_events()
                 for i in range(0, self.maxPlayers):
                     if not forfeit[i]:
                         try:
                             data = self.game.get_info(i)
                             if running:
                                 data["errors"] = errors[i]
+                                data["events"] = events
                             player_data_for_turn[i] = data
                             playerConnections[i].sendall(
                                 json.dumps(player_data_for_turn[i], ensure_ascii = True) + "\n")

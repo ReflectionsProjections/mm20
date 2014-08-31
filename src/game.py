@@ -37,6 +37,7 @@ class Game(object):
         self.teams = {}
         self.people = []
         self.practice_games = False
+        self.events = {}
 
     ##  Adds a new team and returns success / failure message
     # @param data
@@ -95,7 +96,13 @@ class Game(object):
 
     ## Notify all teams of an event that just occurred
     def event_notification(self, code, message):
-        pass
+        self.events[code] = message
+
+    ## called by server to receive events for that turn
+    def get_events(self):
+        newevents = self.events
+        self.events = {}
+        return newevents
 
     ## Queues all of the actions one client is attempting to execute this turn
     # @param action_list
