@@ -85,10 +85,10 @@ class Game(object):
         self.turn += 1
         if not self.practice_games and self.turn >= self.turn_limit / 2:
             self.practice_games = True
-            for r in self.rooms:
+            for r in self.rooms.values():
                 if r.isAvailable("PROJECTOR"):
                     r.addResource("PRACTICE")
-            event_notification("PRACTICE", "The projectors are now showing practice games")
+            self.event_notification("PRACTICE", "The projectors are now showing practice games")
         if self.turn >= self.turn_limit:
             return False
         return True
