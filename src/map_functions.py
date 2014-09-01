@@ -1,22 +1,16 @@
 from PIL import Image
 import Queue
 import objects.room
+import config.handle_constants
 
-# Colors used for walls
-# TODO move to constants.py or something like that
-wallColors = ["0 0 0 255"]
+mapConstants = config.handle_constants.retrieveConstants("map_reader_constants")
+
+wallColor = mapConstants["wall_color"]
+doorColor = mapConstants["wall_color"]
 
 # Furniture
-roomObjectColorDict = {
-    "57 234 49 255":    "chair",
-    "255 0 234 255":    "desk",
-    "0 12 255 255":     "stand",
-    "220 22 22 255":    "door",
-    "50 50 50 255":     "snacktable",
-    "255 168 0 255":    "chair_dir"
-}
-doorColor = "220 22 22 255"
-
+roomObjectColorDict = mapConstants["objects"]
+roomNames = mapConstants["room_names"]
 
 ## Gets a list of Rooms (with connections) from a given map image
 # @param map_path A path to the map image
@@ -58,17 +52,15 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
         rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
         rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
+        rooms[i].char_dirs = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "chair_dir"]
         if len(rooms[i].snacktables) != 0:
             rooms[i].addResource('FOOD')  # For now, this is how we are treating food
 
-    # Done!
-    """
-    # Left for debug
-    print rooms
+    # Debug
     for r in rooms:
-        print "---------------------"
-        print r.connections
-    """
+        print "\n---------- %s -----------" % roomNames[r.name]
+        for rc in r.connectedRooms:
+            print roomNames[rc] + " "
 
     # Hacky transformation code
     rooms2 = {i.name: i for i in rooms}
@@ -103,8 +95,7 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
 
     # Queues
     nodeQueue = Queue.Queue()
-
-    nodeQueue.put(start)
+    nodeQueue.put((start[0], start[1]))
 
     width = imgsize[0]
     height = imgsize[1]
@@ -138,6 +129,9 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
 
         # Base case 1: hit target
         curColor = _stringify(pixels[x, y])
+        if curColor == "0 38 255 255":
+            print (x, y)
+
         if curColor == targetColor:
             return (x, y)
 
@@ -185,10 +179,8 @@ def _floodFillConnectionsIter(
 
     # Queues
     nodeQueue = Queue.Queue()
-    parentQueue = Queue.Queue()
-
-    nodeQueue.put(start)
-    parentQueue.put(start)
+    roomColor = _stringify(pixels[start[0], start[1]])
+    nodeQueue.put((start[0], start[1], start[0], start[1], roomColor))
 
     width = imgsize[0]
     height = imgsize[1]
@@ -202,22 +194,22 @@ def _floodFillConnectionsIter(
     y = start[1]
     if (x < 0 or y < 0) or (width <= x or height <= y):
         raise ValueError("Starting pixel must not be out of bounds.")
-    if pixels[x, y] in wallColors:
+    if pixels[x, y] == wallColor:
         raise ValueError("Starting pixel must not be a wall.")
 
     # Begin flood search
     while not nodeQueue.empty():
 
         node = nodeQueue.get()
-        parent = parentQueue.get()
 
         x = node[0]
         y = node[1]
 
         # Base case 1: hit black
-        curColor = _stringify(pixels[parent[0], parent[1]])
+        curColor = node[4]
         nextColor = _stringify(pixels[x, y])
-        if nextColor in wallColors:
+        updateRoomColor = False
+        if nextColor == wallColor:
             continue
 
         # Base case 2: hit an object (don't do Iterative Case 1a if this triggers)
@@ -230,6 +222,7 @@ def _floodFillConnectionsIter(
 
         # Iterative case 1a: hit another color (not black), so record the connection
         elif curColor not in roomObjectColorDict:
+            updateRoomColor = True
             if curColor not in connections:
                 connections[curColor] = []
             if nextColor != curColor and nextColor not in connections[curColor]:
@@ -255,29 +248,22 @@ def _floodFillConnectionsIter(
                 if curColor not in connections[nextColor]:  # Redundant, but kept for code clarity
                     connections[nextColor].append(curColor)
 
+        # Determine room color
+        roomColor = nextColor if updateRoomColor else curColor
+
         # Iterative case 1b: further iteration (basically recursion)
         for mx in range(-1, 2):
-
-            px = x + mx * stepSize
-
-            # Skip out of bounds pixels (pt 1/3)
-            if (px < 0 or width <= px):
-                continue
-
             for my in range(-1, 2):
 
-                # Skip identical pixels
-                if mx == 0 and my == 0:
+                # Skip identical pixels and diagonals
+                if (mx == 0) == (my == 0):
                     continue
 
+                px = x + mx * stepSize
                 py = y + my * stepSize
 
-                # Skip out of bounds pixels (pt 2/3)
-                if (py < 0 or height <= py):
-                    continue
-
-                # Skip diagonal checks (pt 3/3)
-                if mx != 0 and my != 0:
+                # Skip out of bounds pixels
+                if (px < 0 or width <= px or py < 0 or height <= py):
                     continue
 
                 # Skip visited pixels
@@ -285,8 +271,7 @@ def _floodFillConnectionsIter(
                     visited[px][py] = True
 
                     # Add pixel to queue
-                    nodeQueue.put((px, py))
-                    parentQueue.put((x, y))
+                    nodeQueue.put((px, py, x, y, roomColor))
 
 # Run a simple test
 if __name__ == "__main__":
@@ -294,12 +279,17 @@ if __name__ == "__main__":
     # Execute function
     rooms = map_reader("./rooms_full.bmp")
     for loc in rooms:
+        
+        if loc != "255 114 0 255":
+            continue
+
         r = rooms[loc]
-        print '-----------------------------------'
-        print loc
-        #print r.stand
-        #print r.chairs
+
+        #print '-----------------------------------'
+        #print loc
+        print r.stand
+        print r.chairs
         #print r.desks
         #print r.doors
         #print r.snacktables
-	print r.connectedRooms.keys()
+        #print r.connectedRooms.keys()

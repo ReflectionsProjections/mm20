@@ -89,11 +89,12 @@ class Visualizer(object):
         while self.running and self.update_state(json.loads(turn)):
 
             # Smooth moving
-            movementFinalized = False
+            movementFinalized = 30
             frameCount = 0
-            while not movementFinalized or frameCount < self.constants["MIN_FRAMES"]:
+            while movementFinalized > 0 or frameCount < self.constants["MIN_FRAMES"]:
                 frameCount += 1
-                movementFinalized = self.movementIsComplete()
+                if self.movementIsComplete():
+                    movementFinalized -= 1
 
                 self.draw()
                 self.GameClock.tick(self.MAX_FPS)
@@ -131,6 +132,8 @@ class Visualizer(object):
             #replace(color, repcolor)
             # toDraw = PixelArray(self.personImage).replace(Color(255, 0, 255, 255), color).surface();
             self.ScreenSurface.blit(p.image, self.scale( (p.pos[0] - 8, p.pos[1] - 8) ) );
+
+            pygame.draw.line(self.ScreenSurface, (255,0,0), self.scale(p.pos), self.scale(p.targetPos), 3)
 
 
         #Draw AI info
@@ -230,7 +233,7 @@ class Visualizer(object):
             color = self.colors[-1]
             if visPlayer.team < len(self.colors):
                 color = self.colors[visPlayer.team]
-            pygame.PixelArray(teamImage).replace(pygame.Color(255, 0, 255, 255), color)
+            pygame.PixelArray(teamImage).replace((255, 0, 0), color)
         
 
 class VisPerson(object):
