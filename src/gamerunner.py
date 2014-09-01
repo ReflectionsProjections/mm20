@@ -12,6 +12,8 @@ import vis.visualizer
 
 FNULL = open(os.devnull, 'w')
 constants = config.handle_constants.retrieveConstants("serverDefaults")
+vis_constants = config.handle_constants.retrieveConstants("visualizerDefaults")
+
 parameters = None
 client_list = list()
 
@@ -43,10 +45,22 @@ def parse_args():
         default=constants["port"],
         type=int)
     parser.add_argument(
+        "-w", "--debug-view",
+        help="Runs the debug view to help you find your problem!",
+        const=True,
+        default=False,
+        action="store_const",
+    )
+    parser.add_argument(
         "-m", "--map",
         help="Specifies the map file on which the game should run. " +
         "Defaults to {0}".format(constants["map"]),
         default=constants["map"])
+    parser.add_argument(
+        "-o", "--mapOverlay",
+        help="Specifies the overlay map file on which the game should be shown. " +
+        "Defaults to {0}".format(vis_constants["map_overlay"]),
+        default=vis_constants["map_overlay"])
     parser.add_argument(
         "-l", "--log",
         help="Specifies a log file where the game log will be written. " +
@@ -154,7 +168,7 @@ def main():
             f.write(rooms_str)
         rooms = pickle.loads(rooms_str)
     if parameters.show:
-        fileLog.vis = vis.visualizer.Visualizer(rooms)
+        fileLog.vis = vis.visualizer.Visualizer(rooms, parameters.mapOverlay, debug=parameters.debug_view)
     serv = MMServer(parameters.teams,
                     my_game,
                     logger=fileLog)
