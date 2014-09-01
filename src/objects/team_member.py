@@ -192,6 +192,9 @@ class TeamMember(object):
         if not self.location.isAvailable('FOOD'):
             raise client_action.ActionError('NOFOODHERE',
                                             "This room does not contain food")
+        if self.location.snacksupply < 1:
+            raise client_action.ActionError('OUTOFFOOD',
+                                            "This food table has depleted")
         self.hunger -= 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))
         if self.hunger < 0.0:
             self.hunger = 0.0

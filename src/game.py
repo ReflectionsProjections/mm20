@@ -97,12 +97,20 @@ class Game(object):
                 self.professortime -= 1
                 if self.professortime < 1:
                     self.rooms[self.professorroom].removeResource("PROFESSOR")
+                    self.event_notification("NOPROFESSOR", self.professorroom)
                     self.professorroom = ""
         # Add new spawns
         if self.professorroom == "" and random.random() < self.spawnchance:
             self.professorroom = random.choice(self.rooms.keys())
             self.professortime = self.turn_limit / 24
             self.rooms[self.professorroom].addResource("PROFESSOR")
+            self.event_notification("PROFESSOR", self.professorroom)
+        for r in self.rooms.values():
+            if self.turn % (self.turn_limit / 24) == 0:
+                if "FOOD" in r.resources:
+                    r.snacksupply = self.snackrefill
+            if "FOOD" in r.resources and r.snacksupply < 1:
+                self.event_notification("DEPLETEDSNACKTABLE", r.name)
         if self.turn >= self.turn_limit:
             return False
         return True
