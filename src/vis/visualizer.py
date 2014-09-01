@@ -150,8 +150,8 @@ class Visualizer(object):
                     0)
 
             else:
-                self.ScreenSurface.blit(p.image, self.scale((p.pos[0] - 8, p.pos[1] - 8)))
-                self.ScreenSurface.blit(p.image, self.scale((p.pos[0] - 16, p.pos[1] - 16)))
+                scale_pos = self.scale((p.pos[0], p.pos[1]))
+                self.ScreenSurface.blit(p.image, [p - 16 for p in scale_pos])
 
 
         #Draw AI info
