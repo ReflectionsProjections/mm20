@@ -134,6 +134,7 @@ class Visualizer(object):
             color = self.colors[-1]
             if p.team < len(self.colors):
                 color = self.colors[p.team]
+
             if self.debug:
                 pygame.draw.circle(
                     self.ScreenSurface,
@@ -150,6 +151,7 @@ class Visualizer(object):
 
             else:
                 self.ScreenSurface.blit(p.image, self.scale((p.pos[0] - 8, p.pos[1] - 8)))
+                self.ScreenSurface.blit(p.image, self.scale((p.pos[0] - 16, p.pos[1] - 16)))
 
 
         #Draw AI info
