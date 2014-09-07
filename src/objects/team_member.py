@@ -338,12 +338,15 @@ class TestTeamMember(unittest.TestCase):
                 pass
         TestTeamMember.PseudoTeam = PseudoTeam
         self.testRoom = room.Room("testRoom")
+        self.testRoom.stand = [(4,8), (4,7), (4,6)]
+        self.testRoom.snacksupply = 100
         self.testTeam = TestTeamMember.PseudoTeam()
         self.testMember = TeamMember("Joe", "Coder", self.testRoom,
                                      self.testTeam, 0)
 
     def testInitCorrect(self):
         testRoom = room.Room("testRoom")
+        testRoom.stand = [(4,8), (4,7), (4,6)]
         testTeam = TestTeamMember.PseudoTeam()
         testMember = TeamMember("Joe", "Coder", testRoom, testTeam, 0)
         self.assertEqual(testMember.name, "Joe")
@@ -376,12 +379,20 @@ class TestTeamMember(unittest.TestCase):
 
     def testValidMove(self):
         roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
         self.testRoom.connectToRoom(roomTwo)
         self.testMember.move(roomTwo)
         self.assertEquals(self.testMember.location, roomTwo)
 
     def testInvalidMove(self):
         roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
+        with self.assertRaises(client_action.ActionError):
+            self.testMember.move(roomTwo)
+
+    def testRoomFull(self):
+        roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
         with self.assertRaises(client_action.ActionError):
             self.testMember.move(roomTwo)
 
@@ -399,6 +410,31 @@ class TestTeamMember(unittest.TestCase):
 
     @unittest.skip("Not yet implemented")
     def testSleep(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testCode(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testTheorize(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testWake(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testDistract(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testUpdate(self):
         # TODO
         self.assertTrue(False)
 
