@@ -84,7 +84,7 @@ class TestaActionHandler(unittest.TestCase):
             'validActions']
         pseudoBuffer = []
         pseudoAction = validActions[0]
-        bufferAction(pseudoBuffer, pseudoAction, {"target": 'pseudoTarget'}, 0)
+        bufferAction(pseudoBuffer, pseudoAction, {"target": 'pseudoTarget', "person_id": 12}, 0)
         self.assertFalse(not pseudoBuffer)
         self.assertEquals(pseudoBuffer[0].action, validActions[0])
 

@@ -232,7 +232,7 @@ class TestRoom(unittest.TestCase):
 
     def testRemoveMemberNotInRoom(self):
         with self.assertRaises(NotInRoomError):
-            self.room.removeMember(self.team_member)
+            self.room.removeMember("Jim")
 
     def testAddResource(self):
         self.room.addResource('food')
