@@ -1,5 +1,4 @@
 import unittest
-from objects.team_member import TeamMember
 
 
 class AlreadyConnectedError(Exception):
@@ -205,6 +204,7 @@ class Room(object):
 
 class TestRoom(unittest.TestCase):
     def setUp(self):
+        from objects.team_member import TeamMember
         self.room = Room("testRoom")
         self.room.chairs = [(1,1), (2,2), (3,3)]
         self.room.stand = [(4,4), (5,5), (6,6)]
@@ -284,6 +284,7 @@ class TestRoom(unittest.TestCase):
         self.assertFalse(self.room.isConnectedTo(roomTwo))
 
     def testRoomFull(self):
+        from objects.team_member import TeamMember
         oldRoom = self.room
         for i in range(1, len(self.room.chairs + self.room.stand)):
             TeamMember(str(i), "Coder", self.room, None, i)
