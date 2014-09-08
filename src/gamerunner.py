@@ -12,6 +12,8 @@ import vis.visualizer
 
 FNULL = open(os.devnull, 'w')
 constants = config.handle_constants.retrieveConstants("serverDefaults")
+vis_constants = config.handle_constants.retrieveConstants("visualizerDefaults")
+
 parameters = None
 client_list = list()
 
@@ -28,7 +30,7 @@ def launch_clients():
 
 
 def launch_client(client):
-        c = client_program(client)
+        c = Client_program(client)
         c.run()
 
 
@@ -43,10 +45,22 @@ def parse_args():
         default=constants["port"],
         type=int)
     parser.add_argument(
+        "-w", "--debug-view",
+        help="Runs the debug view to help you find your problem!",
+        const=True,
+        default=False,
+        action="store_const",
+    )
+    parser.add_argument(
         "-m", "--map",
         help="Specifies the map file on which the game should run. " +
         "Defaults to {0}".format(constants["map"]),
         default=constants["map"])
+    parser.add_argument(
+        "-o", "--mapOverlay",
+        help="Specifies the overlay map file on which the game should be shown. " +
+        "Defaults to {0}".format(vis_constants["map_overlay"]),
+        default=vis_constants["map_overlay"])
     parser.add_argument(
         "-l", "--log",
         help="Specifies a log file where the game log will be written. " +
@@ -74,10 +88,17 @@ def parse_args():
         default=os.path.join(*constants["defaultClient"].split("/")))
     parser.add_argument(
         "-v", "--verbose",
-        help="When present prints player one's standard output to the screen.",
+        help="When present prints player one's standard output.",
         const=None,
         default=FNULL,
         action="store_const")
+    parser.add_argument(
+        "-vv", "--veryVerbose",
+        help="When present prints all players standard output.",
+        const=None,
+        default=FNULL,
+        action="store_const")
+
     parser.add_argument(
         "-s", "--show",
         help="Set this to make the game be visualized in a window." +
@@ -147,18 +168,19 @@ def main():
             f.write(rooms_str)
         rooms = pickle.loads(rooms_str)
     if parameters.show:
-        fileLog.vis = vis.visualizer.Visualizer(rooms)
+        fileLog.vis = vis.visualizer.Visualizer(rooms, parameters.mapOverlay, debug=parameters.debug_view)
     serv = MMServer(parameters.teams,
                     my_game,
                     logger=fileLog)
     serv.run(parameters.port, launch_clients)
 
 
-class client_program(object):
+class Client_program(object):
     """
     This object holds and manages the prosses for the
     connecting teams
     """
+    first = True
 
     def __init__(self, client_path):
         """
@@ -171,7 +193,7 @@ class client_program(object):
         """
         try:
             self.bot = Popen(os.path.join(self.client_path, "run.sh"),
-                             stdout=parameters.verbose, cwd=self.client_path)
+                             stdout=self.chose_output(), cwd=self.client_path)
         except OSError as e:
             msg = "the player {} failed to start with error {}".format(
                 self.client_path, e)
@@ -190,6 +212,14 @@ class client_program(object):
         """
         self.bot.terminate()
 
+    @classmethod
+    def chose_output(cls):
+        output = parameters.veryVerbose
+        if cls.first and not parameters.veryVerbose:
+            output = parameters.verbose
+
+        cls.first = False
+        return output
 
 class ClientFailedToRun(Exception):
     def __init__(self, msg):

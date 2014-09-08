@@ -52,15 +52,13 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
         rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
         rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
-        rooms[i].char_dirs = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "chair_dir"]
+        rooms[i].chair_dirs = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "chair_dir"]
+
+        for r in roomObjects[rooms[i].name]:
+            if r[2] == "projector":
+                rooms[i].addResource('PROJECTOR')
         if len(rooms[i].snacktables) != 0:
             rooms[i].addResource('FOOD')  # For now, this is how we are treating food
-
-    # Debug
-    for r in rooms:
-        print "\n---------- %s -----------" % roomNames[r.name]
-        for rc in r.connectedRooms:
-            print roomNames[rc] + " "
 
     # Hacky transformation code
     rooms2 = {i.name: i for i in rooms}

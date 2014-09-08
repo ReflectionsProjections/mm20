@@ -97,8 +97,8 @@ class TeamMember(object):
                     "ROOMISFULL",
                     "Cannot move to destination, it is full.")
             else:
-                self.location.removeMember(self)
                 destination.addMember(self)
+                self.location.removeMember(self)
                 self.location = destination
             self.acted = "move"
         else:
@@ -249,6 +249,17 @@ class TeamMember(object):
                 "Cannot wake someone who is not asleep")
         victim.asleep = False
         self.acted = "wake"
+
+    ##  View the projection in order to gain information about other teams
+    def view(self):
+        self._can_move()
+        if not self.location.isAvailable('PROJECTOR'):
+            raise client_action.ActionError('NOPROJECTOR',
+                                            "This room does not have a projector!")
+        if not self.location.isAvailable('PRACTICE'):
+            raise client_action.ActionError('NOPRACTICE',
+                                            "The projector is not currently running practice games.")
+        self.acted = "view"
 
     ## Calculate effectiveness based on fatigue and hunger
     def getEffectiveness(self):

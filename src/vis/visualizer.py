@@ -11,7 +11,7 @@ NO_CHAIR = (-100, -100)
 
 class Visualizer(object):
 
-    def __init__(self, rooms=None):
+    def __init__(self, rooms=None, map_overlay=None, **kwargs):
         self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
         self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
@@ -31,9 +31,11 @@ class Visualizer(object):
         self.messages = list()
         self.game_done = False
         self.game_result = None
+        self.debug = kwargs["debug"]
         self.rooms = rooms
+        self.map_overlay = map_overlay or self.constants["map_overlay"]
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
-        self.scaleFactor = (float(self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]) / self.MAP_WIDTH, float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT)
+        self.set_scaleFactor()
         
         # shuffle seat assignment
         if self.rooms:
@@ -50,13 +52,19 @@ class Visualizer(object):
         pygame.display.set_caption(self.TITLE)
         self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
         self.GameClock = pygame.time.Clock()
-        image = pygame.image.load(self.constants["map_overlay"]).convert()
+        image = pygame.image.load(self.map_overlay)
+        self.MAP_HEIGHT = image.get_height()
+        self.MAP_WIDTH = image.get_width()
+        self.set_scaleFactor()
+        image = image.convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
         
         image = pygame.image.load("person.png").convert_alpha()
         self.personImage = pygame.transform.scale(image, (32, 32))
         # self.teamPersonImages = []
 
+    def set_scaleFactor(self):
+            self.scaleFactor = (float(self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]) / self.MAP_WIDTH, float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT)
 
     def run_from_file(self, file_name=""):
 
@@ -127,11 +135,24 @@ class Visualizer(object):
             color = self.colors[-1]
             if p.team < len(self.colors):
                 color = self.colors[p.team]
-            # pygame.draw.circle(self.ScreenSurface, (0, 0, 0), self.scale(p.pos), self.constants["PERSON_SIZE"], 0)
-            # pygame.draw.circle(self.ScreenSurface, color, self.scale(p.pos), self.constants["PERSON_SIZE"] - 2, 0)
-            #replace(color, repcolor)
-            # toDraw = PixelArray(self.personImage).replace(Color(255, 0, 255, 255), color).surface();
-            self.ScreenSurface.blit(p.image, self.scale( (p.pos[0] - 8, p.pos[1] - 8) ) );
+
+            if self.debug:
+                pygame.draw.circle(
+                    self.ScreenSurface,
+                    (0, 0, 0),
+                    self.scale(p.pos),
+                    self.constants["PERSON_SIZE"],
+                    0,
+                )
+                pygame.draw.circle(
+                    self.ScreenSurface,
+                    color, self.scale(p.pos),
+                    self.constants["PERSON_SIZE"] - 2,
+                    0)
+
+            else:
+                scale_pos = self.scale((p.pos[0], p.pos[1]))
+                self.ScreenSurface.blit(p.image, [p - 16 for p in scale_pos])
 
             pygame.draw.line(self.ScreenSurface, (255,0,0), self.scale(p.pos), self.scale(p.targetPos), 3)
 

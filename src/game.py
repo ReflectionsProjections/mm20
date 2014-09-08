@@ -35,6 +35,8 @@ class Game(object):
         self.result_buffer = {}
         self.teams = {}
         self.people = []
+        self.practice_games = False
+        self.events = {}
 
     ##  Adds a new team and returns success / failure message
     # @param data
@@ -57,8 +59,8 @@ class Game(object):
                 try_limit = try_limit-1
             newTeam = Team(data["team"], data["members"],
                            start_room, self.people, client_id)
-        except KeyError:
-            return (False, {"status": "Failure", "errors": ["KeyError"]})
+        except KeyError as e:
+            return (False, {"status": "Failure", "errors": [{"KeyError": e.message}]})
             
         # TODO: Make all error objects uniform
         self.result_buffer[client_id] = []
@@ -82,9 +84,25 @@ class Game(object):
         for person in self.people:
             person.update()
         self.turn += 1
+        if not self.practice_games and self.turn >= self.turn_limit / 2:
+            self.practice_games = True
+            for r in self.rooms.values():
+                if r.isAvailable("PROJECTOR"):
+                    r.addResource("PRACTICE")
+            self.event_notification("PRACTICE", "The projectors are now showing practice games")
         if self.turn >= self.turn_limit:
             return False
         return True
+
+    ## Notify all teams of an event that just occurred
+    def event_notification(self, code, message):
+        self.events[code] = message
+
+    ## called by server to receive events for that turn
+    def get_events(self):
+        newevents = self.events
+        self.events = {}
+        return newevents
 
     ## Queues all of the actions one client is attempting to execute this turn
     # @param action_list

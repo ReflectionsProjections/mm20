@@ -89,6 +89,7 @@
       "distract",
       "wake",
       "spy",
+      "view",
       "serverInfo"
     ],
     "priorities": {
@@ -99,6 +100,7 @@
       "sleep": 60.0,
       "code": 60.0,
       "theorize": 50.0,
+      "view": 50.0,
       "wake": 40.0,
       "spy": 20.0
     }
