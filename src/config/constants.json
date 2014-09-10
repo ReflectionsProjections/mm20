@@ -20,6 +20,7 @@
     "map": "rooms_full.bmp",
     "mapWidth": 1024,
     "mapHeight": 768,
+    "mapParseStartPos": [147, 139],
     "log": "log.txt",
     "port": 8080,
     "time": 0.1,
@@ -29,7 +30,7 @@
     "log": "serverlog.json"
   },
   "visualizerDefaults": {
-    "map_overlay": "rooms_overlay.png",
+    "map_overlay": "rooms_full.bmp",
     "SCREEN_WIDTH": 1224,
     "SCREEN_HEIGHT": 768,
     "MAX_FPS": 20,
@@ -57,6 +58,7 @@
     },
     "door_color": "220 22 22 255",
     "wall_color": "0 0 0 255",
+    "door_search_radius": 16,
     "room_names": {
       "234 100 100 255": "Hallway",
       "186 255 0 255": "Key Lime Pie",

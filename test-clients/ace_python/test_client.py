@@ -59,11 +59,6 @@ def setActions(members, value, map_dict):
             act["action"] = "move"
             connected_rooms = map_dict[m["location"]]["connectedRooms"]
             
-<<<<<<< HEAD
-=======
-            sys.stdout.write(", ".join(connected_rooms) + "\n")
-            
->>>>>>> 56759d64745d75de0bac9e1994d4b858d0ea91c4
             if TARGET in connected_rooms:
                 act["room"] = TARGET
             else:

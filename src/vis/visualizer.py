@@ -31,7 +31,7 @@ class Visualizer(object):
         self.messages = list()
         self.game_done = False
         self.game_result = None
-        self.debug = kwargs["debug"]
+        self.debug = kwargs.get("debug", False)
         self.rooms = rooms
         self.map_overlay = map_overlay or self.constants["map_overlay"]
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
@@ -59,7 +59,7 @@ class Visualizer(object):
         image = image.convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
         
-        image = pygame.image.load("person.png").convert_alpha()
+        image = pygame.image.load("person.bmp").convert_alpha()
         self.personImage = pygame.transform.scale(image, (32, 32))
         # self.teamPersonImages = []
 
@@ -93,30 +93,119 @@ class Visualizer(object):
                 return False
         return True
 
+    # Determine which points a player should move through to get to a certain position
+    # (using A*, since performance here matters unlike in the map reader)
+    # @param availableConnections The list of points that are connected with each other (as an adjacency list)
+    def construct_path(self, start, end, allPaths, availableConnections):
+        
+        # Queue of paths so far
+        frontierPaths = [[start]]
+
+        # Dict of points reached so far (to keep contains() at O(1))
+        visited = dict()
+        visited[start] = True
+
+        print str(start) + " --> " + str(end)
+
+        while len(frontierPaths) != 0:
+
+            # Pick the best path and remove it from the queue
+            bestDist = 99999999
+            bestIndex = -1
+            for i in range(0, len(frontierPaths)):
+
+                path = frontierPaths[i]
+                dist = pow(path[-1][0] - end[0], 2) + pow(path[-1][1] - end[1], 2)
+
+                if dist < bestDist:
+                    bestDist = dist
+                    bestIndex = i
+
+            currentPath = frontierPaths[bestIndex] # A list of waypoints
+            frontierPaths.pop(bestIndex)
+
+            print str(bestDist) + " / " + str(currentPath)
+
+            # Check if we've reached the goal - if so, terminate pathfinding
+            currentWaypoint = currentPath[-1]
+            if currentWaypoint[0:1] == end[0:1]:
+
+                # Concatenate all the steps between the waypoints together
+                currentSteps = []
+                for i in range(0, len(currentPath) - 1):
+
+                    a = currentPath[i+1]
+                    b = currentPath[i]
+
+                    fullPath = None
+                    if b in allPaths[a]:
+                        fullPath = allPaths[a][b]
+                    elif a in allPaths[b]:
+                        fullPath = allPaths[b][a]
+                    else:
+                        print "SHIT BRICKS!"
+
+                    currentSteps.extend(fullPath)
+
+                return currentSteps
+
+            # Expand it
+            for nextWaypoint in availableConnections[currentWaypoint]:
+
+                # Don't include already-visited points
+                if nextWaypoint in visited:
+                    continue
+
+                # Mark next waypoint as visited
+                visited[nextWaypoint] = True
+
+                # Add path to frontier
+                frontierPaths.append(currentPath + [nextWaypoint])
+
+        # No paths found
+        return None
+
     def frame(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
 
+            # Get all paths
+            allPaths = dict()
+            for r in self.rooms.values():
+                allPaths.update(r.paths)
+
+            # Get connected paths
+            availableConnections = dict()
+            for startPt in allPaths.keys():
+                availableConnections[startPt] = []
+
+            for startPt in allPaths.keys():
+                for endPt in allPaths[startPt].keys():
+                    if startPt != endPt:
+                        availableConnections[startPt].append(endPt)
+                        availableConnections[endPt].append(startPt)
+
+            # Construct paths
+            for p in self.people:
+                p.path = []
+                if p.pos != p.targetPos:
+                    p.path = self.construct_path(p.pos, p.targetPos, allPaths, availableConnections)
+                    print '-----------------'
+
             # Smooth moving
-            movementFinalized = 30
-            frameCount = 0
-            while movementFinalized > 0 or frameCount < self.constants["MIN_FRAMES"]:
-                frameCount += 1
-                if self.movementIsComplete():
-                    movementFinalized -= 1
+            movementFinalized = False
+            while not movementFinalized:
+                movementFinalized = self.movementIsComplete()
 
                 self.draw()
                 self.GameClock.tick(self.MAX_FPS)
 
                 for p in self.people:
-                    if p.targetPos != p.pos:
-                        length = math.sqrt(math.pow((p.targetPos[0] - p.pos[0]), 2) + math.pow((p.targetPos[1] - p.pos[1]), 2))
-                        if length > self.constants["WALK_SPEED"]:
-                            x_dir = float(p.targetPos[0] - p.pos[0]) / length
-                            y_dir = float(p.targetPos[1] - p.pos[1]) / length
-
-                            p.pos = (p.pos[0] + x_dir * self.constants["WALK_SPEED"], p.pos[1] + y_dir * self.constants["WALK_SPEED"])
-                        else:
-                            p.pos = p.targetPos # To avoid floating point errors
+                    if len(p.path):
+                        print str(p.pos) + " --> " + str(p.targetPos)
+                        p.pos = p.path[0]
+                        p.path.pop(0)
+                    else:
+                        p.pos = p.targetPos
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -152,9 +241,10 @@ class Visualizer(object):
 
             else:
                 scale_pos = self.scale((p.pos[0], p.pos[1]))
-                self.ScreenSurface.blit(p.image, [p - 16 for p in scale_pos])
+                self.ScreenSurface.blit(p.image, [q - 16 for q in scale_pos])
 
-            pygame.draw.line(self.ScreenSurface, (255,0,0), self.scale(p.pos), self.scale(p.targetPos), 3)
+            for q in range(0, len(p.path) - 1):
+                pygame.draw.line(self.ScreenSurface, (255,0,0), self.scale(p.path[q]), self.scale(p.path[q+1]), 3)
 
 
         #Draw AI info
@@ -209,7 +299,7 @@ class Visualizer(object):
 
                     # Determine player position
                     if acted == "eat":
-                        visPlayer.targetPos = currentRoom.snacktables[0]
+                        visPlayer.targetPos = currentRoom.snacktable[0]
                         if visPlayer in currentRoom.sitting:
                             currentRoom.sitting.remove(visPlayer)
                     elif acted in ["code", "move", "theorize"]:
@@ -309,7 +399,8 @@ class VisPerson(object):
         
         
 if __name__ == "__main__":
-    mapPath = config.handle_constants.retrieveConstants("serverDefaults")['map']
-    vis = Visualizer(map_reader(mapPath))
+    mapConstants = config.handle_constants.retrieveConstants("serverDefaults")
+    mapPath = mapConstants['map']
+    vis = Visualizer(map_reader(mapPath, tuple(mapConstants["mapParseStartPos"])))
     vis.run_from_file(("../serverlog.json"))
 

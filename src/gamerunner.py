@@ -22,7 +22,7 @@ def launch_clients():
     if parameters.client:
         numberOfClients = len(parameters.client)
         for client in parameters.client:
-            launch_client(os.path.join(os.getcwd(), client))
+            launch_client(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'test-clients/', client))
     else:
         numberOfClients = 0
     for x in xrange(numberOfClients, parameters.teams):
