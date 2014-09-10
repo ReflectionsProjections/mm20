@@ -13,14 +13,13 @@ doorSearchRadius = mapConstants["door_search_radius"]
 roomObjectColorDict = mapConstants["objects"]
 roomNames = mapConstants["room_names"]
 
-## Gets a list of Rooms (with connections) from a given map image
+
+# Gets a list of Rooms (with connections) from a given map image
 # @param map_path A path to the map image
-# @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
+# @param start The *non-wall* point in the image to start searching from.
 # @param stepSize The number of pixels the algorithm moves per step
 # @returns A list of Rooms if any exist, an empty list otherwise.
 def map_reader(map_path, start=(2, 2), stepSize=2):
-
-    # NOTE: The map file's colors must be exact i.e. (1,0,0) and (2,0,0) are considered different rooms
 
     # Open picture
     img = Image.open(map_path).convert("RGBA")
@@ -40,12 +39,13 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].connectedRooms = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
 
         # Room objects
-        rooms[i].stand = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "stand"]
-        rooms[i].chairs = [(r[0], r[1])      for r in roomObjects[rooms[i].name] if r[2] == "chair"]
-        rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
-        rooms[i].doors = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "door"]
-        rooms[i].snacktable = [(r[0], r[1])  for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
-        rooms[i].chair_dirs = [(r[0], r[1])  for r in roomObjects[rooms[i].name] if r[2] == "chair_dir"]
+        curRoomObjects = roomObjects[rooms[i].name]
+        rooms[i].stand = [(r[0], r[1]) for r in curRoomObjects if r[2] == "stand"]
+        rooms[i].chairs = [(r[0], r[1]) for r in curRoomObjects if r[2] == "chair"]
+        rooms[i].desks = [(r[0], r[1]) for r in curRoomObjects if r[2] == "desk"]
+        rooms[i].doors = [(r[0], r[1]) for r in curRoomObjects if r[2] == "door"]
+        rooms[i].snacktable = [(r[0], r[1]) for r in curRoomObjects if r[2] == "snacktable"]
+        rooms[i].chair_dirs = [(r[0], r[1]) for r in curRoomObjects if r[2] == "chair_dir"]
         rooms[i].paths = _getPathsInRoom(rooms[i], pixels, img.size)
 
         for r in roomObjects[rooms[i].name]:
@@ -60,7 +60,7 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
 
 
 # --- INTERNAL CODE - DO NOT USE OUTSIDE OF THIS FILE ---
-## [map_functions.py only] Converts a tuple to a string.
+# [map_functions.py only] Converts a tuple to a string.
 # @param t The tuple to convert.
 def _stringify(t):
 
@@ -76,7 +76,8 @@ def _stringify(t):
     # Done!
     return s
 
-## [map_functions.py only] Finds the shortest valid player path between two points using a BFS
+
+# [map_functions.py only] Finds the shortest valid player path between two points using a BFS
 # @param start A 2-tuple representing the starting point of the path
 # @param end A 2-tuple representing the ending point of the path
 # @param roomColor The color of the current room (as a string)
@@ -86,7 +87,7 @@ def _stringify(t):
 def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
     # Ace settings
-    playerSize = 1 # Should be 12, use 4 for testing
+    playerSize = 1  # Should be 12, use 4 for testing
     playerStep = 1
 
     # Visited
@@ -183,7 +184,8 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
     return path
 
-## [map_functions.py only] Gets the paths within a room
+
+# [map_functions.py only] Gets the paths within a room
 def _getPathsInRoom(room, pixels, imgSize):
 
     # Get connected objects in a room
@@ -214,12 +216,12 @@ def _getPathsInRoom(room, pixels, imgSize):
     return paths
 
 
-## [map_functions.py only] Gets the closest pixel with the specified color. Returns NONE if no matches are found.
+# [map_functions.py only] Gets the closest point with the specified color, else NONE.
 # @param start A 2-tuple representing the point in the image to start searching from.
 # @param targetColor The color to search for
 # @param pixels The pixels of the image (obtained using Image.load())
 # @param imgSize The size of the image as a tuple: (width, height).
-# @param searchRadius The maximum (Manhattan) distance a pixel can have from the start for it to be searched
+# @param searchRadius The max [Manhattan] distance the search can have from start
 # @param stepSize The number of pixels the algorithm moves per step
 def _findClosestPixel(start, targetColor, pixels, imgSize, searchRadius, stepSize=1):
 
@@ -272,8 +274,8 @@ def _findClosestPixel(start, targetColor, pixels, imgSize, searchRadius, stepSiz
 
             for my in range(-1, 2):
 
-                # Skip identical/diagonal pixels (since this function is used primarily for finding doors)
-                if (mx == 0) == (my == 0):
+                # Skip identical pixels
+                if (mx == 0) and (my == 0):
                     continue
 
                 py = y + my * stepSize
@@ -283,7 +285,7 @@ def _findClosestPixel(start, targetColor, pixels, imgSize, searchRadius, stepSiz
                     continue
 
                 # Add pixel to queue
-                nextPos = (px,py)
+                nextPos = (px, py)
                 if not visited.get(nextPos, False):
                     visited[nextPos] = True
                     nodeQueue.put(nextPos)
@@ -292,8 +294,8 @@ def _findClosestPixel(start, targetColor, pixels, imgSize, searchRadius, stepSiz
     return None
 
 
-## [map_functions.py only] Gets the connections between rooms
-# @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
+# [map_functions.py only] Gets the connections between rooms
+# @param start The non-wall point in the image to start searching from.
 # @param connections (Output) A dictionary of rooms used to store connections
 # @param roomObjects (Output) A dictionary of lists of objects and their positions in a room
 # @param pixels The pixels of the image (obtained using Image.load())
@@ -367,13 +369,15 @@ def _floodFillConnectionsIter(
                 # Skip door finding process if we're within a known one's search radius
                 doDoorSearch = True
                 for obj in (roomObjects[curColor] | roomObjects[nextColor]):
-                    if obj[2] == "door" and abs(obj[0] - x) + abs(obj[1] - y) <= doorSearchRadius + 2:
+                    if obj[2] != "door":
+                        continue
+                    if abs(obj[0] - x) + abs(obj[1] - y) <= doorSearchRadius + 2:
                         doDoorSearch = False
                         break
 
                 # Find nearest door (if appropriate)
                 if doDoorSearch:
-                    doorPos = _findClosestPixel((x, y), doorColor, pixels, imgSize, doorSearchRadius)
+                    doorPos = _findClosestPixel(node, doorColor, pixels, imgSize, doorSearchRadius)
                     if doorPos:
                         roomObjects[curColor].update({(doorPos[0], doorPos[1], "door")})
                         roomObjects[nextColor].update({(doorPos[0], doorPos[1], "door")})
@@ -410,14 +414,16 @@ if __name__ == "__main__":
     mapConstants = config.handle_constants.retrieveConstants("serverDefaults")
     mapPath = mapConstants['map']
     rooms = map_reader(mapPath, tuple(mapConstants["mapParseStartPos"]))
-    #print rooms
+
+    """
     for loc in rooms:
         r = rooms[loc]
         print '-----------------------------------'
         print loc
-        #print r.stand
-        #print r.chairs
-        #print r.desks
+        # print r.stand
+        # print r.chairs
+        # print r.desks
         print r.doors
-        #print r.snacktable
-        #print r.connectedRooms.keys()
+        # print r.snacktable
+        # print r.connectedRooms.keys()
+    """

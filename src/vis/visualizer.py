@@ -1,9 +1,8 @@
 import pygame
-import config.handle_constants
+from config.handle_constants import retrieveConstants
 import json
 import random
 import time
-import math
 from map_functions import map_reader
 
 NO_CHAIR = (-100, -100)
@@ -12,8 +11,8 @@ NO_CHAIR = (-100, -100)
 class Visualizer(object):
 
     def __init__(self, rooms=None, map_overlay=None, **kwargs):
-        self.serverDefaults = config.handle_constants.retrieveConstants("serverDefaults")
-        self.constants = config.handle_constants.retrieveConstants("visualizerDefaults")
+        self.serverDefaults = retrieveConstants("serverDefaults")
+        self.constants = retrieveConstants("visualizerDefaults")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
         self.SCREEN_MAP_WIDTH = self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]
         self.MAP_WIDTH = self.serverDefaults["mapWidth"]
@@ -35,8 +34,11 @@ class Visualizer(object):
         self.rooms = rooms
         self.map_overlay = map_overlay or self.constants["map_overlay"]
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
-        self.set_scaleFactor()
-        
+        self.scaleMod = (
+            float(self.SCREEN_MAP_WIDTH) / self.MAP_WIDTH,
+            float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT
+            )
+
         # shuffle seat assignment
         if self.rooms:
             for r in self.rooms.values():
@@ -46,7 +48,7 @@ class Visualizer(object):
         self.setup()
 
     def scale(self, pos):
-        return (int(pos[0] * self.scaleFactor[0]), int(pos[1] * self.scaleFactor[1]))
+        return (int(pos[0] * self.scaleMod[0]), int(pos[1] * self.scaleMod[1]))
 
     def setup(self):
         pygame.display.set_caption(self.TITLE)
@@ -58,13 +60,10 @@ class Visualizer(object):
         self.set_scaleFactor()
         image = image.convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
-        
+
         image = pygame.image.load("person.bmp").convert_alpha()
         self.personImage = pygame.transform.scale(image, (32, 32))
         # self.teamPersonImages = []
-
-    def set_scaleFactor(self):
-            self.scaleFactor = (float(self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]) / self.MAP_WIDTH, float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT)
 
     def run_from_file(self, file_name=""):
 
@@ -93,11 +92,11 @@ class Visualizer(object):
                 return False
         return True
 
-    # Determine which points a player should move through to get to a certain position
+    # Determine which points a player moves through to reach a certain position
     # (using A*, since performance here matters unlike in the map reader)
-    # @param availableConnections The list of points that are connected with each other (as an adjacency list)
+    # @param availableConnections Adjacency list of connections between points
     def construct_path(self, start, end, allPaths, availableConnections):
-        
+
         # Queue of paths so far
         frontierPaths = [[start]]
 
@@ -121,7 +120,7 @@ class Visualizer(object):
                     bestDist = dist
                     bestIndex = i
 
-            currentPath = frontierPaths[bestIndex] # A list of waypoints
+            currentPath = frontierPaths[bestIndex]  # A list of waypoints
             frontierPaths.pop(bestIndex)
 
             print str(bestDist) + " / " + str(currentPath)
@@ -215,11 +214,11 @@ class Visualizer(object):
                 break
 
     def draw(self):
-        #Draw background
+        # Draw background
         self.ScreenSurface.fill((0, 0, 0))
         self.ScreenSurface.blit(self.background, (0, 0))
 
-        #Draw people in rooms
+        # Draw people in rooms
         for p in self.people:
             color = self.colors[-1]
             if p.team < len(self.colors):
@@ -243,11 +242,17 @@ class Visualizer(object):
                 scale_pos = self.scale((p.pos[0], p.pos[1]))
                 self.ScreenSurface.blit(p.image, [q - 16 for q in scale_pos])
 
+            # Debug
             for q in range(0, len(p.path) - 1):
-                pygame.draw.line(self.ScreenSurface, (255,0,0), self.scale(p.path[q]), self.scale(p.path[q+1]), 3)
+                pygame.draw.line(
+                    self.ScreenSurface,
+                    (255, 0, 0),
+                    self.scale(p.path[q]),
+                    self.scale(p.path[q+1]),
+                    3
+                )
 
-
-        #Draw AI info
+        # Draw AI info
         namefont = pygame.font.SysFont("monospace", 40)
         aifont = pygame.font.SysFont("monospace", 20)
         x_pos = 0
@@ -263,9 +268,9 @@ class Visualizer(object):
                 self.ScreenSurface.blit(label, (self.SCREEN_MAP_WIDTH, x_pos))
                 x_pos += 20
 
-        #Draw actions (move animations? failure prompts?)
+        # Draw actions (move animations? failure prompts?)
 
-        #If game is over, show winner
+        # If game is over, show winner
         if self.game_done:
             for i in range(len(self.game_result)):
                 if self.game_result[i]["winner"]:
@@ -273,11 +278,12 @@ class Visualizer(object):
                     label = gameoverfont.render(self.team_names[i] + " WINS!", 35, (12, 12, 12))
                     self.ScreenSurface.blit(label, (0, 0))
 
-        #flip display
+        # Flip display
         pygame.display.flip()
 
     def update_state(self, turn):
-        # check to see if the game has ended 
+
+        # Check to see if the game has ended
         if "winner" in turn[0]:
             self.game_done = True
             self.game_result = turn
@@ -285,12 +291,14 @@ class Visualizer(object):
         if "team_name" in turn[0]:
             self.add_teams(turn)
             return False
-        #reshape data
+
+        # Reshape data
         for i, player in enumerate(turn):
             self.ai[i] = player["aiStats"]
             for person in player["people"].values():
                 if person["team"] == i:
 
+                    # Get existing data
                     visPlayer = self.people[person["person_id"]]
                     acted = person.get("acted", "asleep" if person["asleep"] else None)
 
@@ -305,12 +313,13 @@ class Visualizer(object):
                     elif acted in ["code", "move", "theorize"]:
                         visPlayer.sit_in_room(newRoom, currentRoom)
 
+                    # Update visPlayer
                     visPlayer.set_data(
                         person["location"],
                         acted,
                         person["team"], person["name"], self)
         return True
-                        
+
     def add_teams(self, teams):
         """
         set up the visualizer to view the teams
@@ -318,7 +327,7 @@ class Visualizer(object):
         self.ai = [None] * len(teams)
         self.team_names = list(self.ai)
         number_of_people = 0
-        
+
         for i, player in enumerate(teams):
             self.team_names[i] = player["team_name"]
             number_of_people += len(player["team"])
@@ -345,7 +354,7 @@ class Visualizer(object):
             if visPlayer.team < len(self.colors):
                 color = self.colors[visPlayer.team]
             pygame.PixelArray(teamImage).replace((255, 0, 0), color)
-        
+
 
 class VisPerson(object):
     """
@@ -387,7 +396,7 @@ class VisPerson(object):
         self.room = newRoom.name
 
         return
-        
+
     def set_data(self, room, act, team, name, visualizer):
         """
         Fields to be used
@@ -396,11 +405,9 @@ class VisPerson(object):
         self.action = act
         self.team = team
         self.name = name
-        
-        
+
 if __name__ == "__main__":
-    mapConstants = config.handle_constants.retrieveConstants("serverDefaults")
+    mapConstants = retrieveConstants("serverDefaults")
     mapPath = mapConstants['map']
     vis = Visualizer(map_reader(mapPath, tuple(mapConstants["mapParseStartPos"])))
     vis.run_from_file(("../serverlog.json"))
-
