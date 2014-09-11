@@ -3,16 +3,20 @@ from config.handle_constants import retrieveConstants
 import json
 import random
 import time
+import Queue
 from map_functions import map_reader
+from vector import vecLen, angleBetween
 
 NO_CHAIR = (-100, -100)
 
+lastCachedPos = dict({"atest1":(-1,-1), "atest2":(-1,-1), "atest3":(-1,-1)})
 
 class Visualizer(object):
 
     def __init__(self, rooms=None, map_overlay=None, **kwargs):
         self.serverDefaults = retrieveConstants("serverDefaults")
         self.constants = retrieveConstants("visualizerDefaults")
+        self.mapConstants = retrieveConstants("map_reader_constants")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
         self.SCREEN_MAP_WIDTH = self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]
         self.MAP_WIDTH = self.serverDefaults["mapWidth"]
@@ -44,6 +48,9 @@ class Visualizer(object):
             for r in self.rooms.values():
                 random.shuffle(r.chairs)
 
+        # Pathfinding variables
+        self.allPaths = dict()
+        self.availableConnections = dict()
         pygame.init()
         self.setup()
 
@@ -63,6 +70,25 @@ class Visualizer(object):
         image = pygame.image.load("person.bmp").convert_alpha()
         self.personImage = pygame.transform.scale(image, (32, 32))
         # self.teamPersonImages = []
+
+        # [Pathfinding] Get all paths
+        for r in self.rooms.values():
+            for p1 in r.paths:
+                if p1 not in self.allPaths:
+                    self.allPaths[p1] = dict()
+                for p2 in r.paths[p1]:
+                    self.allPaths[p1][p2] = r.paths[p1][p2]
+
+        # [Pathfinding] Get connected paths
+        for startPt in self.allPaths.keys():
+            self.availableConnections[startPt] = []
+
+        for startPt in self.allPaths.keys():
+            for endPt in self.allPaths[startPt].keys():
+
+                if startPt != endPt:
+                    self.availableConnections[startPt].append(endPt)
+                    self.availableConnections[endPt].append(startPt)
 
     def run_from_file(self, file_name=""):
 
@@ -93,36 +119,24 @@ class Visualizer(object):
 
     # Determine which points a player moves through to reach a certain position
     # (using A*, since performance here matters unlike in the map reader)
-    # @param availableConnections Adjacency list of connections between points
-    def construct_path(self, start, end, allPaths, availableConnections):
+    def construct_path(self, start, end):
 
         # Queue of paths so far
-        frontierPaths = [[start]]
+        frontierPaths = Queue.PriorityQueue()
+        frontierPaths.put([0, [start]])
 
         # Dict of points reached so far (to keep contains() at O(1))
         visited = dict()
         visited[start] = True
 
-        while len(frontierPaths):
+        while not frontierPaths.empty():
 
-            # Pick the best path and remove it from the queue
-            bestDist = 99999999
-            bestIndex = -1
-            for i in range(0, len(frontierPaths)):
-
-                pathEnd = frontierPaths[i][-1]
-                dist = abs(pathEnd[0] - end[0]) + abs(pathEnd[1] + end[1])
-
-                if dist < bestDist:
-                    bestDist = dist
-                    bestIndex = i
-
-            currentPath = frontierPaths[bestIndex]  # A list of waypoints
-            frontierPaths.pop(bestIndex)
+            currentNode = frontierPaths.get()
+            currentPath = currentNode[1]  # A list of waypoints
+            
 
             # Check if we've reached the goal - if so, terminate pathfinding
             currentWaypoint = currentPath[-1]
-            print "CWP " + str(currentWaypoint)
             if currentWaypoint == end:
 
                 # Concatenate all the steps between the waypoints together
@@ -132,20 +146,13 @@ class Visualizer(object):
                     a = currentPath[i+1]
                     b = currentPath[i]
 
-                    fullPath = None
-                    if b in allPaths[a]:
-                        fullPath = allPaths[a][b]
-                    elif a in allPaths[b]:
-                        fullPath = allPaths[b][a]
-                    else:
-                        print "SHIT BRICKS!"
-
+                    fullPath = self.allPaths[a][b]
                     currentSteps.extend(fullPath)
 
                 return currentSteps
 
             # Expand it
-            for nextWaypoint in availableConnections[currentWaypoint]:
+            for nextWaypoint in self.availableConnections[currentWaypoint]:
 
                 # Don't include already-visited points
                 if nextWaypoint in visited:
@@ -155,35 +162,22 @@ class Visualizer(object):
                 visited[nextWaypoint] = True
 
                 # Add path to frontier
-                frontierPaths.append(currentPath + [nextWaypoint])
+                travelled = currentNode[0] + len(currentPath) * self.mapConstants["path_step_size"]
+                dist = vecLen(end, nextWaypoint)
+                frontierPaths.put([99999999 - travelled - dist, currentPath + [nextWaypoint]])
 
         # No paths found
         return None
-
+    
     def frame(self, turn=None):
+
         while self.running and self.update_state(json.loads(turn)):
 
-            # Get all paths
-            allPaths = dict()
-            for r in self.rooms.values():
-                allPaths.update(r.paths)
-
-            # Get connected paths
-            availableConnections = dict()
-            for startPt in allPaths.keys():
-                availableConnections[startPt] = []
-
-            for startPt in allPaths.keys():
-                for endPt in allPaths[startPt].keys():
-
-                    if startPt != endPt:
-                        availableConnections[startPt].append(endPt)
-                        availableConnections[endPt].append(startPt)
-
+            # Get paths
             for p in self.people:
                 p.path = []
                 if p.pos != p.targetPos:
-                    p.path = self.construct_path(p.pos, p.targetPos, allPaths, availableConnections)
+                    p.path = self.construct_path(p.pos, p.targetPos)
 
             # Smooth moving
             movementFinalized = False
@@ -194,10 +188,16 @@ class Visualizer(object):
                 self.GameClock.tick(self.MAX_FPS)
 
                 for p in self.people:
-                    if len(p.path):
-                        print str(p.pos) + " --> " + str(p.targetPos)
+                    if p.path and len(p.path):
+
+                        # Increment path
                         p.pos = p.path[0]
                         p.path.pop(0)
+
+                        # Adjust rotation
+                        if len(p.path) > 2:
+                            p.setRotation(angleBetween(p.pos, p.path[2]))
+
                     else:
                         p.pos = p.targetPos
 
@@ -238,16 +238,38 @@ class Visualizer(object):
                 self.ScreenSurface.blit(p.image, [q - 16 for q in scale_pos])
 
             # Debug
-            if p.targetPos != p.pos:
-                print "TGR " + str(p.pos) + " --> " + str(p.targetPos)
+            if p.targetPos != p.pos and p.path:
                 for q in range(0, len(p.path) - 1):
                     pygame.draw.line(
                         self.ScreenSurface,
                         (255, 0, 0),
                         self.scale(p.path[q]),
                         self.scale(p.path[q+1]),
-                        3
+                        1
                     )
+
+                
+                # DBG
+                for c in self.availableConnections:
+                    for c2 in self.availableConnections[c]:
+
+                        drawLine = False
+                        for p in self.people:
+                            if p.name in lastCachedPos and c == lastCachedPos[p.name]:
+                                drawLine = True
+                                break
+                            if p.name in lastCachedPos and c == p.pos:
+                                lastCachedPos[p.name] = c
+
+                        if drawLine:
+                            pygame.draw.line(
+                                self.ScreenSurface,
+                                (0, 0, 255),
+                                c2,
+                                c,
+                                1
+                            )
+                
 
         # Draw AI info
         namefont = pygame.font.SysFont("monospace", 40)
@@ -365,7 +387,13 @@ class VisPerson(object):
         self.team = None
         self.name = None
         self.image = None
-        self.path = None
+        self.rotation = 0
+        self.path = []
+
+    def setRotation(self, rotation):
+        # BROKEN!
+        #self.image = pygame.transform.rotate(self.image, rotation - self.rotation)
+        self.rotation = rotation
 
     def set_image(self, image):
         self.image = image

@@ -81,6 +81,7 @@ class Room(object):
         self.desks = list()
         self.doors = list()
         self.snacktable = list()
+        self.paths = None
 
     ## Adds a member to this room
     # @param member

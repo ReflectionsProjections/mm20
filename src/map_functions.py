@@ -2,6 +2,7 @@ from PIL import Image
 import Queue
 import objects.room
 import config.handle_constants
+from vector import vecLen
 
 mapConstants = config.handle_constants.retrieveConstants("map_reader_constants")
 
@@ -86,13 +87,8 @@ def _stringify(t):
 # @param stepSize The number of pixels the algorithm moves per step
 def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
-    dbg = start == (99, 237)
-    if dbg:
-        print "DEBUG!"
-    dbg_m = 999999
-
     # Ace settings
-    playerSize = 2  # Should be 12, use 4 for testing
+    playerSize = 4  # Should be 12, use 4 for testing
     playerStep = 2
 
     # Visited
@@ -146,7 +142,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
             continue
 
         # Base case 3: hit goal
-        if _manhattan(coord, end) <= stepSize:
+        if vecLen(coord, end) <= stepSize:
             pathFound = True
             break
 
@@ -172,12 +168,8 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
                     # Add pixel to queue
                     travelled = node[1] + 1
-                    dist = travelled + _manhattan(nextCoord, end)
+                    dist = travelled + vecLen(nextCoord, end)
                     nodeQueue.put((dist, travelled, px, py))
-
-                    if dbg and dbg_m > _manhattan(nextCoord, end):
-                        dbg_m = _manhattan(nextCoord, end)
-                        print str(coord) + " / " + str(dbg_m)
 
     # Backtrack to start (if possible)
     if not pathFound:
@@ -185,11 +177,13 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
         return None
 
     path = list()
+    if coord != end:
+        path.append(end)
     while coord != start:
         path.append(coord)
         coord = visited[coord]
 
-    print "\033[92mDEST REACHED " + str(start) + " --> " + str(end) + "\033[0m"
+    #print "\033[92mDEST REACHED " + str(start) + " --> " + str(end) + "\033[0m"
     return path
 
 
@@ -213,26 +207,15 @@ def _getPathsInRoom(room, pixels, imgSize):
             if p1 in room.chairs and p2 in room.chairs:
                 continue
 
-            # Add existing-but-reversed paths
-            if p2 in paths and p1 in paths[p2]:
-                paths[p1][p2] = list(paths[p2][p1])
-                if paths[p1][p2]:
-                    paths[p1][p2].reverse()
+            # Add path
+            path = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, mapConstants["path_step_size"])
+
+            if path:
+                paths[p1][p2] = path
             else:
-                # Add path
-                path = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, 2)
-                if path:
-                    paths[p1][p2] = path
-                else:
-                    print "\033[91mSomething went wrong with path " + str(p1) + " --> " + str(p2) + "\033[0m"
+                print "\033[91mSomething went wrong with path " + str(p1) + " --> " + str(p2) + "\033[0m"
 
     return paths
-
-
-# [map_functions.py only] Returns the Manhattan Distance between 2 2-d tuples
-def _manhattan(a, b):
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
-
 
 # [map_functions.py only] Gets the closest point with the specified color, else NONE.
 # @param inX The x coordinate in the image to start searching from.
@@ -240,7 +223,7 @@ def _manhattan(a, b):
 # @param targetColor The color to search for
 # @param pixels The pixels of the image (obtained using Image.load())
 # @param imgSize The size of the image as a tuple: (width, height).
-# @param searchRadius The max [Manhattan] distance the search can have from start
+# @param searchRadius The max distance the search can have from start
 # @param stepSize The number of pixels the algorithm moves per step
 def _findClosestPixel(inX, inY, targetColor, pixels, imgSize, searchRadius, stepSize=1):
 
@@ -271,7 +254,7 @@ def _findClosestPixel(inX, inY, targetColor, pixels, imgSize, searchRadius, step
             return coord
 
         # Base case 2: out of search range
-        if _manhattan(coord, start) > searchRadius:
+        if vecLen(coord, start) > searchRadius:
             continue
 
         # Iterative case 1: further iteration (basically recursion)
@@ -420,15 +403,16 @@ if __name__ == "__main__":
     mapPath = mapConstants['map']
     rooms = map_reader(mapPath, tuple(mapConstants["mapParseStartPos"]))
 
-    """
     for loc in rooms:
         r = rooms[loc]
+        if loc != "180 0 255 255":
+            continue
         print '-----------------------------------'
-        print loc
+        #print loc
         # print r.stand
         # print r.chairs
         # print r.desks
-        print r.doors
+        # print r.doors
+        #print r.paths
         # print r.snacktable
         # print r.connectedRooms.keys()
-    """

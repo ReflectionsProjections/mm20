@@ -49,7 +49,6 @@ def setActions(members, value, map_dict):
 
     actions = []
     for m_id, m in members.iteritems():
-
         act = {}
         act["person_id"] = m["person_id"]
 
