@@ -86,17 +86,22 @@ def _stringify(t):
 # @param stepSize The number of pixels the algorithm moves per step
 def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
+    dbg = start == (99, 237)
+    if dbg:
+        print "DEBUG!"
+    dbg_m = 999999
+
     # Ace settings
-    playerSize = 1  # Should be 12, use 4 for testing
-    playerStep = 1
+    playerSize = 2  # Should be 12, use 4 for testing
+    playerStep = 2
 
     # Visited
     visited = dict()
     visited[(start[0], start[1])] = (-1, -1)
 
     # Queues
-    nodeQueue = Queue.Queue()
-    nodeQueue.put((start[0], start[1]))
+    nodeQueue = Queue.PriorityQueue()
+    nodeQueue.put((0, 0, start[0], start[1]))
 
     width = imgSize[0]
     height = imgSize[1]
@@ -107,20 +112,25 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
     while not nodeQueue.empty():
 
         node = nodeQueue.get()
+        coord = node[2:]
 
-        x = node[0]
-        y = node[1]
+        x = coord[0]
+        y = coord[1]
 
         # Base case 1: too close to a wall
-        """
         pathIsValid = True
         for i in range(x - playerSize, x + playerSize + 1, playerStep):
             if not pathIsValid:
                 break
+
+            # Bounds check (1/2)
+            if (i < 0 or width <= i):
+                continue
+
             for j in range(y - playerSize, y + playerSize + 1, playerStep):
 
-                # Bounds check
-                if (i < 0 or width <= i or j < 0 or height <= j):
+                # Bounds check (2/2)
+                if (j < 0 or height <= j):
                     continue
 
                 color = _stringify(pixels[i, j])
@@ -129,23 +139,14 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
                     break
         if not pathIsValid:
             continue
-        """
-
-        """
-        dbg_d = abs(x - end[0]) + abs(y - end[1])
-        if dbg_d < dbg:
-            dbg = dbg_d
-            print str(dbg) + " / " + str(node) + " / " + str(nodeQueue.qsize())
-        """
 
         # Base case 2: hit a different color
         color = _stringify(pixels[x, y])
-        #if color != roomColor and color in roomNames:
-        if color == wallColor:
+        if color != roomColor and color in roomNames:
             continue
 
         # Base case 3: hit goal
-        if abs(node[0] - end[0]) < stepSize and abs(node[1] - end[1]) < stepSize:
+        if _manhattan(coord, end) <= stepSize:
             pathFound = True
             break
 
@@ -165,12 +166,18 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
                     continue
 
                 # Skip visited pixels
-                nextNode = (px, py)
-                if not visited.get(nextNode, None):
-                    visited[nextNode] = node
+                nextCoord = (px, py)
+                if not visited.get(nextCoord, None):
+                    visited[nextCoord] = coord
 
                     # Add pixel to queue
-                    nodeQueue.put(nextNode)
+                    travelled = node[1] + 1
+                    dist = travelled + _manhattan(nextCoord, end)
+                    nodeQueue.put((dist, travelled, px, py))
+
+                    if dbg and dbg_m > _manhattan(nextCoord, end):
+                        dbg_m = _manhattan(nextCoord, end)
+                        print str(coord) + " / " + str(dbg_m)
 
     # Backtrack to start (if possible)
     if not pathFound:
@@ -178,10 +185,11 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
         return None
 
     path = list()
-    while node != start:
-        path.append(node)
-        node = visited[node]
+    while coord != start:
+        path.append(coord)
+        coord = visited[coord]
 
+    print "\033[92mDEST REACHED " + str(start) + " --> " + str(end) + "\033[0m"
     return path
 
 
@@ -212,55 +220,58 @@ def _getPathsInRoom(room, pixels, imgSize):
                     paths[p1][p2].reverse()
             else:
                 # Add path
-                paths[p1][p2] = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, 2)
+                path = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, 2)
+                if path:
+                    paths[p1][p2] = path
+                else:
+                    print "\033[91mSomething went wrong with path " + str(p1) + " --> " + str(p2) + "\033[0m"
+
     return paths
 
 
+# [map_functions.py only] Returns the Manhattan Distance between 2 2-d tuples
+def _manhattan(a, b):
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
+
+
 # [map_functions.py only] Gets the closest point with the specified color, else NONE.
-# @param start A 2-tuple representing the point in the image to start searching from.
+# @param inX The x coordinate in the image to start searching from.
+# @param inY The y coordinate in the image to start searching from.
 # @param targetColor The color to search for
 # @param pixels The pixels of the image (obtained using Image.load())
 # @param imgSize The size of the image as a tuple: (width, height).
 # @param searchRadius The max [Manhattan] distance the search can have from start
 # @param stepSize The number of pixels the algorithm moves per step
-def _findClosestPixel(start, targetColor, pixels, imgSize, searchRadius, stepSize=1):
+def _findClosestPixel(inX, inY, targetColor, pixels, imgSize, searchRadius, stepSize=1):
+
+    start = (inX, inY)
 
     # Queues
-    nodeQueue = Queue.Queue()
-    nodeQueue.put((start[0], start[1]))
+    coordQueue = Queue.Queue()
+    coordQueue.put(start)
 
     width = imgSize[0]
     height = imgSize[1]
 
-    # Make sure start is a 2-tuple of integers
-    if len(start) != 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
-        raise ValueError("Starting pixel must be a 2-tuple of integers.")
-
-    # Make sure this wasn't started on a wall or out of bounds
-    x = start[0]
-    y = start[1]
-    if (x < 0 or y < 0) or (width <= x or height <= y):
-        raise ValueError("Starting pixel must not be out of bounds.")
-
     # Visited
     visited = dict()
-    visited[(start[0], start[1])] = True
+    visited[start] = True
 
     # Search
-    while not nodeQueue.empty():
+    while not coordQueue.empty():
 
-        node = nodeQueue.get()
+        coord = coordQueue.get()
 
-        x = node[0]
-        y = node[1]
+        x = coord[0]
+        y = coord[1]
 
         # Base case 1: hit target
         curColor = _stringify(pixels[x, y])
         if curColor == targetColor:
-            return (x, y)
+            return coord
 
         # Base case 2: out of search range
-        if abs(x - start[0]) + abs(y - start[1]) > searchRadius:
+        if _manhattan(coord, start) > searchRadius:
             continue
 
         # Iterative case 1: further iteration (basically recursion)
@@ -288,7 +299,7 @@ def _findClosestPixel(start, targetColor, pixels, imgSize, searchRadius, stepSiz
                 nextPos = (px, py)
                 if not visited.get(nextPos, False):
                     visited[nextPos] = True
-                    nodeQueue.put(nextPos)
+                    coordQueue.put((px, py))
 
     # No match found
     return None
@@ -320,15 +331,9 @@ def _floodFillConnectionsIter(
     width = imgSize[0]
     height = imgSize[1]
 
-    # Make sure start is a 2-tuple of integers
-    if len(start) != 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
-        raise ValueError("Starting pixel must be a 2-tuple of integers.")
-
     # Make sure this wasn't started on a wall or out of bounds
     x = start[0]
     y = start[1]
-    if (x < 0 or y < 0) or (width <= x or height <= y):
-        raise ValueError("Starting pixel must not be out of bounds.")
     if pixels[x, y] == wallColor:
         raise ValueError("Starting pixel must not be a wall.")
 
@@ -368,7 +373,7 @@ def _floodFillConnectionsIter(
 
                 # Skip door finding process if we're within a known one's search radius
                 doDoorSearch = True
-                for obj in (roomObjects[curColor] | roomObjects[nextColor]):
+                for obj in roomObjects[curColor]:
                     if obj[2] != "door":
                         continue
                     if abs(obj[0] - x) + abs(obj[1] - y) <= doorSearchRadius + 2:
@@ -377,7 +382,7 @@ def _floodFillConnectionsIter(
 
                 # Find nearest door (if appropriate)
                 if doDoorSearch:
-                    doorPos = _findClosestPixel(node, doorColor, pixels, imgSize, doorSearchRadius)
+                    doorPos = _findClosestPixel(x, y, doorColor, pixels, imgSize, doorSearchRadius)
                     if doorPos:
                         roomObjects[curColor].update({(doorPos[0], doorPos[1], "door")})
                         roomObjects[nextColor].update({(doorPos[0], doorPos[1], "door")})

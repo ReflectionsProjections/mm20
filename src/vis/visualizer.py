@@ -57,7 +57,6 @@ class Visualizer(object):
         image = pygame.image.load(self.map_overlay)
         self.MAP_HEIGHT = image.get_height()
         self.MAP_WIDTH = image.get_width()
-        self.set_scaleFactor()
         image = image.convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
 
@@ -104,17 +103,15 @@ class Visualizer(object):
         visited = dict()
         visited[start] = True
 
-        print str(start) + " --> " + str(end)
-
-        while len(frontierPaths) != 0:
+        while len(frontierPaths):
 
             # Pick the best path and remove it from the queue
             bestDist = 99999999
             bestIndex = -1
             for i in range(0, len(frontierPaths)):
 
-                path = frontierPaths[i]
-                dist = pow(path[-1][0] - end[0], 2) + pow(path[-1][1] - end[1], 2)
+                pathEnd = frontierPaths[i][-1]
+                dist = abs(pathEnd[0] - end[0]) + abs(pathEnd[1] + end[1])
 
                 if dist < bestDist:
                     bestDist = dist
@@ -123,11 +120,10 @@ class Visualizer(object):
             currentPath = frontierPaths[bestIndex]  # A list of waypoints
             frontierPaths.pop(bestIndex)
 
-            print str(bestDist) + " / " + str(currentPath)
-
             # Check if we've reached the goal - if so, terminate pathfinding
             currentWaypoint = currentPath[-1]
-            if currentWaypoint[0:1] == end[0:1]:
+            print "CWP " + str(currentWaypoint)
+            if currentWaypoint == end:
 
                 # Concatenate all the steps between the waypoints together
                 currentSteps = []
@@ -179,16 +175,15 @@ class Visualizer(object):
 
             for startPt in allPaths.keys():
                 for endPt in allPaths[startPt].keys():
+
                     if startPt != endPt:
                         availableConnections[startPt].append(endPt)
                         availableConnections[endPt].append(startPt)
 
-            # Construct paths
             for p in self.people:
                 p.path = []
                 if p.pos != p.targetPos:
                     p.path = self.construct_path(p.pos, p.targetPos, allPaths, availableConnections)
-                    print '-----------------'
 
             # Smooth moving
             movementFinalized = False
@@ -243,14 +238,16 @@ class Visualizer(object):
                 self.ScreenSurface.blit(p.image, [q - 16 for q in scale_pos])
 
             # Debug
-            for q in range(0, len(p.path) - 1):
-                pygame.draw.line(
-                    self.ScreenSurface,
-                    (255, 0, 0),
-                    self.scale(p.path[q]),
-                    self.scale(p.path[q+1]),
-                    3
-                )
+            if p.targetPos != p.pos:
+                print "TGR " + str(p.pos) + " --> " + str(p.targetPos)
+                for q in range(0, len(p.path) - 1):
+                    pygame.draw.line(
+                        self.ScreenSurface,
+                        (255, 0, 0),
+                        self.scale(p.path[q]),
+                        self.scale(p.path[q+1]),
+                        3
+                    )
 
         # Draw AI info
         namefont = pygame.font.SysFont("monospace", 40)
@@ -368,6 +365,7 @@ class VisPerson(object):
         self.team = None
         self.name = None
         self.image = None
+        self.path = None
 
     def set_image(self, image):
         self.image = image

@@ -58,7 +58,7 @@
     },
     "door_color": "220 22 22 255",
     "wall_color": "0 0 0 255",
-    "door_search_radius": 16,
+    "door_search_radius": 64,
     "room_names": {
       "234 100 100 255": "Hallway",
       "186 255 0 255": "Key Lime Pie",
