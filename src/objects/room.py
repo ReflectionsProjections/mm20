@@ -60,7 +60,8 @@ class RoomIsFullError(Exception):
 
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
-#  Rooms contain team members and furniture (TODO)
+#  Rooms contain team members, chairs, standing spots,
+#  and possibly snack tables and projectors.
 class Room(object):
     ## Initializes a Room object.
     # @param name
@@ -112,7 +113,7 @@ class Room(object):
         if not member in self.people:
             raise NotInRoomError(self, member)
         elif len(self.sitting) + 1 > len(self.chairs):
-            raise RoomIsFullError(self)
+            return
         elif not member in self.sitting:
             self.sitting.add(member)
             member.sitting = True
@@ -288,32 +289,28 @@ class TestRoom(unittest.TestCase):
 
     def testRoomFull(self):
         from objects.team_member import TeamMember
-        oldRoom = self.room
         for i in range(1, len(self.room.chairs + self.room.stand)):
             TeamMember(str(i), "Coder", self.room, None, i)
         with self.assertRaises(RoomIsFullError):
             TeamMember("Jim", "Coder", self.room, None, 18)
-        self.room = oldRoom
 
-    @unittest.skip("Not yet implemented")
     def testSit(self):
-        # TODO
-        self.assertTrue(False)
+        self.room.sitDown(self.team_member)
+        self.assertTrue(self.team_member.sitting)
 
-    @unittest.skip("Not yet implemented")
     def testSitNoChairs(self):
-        # TODO
-        self.assertTrue(False)
+        from objects.team_member import TeamMember
+        for i in range(1, len(self.room.chairs + self.room.stand)):
+            newmem = TeamMember(str(i), "Coder", self.room, None, i)
+            self.room.sitDown(newmem)
+        self.room.sitDown(self.team_member)
+        self.assertFalse(self.team_member.sitting)
 
-    @unittest.skip("Not yet implemented")
     def testStand(self):
-        # TODO
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testStandNoSpace(self):
-        # TODO
-        self.assertTrue(False)
+        self.room.sitDown(self.team_member)
+        self.assertTrue(self.team_member.sitting)
+        self.room.standUp(self.team_member)
+        self.assertFalse(self.team_member.sitting)
 
 if __name__ == "__main__":
     unittest.main()
