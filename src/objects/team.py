@@ -52,10 +52,11 @@ import room
 class TestTeam(unittest.TestCase):
     def setUp(self):
         self.testRoom = room.Room("Narnia")
+        self.testRoom.stand = [(4,4), (5,5), (6,6)]
         self.team = Team("testTeam",
                          [
-                             {"name": "Steve", "class": "Coder"},
-                             {"name": "Bob", "class": "Theorist"}
+                             {"name": "Steve", "archetype": "Coder"},
+                             {"name": "Bob", "archetype": "Theorist"}
                          ], self.testRoom, [], 0)
 
     def testInit(self):
