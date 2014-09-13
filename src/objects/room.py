@@ -81,6 +81,7 @@ class Room(object):
         self.desks = list()
         self.doors = list()
         self.snacktable = list()
+        self.snacksupply = 0
 
     ## Adds a member to this room
     # @param member
@@ -203,9 +204,11 @@ class Room(object):
 
 class TestRoom(unittest.TestCase):
     def setUp(self):
+        from objects.team_member import TeamMember
         self.room = Room("testRoom")
         self.room.chairs = [(1,1), (2,2), (3,3)]
         self.room.stand = [(4,4), (5,5), (6,6)]
+        self.team_member = TeamMember("Joe", "Coder", self.room, None, 0)
 
     def testInitCorrect(self):
         room = Room("testRoom")
@@ -217,22 +220,19 @@ class TestRoom(unittest.TestCase):
             Room(None)
 
     def testAddMember(self):
-        self.room.addMember('Jim')
-        self.assertTrue('Jim' in self.room.people)
+        self.assertTrue(self.team_member in self.room.people)
 
     def testAddMemberAlreadyThere(self):
-        self.room.addMember('Jim')
         with self.assertRaises(AlreadyInRoomError):
-            self.room.addMember('Jim')
+            self.room.addMember(self.team_member)
 
     def testRemoveMember(self):
-        self.room.addMember('Jim')
-        self.room.removeMember('Jim')
-        self.assertFalse('Jim' in self.room.people)
+        self.room.removeMember(self.team_member)
+        self.assertFalse(self.team_member in self.room.people)
 
     def testRemoveMemberNotInRoom(self):
         with self.assertRaises(NotInRoomError):
-            self.room.removeMember('Jim')
+            self.room.removeMember("Jim")
 
     def testAddResource(self):
         self.room.addResource('food')
@@ -283,13 +283,34 @@ class TestRoom(unittest.TestCase):
         roomTwo = Room("testRoom2")
         self.assertFalse(self.room.isConnectedTo(roomTwo))
 
-    def testAddMember(self):
+    def testRoomFull(self):
+        from objects.team_member import TeamMember
         oldRoom = self.room
-        for i in range(0, len(self.room.chairs + self.room.stand)):
-            self.room.addMember(str(i))
+        for i in range(1, len(self.room.chairs + self.room.stand)):
+            TeamMember(str(i), "Coder", self.room, None, i)
         with self.assertRaises(RoomIsFullError):
-            self.room.addMember('jim')
+            TeamMember("Jim", "Coder", self.room, None, 18)
         self.room = oldRoom
+
+    @unittest.skip("Not yet implemented")
+    def testSit(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testSitNoChairs(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testStand(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testStandNoSpace(self):
+        # TODO
+        self.assertTrue(False)
 
 if __name__ == "__main__":
     unittest.main()

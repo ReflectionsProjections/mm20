@@ -4,7 +4,6 @@ import action_handler
 import config.handle_constants
 import random
 
-
 ## Holds the gamestate and represents the game to the server
 class Game(object):
     # Objects:
@@ -31,12 +30,15 @@ class Game(object):
         self.unoptimized_weight = defaults["UNOPTWEIGHT"]
         self.optimized_weight = defaults["OPTWEIGHT"]
         self.team_limit = defaults["TEAMSIZE"]
+        self.spawnchance = defaults["SPAWNCHANCE"]
         self.action_buffer = []
         self.result_buffer = {}
         self.teams = {}
         self.people = []
         self.practice_games = False
         self.events = {}
+        self.professorroom = ""
+        self. professortime = 0
 
     ##  Adds a new team and returns success / failure message
     # @param data
@@ -90,6 +92,25 @@ class Game(object):
                 if r.isAvailable("PROJECTOR"):
                     r.addResource("PRACTICE")
             self.event_notification("PRACTICE", "The projectors are now showing practice games")
+        # If professor, see if we can despawn
+            if self.professorroom != "":
+                self.professortime -= 1
+                if self.professortime < 1:
+                    self.rooms[self.professorroom].removeResource("PROFESSOR")
+                    self.event_notification("NOPROFESSOR", self.professorroom)
+                    self.professorroom = ""
+        # Add new spawns
+        if self.professorroom == "" and random.random() < self.spawnchance:
+            self.professorroom = random.choice(self.rooms.keys())
+            self.professortime = self.turn_limit / 24
+            self.rooms[self.professorroom].addResource("PROFESSOR")
+            self.event_notification("PROFESSOR", self.professorroom)
+        for r in self.rooms.values():
+            if self.turn % (self.turn_limit / 24) == 0:
+                if "FOOD" in r.resources:
+                    r.snacksupply = self.snackrefill
+            if "FOOD" in r.resources and r.snacksupply < 1:
+                self.event_notification("DEPLETEDSNACKTABLE", r.name)
         if self.turn >= self.turn_limit:
             return False
         return True

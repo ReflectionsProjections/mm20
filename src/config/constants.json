@@ -6,7 +6,10 @@
     "TEAMSIZE": 4,
     "UNOPTWEIGHT": 0.2,
     "OPTWEIGHT": 0.8,
-    "STARTROOM": "72 0 255 255"
+    "STARTROOM": "72 0 255 255",
+    "SPAWNCHANCE": 0.1,
+    "PROFESSORTIME": 1,
+    "SNACKREFILL": 2
   },
   "memberConstants": {
     "effectiveness_drops": 60.0,
