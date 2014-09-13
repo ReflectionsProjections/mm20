@@ -3,6 +3,7 @@ import map_functions
 import action_handler
 import config.handle_constants
 import random
+import unittest
 
 ## Holds the gamestate and represents the game to the server
 class Game(object):
@@ -191,3 +192,54 @@ class Game(object):
         return ((ai.implementation - ai.optimization) *
                 self.unoptimized_weight + ai.optimization *
                 self.optimized_weight) * ai.stability
+
+class TestGame(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    @unittest.skip("Not yet implemented")
+    def testInit(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testAddTeam(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testQueueTurn(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testGetInfo(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testExecuteTurn(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testProfessorSpawn(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testProfessorDespawn(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testPractice(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testSnackdeplete(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testSnackrefill(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testFindvictor(self):
+        self.assertTrue(False)
+
+if __name__ == "__main__":
+    unittest.main()
