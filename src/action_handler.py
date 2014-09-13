@@ -53,7 +53,7 @@ def bufferAction(actionBuffer, action, parameters, client_id):
     actionBuffer.append(action)
 
 
-class TestaActionHandler(unittest.TestCase):
+class TestActionHandler(unittest.TestCase):
     ## Sets up variables required by each test case
     def setUp(self):
         pass
