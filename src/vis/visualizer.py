@@ -388,7 +388,7 @@ class Visualizer(object):
             color = self.colors[-1]
             if visPlayer.team < len(self.colors):
                 color = self.colors[visPlayer.team]
-            pygame.PixelArray(teamImage).replace((255, 0, 0), color)
+            pygame.PixelArray(teamImage).replace((255, 0, 255), color)
 
 
 class VisPerson(object):

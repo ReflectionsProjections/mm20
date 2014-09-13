@@ -38,7 +38,7 @@ class Game(object):
         self.practice_games = False
         self.events = {}
         self.professorroom = ""
-        self. professortime = 0
+        self.professortime = 0
 
     ##  Adds a new team and returns success / failure message
     # @param data
