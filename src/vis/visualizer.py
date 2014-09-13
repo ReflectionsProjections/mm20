@@ -134,7 +134,6 @@ class Visualizer(object):
             currentNode = frontierPaths.get()
             currentPath = currentNode[1]  # A list of waypoints
             
-
             # Check if we've reached the goal - if so, terminate pathfinding
             currentWaypoint = currentPath[-1]
             if currentWaypoint == end:
@@ -162,9 +161,9 @@ class Visualizer(object):
                 visited[nextWaypoint] = True
 
                 # Add path to frontier
-                travelled = currentNode[0] + len(currentPath) * self.mapConstants["path_step_size"]
+                travelled = currentNode[0] + len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
                 dist = vecLen(end, nextWaypoint)
-                frontierPaths.put([99999999 - travelled - dist, currentPath + [nextWaypoint]])
+                frontierPaths.put([travelled + dist, currentPath + [nextWaypoint]])
 
         # No paths found
         return None
@@ -250,6 +249,7 @@ class Visualizer(object):
 
                 
                 # DBG
+                """
                 for c in self.availableConnections:
                     for c2 in self.availableConnections[c]:
 
@@ -269,6 +269,7 @@ class Visualizer(object):
                                 c,
                                 1
                             )
+                """
                 
 
         # Draw AI info

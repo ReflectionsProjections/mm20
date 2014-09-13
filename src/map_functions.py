@@ -3,6 +3,7 @@ import Queue
 import objects.room
 import config.handle_constants
 from vector import vecLen
+import sys
 
 mapConstants = config.handle_constants.retrieveConstants("map_reader_constants")
 
@@ -13,6 +14,9 @@ doorSearchRadius = mapConstants["door_search_radius"]
 # Furniture
 roomObjectColorDict = mapConstants["objects"]
 roomNames = mapConstants["room_names"]
+
+# Progress report variables
+pathStatus = {"pathsCount": 0, "totalPaths": 0}
 
 
 # Gets a list of Rooms (with connections) from a given map image
@@ -36,6 +40,8 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
     for c in connections:
         room = objects.room.Room(c)  # c = room.name
         rooms.append(room)
+
+    # Init rooms (everything but paths)
     for i in range(0, len(rooms)):
         rooms[i].connectedRooms = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
 
@@ -47,7 +53,6 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].doors = [(r[0], r[1]) for r in curRoomObjects if r[2] == "door"]
         rooms[i].snacktable = [(r[0], r[1]) for r in curRoomObjects if r[2] == "snacktable"]
         rooms[i].chair_dirs = [(r[0], r[1]) for r in curRoomObjects if r[2] == "chair_dir"]
-        rooms[i].paths = _getPathsInRoom(rooms[i], pixels, img.size)
 
         for r in roomObjects[rooms[i].name]:
             if r[2] == "projector":
@@ -55,6 +60,29 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         if len(rooms[i].snacktable) != 0:
             rooms[i].addResource('FOOD')  # For now, this is how we are treating food
 
+    # Count paths
+    for r in rooms:
+
+        # Get connected waypoints in a room
+        waypoints = r.snacktable + r.stand + r.chairs + r.doors
+
+        for p1 in waypoints:
+            for p2 in waypoints:
+
+                # Skip identical points
+                if p1 == p2:
+                    continue
+
+                # Skip if the two items are both chairs (because moving between chairs doesn't happen)
+                if p1 in r.chairs and p2 in r.chairs:
+                    continue
+
+                pathStatus["totalPaths"] += 1
+
+    # Find paths
+    for i in range(0, len(rooms)):
+        rooms[i].paths = _getPathsInRoom(rooms[i], pixels, img.size)
+        
     # Hacky transformation code
     rooms2 = {i.name: i for i in rooms}
     return rooms2
@@ -167,7 +195,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
                     visited[nextCoord] = coord
 
                     # Add pixel to queue
-                    travelled = node[1] + 1
+                    travelled = node[1] + stepSize
                     dist = travelled + vecLen(nextCoord, end)
                     nodeQueue.put((dist, travelled, px, py))
 
@@ -183,21 +211,20 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
         path.append(coord)
         coord = visited[coord]
 
-    #print "\033[92mDEST REACHED " + str(start) + " --> " + str(end) + "\033[0m"
     return path
 
 
 # [map_functions.py only] Gets the paths within a room
 def _getPathsInRoom(room, pixels, imgSize):
 
-    # Get connected objects in a room
-    objects = room.snacktable + room.stand + room.chairs + room.doors
+    # Get connected waypoints in a room
+    waypoints = room.snacktable + room.stand + room.chairs + room.doors
 
     # Find paths
     paths = dict()
-    for p1 in objects:
+    for p1 in waypoints:
         paths[p1] = dict()
-        for p2 in objects:
+        for p2 in waypoints:
 
             # Skip identical points
             if p1 == p2:
@@ -208,14 +235,26 @@ def _getPathsInRoom(room, pixels, imgSize):
                 continue
 
             # Add path
-            path = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, mapConstants["path_step_size"])
+            stepSize = mapConstants["path_step_size"]
+            path = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, stepSize)
 
             if path:
                 paths[p1][p2] = path
             else:
-                print "\033[91mSomething went wrong with path " + str(p1) + " --> " + str(p2) + "\033[0m"
+                print "\033[91mPath " + str(p1) + " --> " + str(p2) + " failed.\033[0m"
+
+            # Print progress
+            pathStatus["pathsCount"] += 1
+            sys.stdout.write('\r')
+            sys.stdout.write('Paths found: \033[92m{}\033[0m/{} (\033[92m{}%\033[0m)\n'.format(
+                pathStatus["pathsCount"],
+                pathStatus["totalPaths"],
+                int(float(pathStatus["pathsCount"])/pathStatus["totalPaths"]*100)
+            ))
+            sys.stdout.flush()
 
     return paths
+
 
 # [map_functions.py only] Gets the closest point with the specified color, else NONE.
 # @param inX The x coordinate in the image to start searching from.
@@ -342,7 +381,18 @@ def _floodFillConnectionsIter(
 
         # Base case 2: hit an object (don't do Iterative Case 1a if this triggers)
         if nextColor in roomObjectColorDict and nextColor != doorColor:
-            roomObjects[curColor].update({(x, y, roomObjectColorDict[nextColor])})
+
+            # Find the top left coord of the object marker
+            objX = x
+            objY = y
+            if _stringify(pixels[x - 1, y]) == nextColor:
+                (objX, objY) = (x - 1, y)
+            if _stringify(pixels[x, y - 1]) == nextColor:
+                (objX, objY) = (x, y - 1)
+            if _stringify(pixels[x - 1, y - 1]) == nextColor:
+                (objX, objY) = (x - 1, y - 1)
+
+            roomObjects[curColor].update({(objX, objY, roomObjectColorDict[nextColor])})
 
         # Iterative case 1a: hit another room, so record the connection
         elif curColor in roomNames and nextColor in roomNames:
@@ -399,20 +449,24 @@ def _floodFillConnectionsIter(
 if __name__ == "__main__":
 
     # Execute function
-    mapConstants = config.handle_constants.retrieveConstants("serverDefaults")
-    mapPath = mapConstants['map']
-    rooms = map_reader(mapPath, tuple(mapConstants["mapParseStartPos"]))
+    serverConstants = config.handle_constants.retrieveConstants("serverDefaults")
+    mapPath = serverConstants['map']
+    rooms = map_reader(mapPath, tuple(serverConstants["mapParseStartPos"]))
 
     for loc in rooms:
         r = rooms[loc]
-        if loc != "180 0 255 255":
-            continue
+        
+        """
         print '-----------------------------------'
-        #print loc
-        # print r.stand
-        # print r.chairs
-        # print r.desks
-        # print r.doors
-        #print r.paths
-        # print r.snacktable
-        # print r.connectedRooms.keys()
+        print loc
+        print r.stand
+        print r.chairs
+        print r.desks
+        print r.doors
+        if (290, 227) in r.paths:
+            print loc
+            print r.paths[(290, 227)][(244, 445)]
+        print r.paths
+        print r.snacktable
+        print r.connectedRooms.keys()
+        """

@@ -30,7 +30,7 @@
     "log": "serverlog.json"
   },
   "visualizerDefaults": {
-    "map_overlay": "rooms_full.bmp",
+    "map_overlay": "rooms_overlay.bmp",
     "SCREEN_WIDTH": 1224,
     "SCREEN_HEIGHT": 768,
     "MAX_FPS": 20,
@@ -61,7 +61,9 @@
     "wall_color": "0 0 0 255",
     "door_search_radius": 64,
     "room_names": {
-      "234 100 100 255": "Hallway",
+      "234 100 100 255": "Hallway Left",
+      "255 66 100 255": "Hallway Middle",
+      "255 66 0 255": "Hallway Right",
       "186 255 0 255": "Key Lime Pie",
       "252 255 0 255": "Sunny Side Up",
       "255 114 0 255": "Pride without the Blue",
