@@ -51,6 +51,8 @@ class Visualizer(object):
         # Pathfinding variables
         self.allPaths = dict()
         self.availableConnections = dict()
+        self.waypointRooms = dict()
+
         pygame.init()
         self.setup()
 
@@ -70,6 +72,11 @@ class Visualizer(object):
         image = pygame.image.load("person.bmp").convert_alpha()
         self.personImage = pygame.transform.scale(image, (32, 32))
         # self.teamPersonImages = []
+
+        # [Pathfinding] Get waypoints --> rooms mapping
+        for r in self.rooms.values():
+            for o in r.snacktable + r.stand + r.chairs + r.doors:
+                self.waypointRooms[o] = r.name
 
         # [Pathfinding] Get all paths
         for r in self.rooms.values():
@@ -121,6 +128,9 @@ class Visualizer(object):
     # (using A*, since performance here matters unlike in the map reader)
     def construct_path(self, start, end):
 
+        # Rooms the path can go through
+        allowedRooms = [self.waypointRooms[p] for p in [start, end]]
+
         # Queue of paths so far
         frontierPaths = Queue.PriorityQueue()
         frontierPaths.put([0, [start]])
@@ -157,13 +167,18 @@ class Visualizer(object):
                 if nextWaypoint in visited:
                     continue
 
+                # Don't include waypoints in non-allowed rooms
+                #if self.waypointRooms[nextWaypoint] not in allowedRooms:
+                #    continue
+
                 # Mark next waypoint as visited
                 visited[nextWaypoint] = True
 
                 # Add path to frontier
-                travelled = currentNode[0] + len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
+                travelled = len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
                 dist = vecLen(end, nextWaypoint)
-                frontierPaths.put([travelled + dist, currentPath + [nextWaypoint]])
+                print "VDIST " + str(dist) + " / Steps " + str(travelled)
+                frontierPaths.put([currentNode[0] + travelled + dist, currentPath + [nextWaypoint]])
 
         # No paths found
         return None

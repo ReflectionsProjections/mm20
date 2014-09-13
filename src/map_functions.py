@@ -235,8 +235,7 @@ def _getPathsInRoom(room, pixels, imgSize):
                 continue
 
             # Add path
-            stepSize = mapConstants["path_step_size"]
-            path = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, stepSize)
+            path = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, mapConstants["path_step_size"])
 
             if path:
                 paths[p1][p2] = path
@@ -246,7 +245,7 @@ def _getPathsInRoom(room, pixels, imgSize):
             # Print progress
             pathStatus["pathsCount"] += 1
             sys.stdout.write('\r')
-            sys.stdout.write('Paths found: \033[92m{}\033[0m/{} (\033[92m{}%\033[0m)\n'.format(
+            sys.stdout.write('Paths found: {}/{} ({}%)'.format(
                 pathStatus["pathsCount"],
                 pathStatus["totalPaths"],
                 int(float(pathStatus["pathsCount"])/pathStatus["totalPaths"]*100)
