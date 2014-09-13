@@ -110,7 +110,7 @@ class MMServer( object ):
                         try:
                             jsonObject = json.loads(data)
                         except ValueError, TypeError:
-                            jsonObject = json.loads('{}')
+                            jsonObject = {}
                             validJson = False
                         if validJson:
                             (success, response) = self.game.add_new_team(jsonObject, player)
@@ -157,7 +157,7 @@ class MMServer( object ):
                 #Timeout
                 for i in range(0, self.maxPlayers):
                     if turnObjects[i] is None:
-                        turnObjects[i] = json.loads('{}')
+                        turnObjects[i] = {}
                         errors[player] = ["Timeout. Make sure that your message ends with '\n'"]
                         validTurns = validTurns + 1
             else:
@@ -170,7 +170,7 @@ class MMServer( object ):
                             turnObjects[player] = json.loads(recval[player])
                             validTurns = validTurns+1
                         except ValueError, TypeError:
-                            turnObjects[player] = json.loads('{}')
+                            turnObjects[player] = {}
                             errors[player] = ["Invalid JSON"]
                             validTurns = validTurns+1
             if validTurns == self.maxPlayers:
