@@ -128,7 +128,8 @@ def parse_args():
     return args
 
 
-## A simple logger that writes things to a file
+## A simple logger that writes things to a file and, if enabled, to the
+## visualizer
 class FileLogger(object):
     def __init__(self, fileName):
         self.file = fileName
@@ -215,7 +216,7 @@ class Client_program(object):
     @classmethod
     def chose_output(cls):
         output = parameters.veryVerbose
-        if cls.first and not parameters.veryVerbose:
+        if cls.first and parameters.veryVerbose == FNULL:
             output = parameters.verbose
 
         cls.first = False
