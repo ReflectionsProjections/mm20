@@ -1,86 +1,95 @@
 from PIL import Image
 import Queue
 import objects.room
+import config.handle_constants
+from vector import vecLen
+import sys
 
-# Colors used for walls
-# TODO move to constants.py or something like that
-wallColors = ["0 0 0 255"]
+mapConstants = config.handle_constants.retrieveConstants("map_reader_constants")
+
+wallColor = mapConstants["wall_color"]
+doorColor = mapConstants["door_color"]
+doorSearchRadius = mapConstants["door_search_radius"]
 
 # Furniture
-roomObjectColorDict = {
-    "57 234 49 255":    "chair",
-    "255 0 234 255":    "desk",
-    "0 12 255 255":     "stand",
-    "220 22 22 255":    "door",
-    "50 50 50 255":     "snacktable",
-    "0 0 125 255":      "projector",
-    "255 168 0 255":    "chair_dir"
-}
-doorColor = "220 22 22 255"
+roomObjectColorDict = mapConstants["objects"]
+roomNames = mapConstants["room_names"]
+
+# Progress report variables
+pathStatus = {"pathsCount": 0, "totalPaths": 0}
 
 
-## Gets a list of Rooms (with connections) from a given map image
+# Gets a list of Rooms (with connections) from a given map image
 # @param map_path A path to the map image
-# @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
+# @param start The *non-wall* point in the image to start searching from.
 # @param stepSize The number of pixels the algorithm moves per step
 # @returns A list of Rooms if any exist, an empty list otherwise.
 def map_reader(map_path, start=(2, 2), stepSize=2):
-
-    # NOTE: The map file's colors must be exact i.e. (1,0,0) and (2,0,0) are considered different rooms
 
     # Open picture
     img = Image.open(map_path).convert("RGBA")
     pixels = img.load()
 
-    # Find connecting rooms
-    connections = dict()
-    visited = []
-    for x in range(0, img.size[0]):
-        col = []
-        for y in range(0, img.size[1]):
-            col.append(False)
-        visited.append(col)
-
     # Get connections between + objects in rooms
     roomObjects = dict()
-    _floodFillConnectionsIter(start, connections, roomObjects, pixels, visited, img.size, stepSize)
+    connections = dict()
+    _floodFillConnectionsIter(start, connections, roomObjects, pixels, img.size, stepSize)
 
     # Show picture
     rooms = []
     for c in connections:
         room = objects.room.Room(c)  # c = room.name
         rooms.append(room)
+
+    # Init rooms (everything but paths)
     for i in range(0, len(rooms)):
         rooms[i].connectedRooms = {r.name: r for r in rooms if r.name in connections[rooms[i].name]}
 
         # Room objects
-        rooms[i].stand = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "stand"]
-        rooms[i].chairs = [(r[0], r[1])      for r in roomObjects[rooms[i].name] if r[2] == "chair"]
-        rooms[i].desks = [(r[0], r[1])       for r in roomObjects[rooms[i].name] if r[2] == "desk"]
-        rooms[i].doors = [(r[0], r[1], r[3]) for r in roomObjects[rooms[i].name] if r[2] == "door"]
-        rooms[i].snacktables = [(r[0], r[1]) for r in roomObjects[rooms[i].name] if r[2] == "snacktable"]
+        curRoomObjects = roomObjects[rooms[i].name]
+        rooms[i].stand = [(r[0], r[1]) for r in curRoomObjects if r[2] == "stand"]
+        rooms[i].chairs = [(r[0], r[1]) for r in curRoomObjects if r[2] == "chair"]
+        rooms[i].desks = [(r[0], r[1]) for r in curRoomObjects if r[2] == "desk"]
+        rooms[i].doors = [(r[0], r[1]) for r in curRoomObjects if r[2] == "door"]
+        rooms[i].snacktable = [(r[0], r[1]) for r in curRoomObjects if r[2] == "snacktable"]
+        rooms[i].chair_dirs = [(r[0], r[1]) for r in curRoomObjects if r[2] == "chair_dir"]
+
         for r in roomObjects[rooms[i].name]:
             if r[2] == "projector":
                 rooms[i].addResource('PROJECTOR')
-        if len(rooms[i].snacktables) != 0:
+        if len(rooms[i].snacktable) != 0:
             rooms[i].addResource('FOOD')  # For now, this is how we are treating food
 
-    # Done!
-    """
-    # Left for debug
-    print rooms
+    # Count paths
     for r in rooms:
-        print "---------------------"
-        print r.connections
-    """
 
+        # Get connected waypoints in a room
+        waypoints = r.snacktable + r.stand + r.chairs + r.doors
+
+        for p1 in waypoints:
+            for p2 in waypoints:
+
+                # Skip identical points
+                if p1 == p2:
+                    continue
+
+                # Skip if the two items are both chairs (because moving between chairs doesn't happen)
+                if p1 in r.chairs and p2 in r.chairs:
+                    continue
+
+                pathStatus["totalPaths"] += 1
+
+    # Find paths
+    for i in range(0, len(rooms)):
+        rooms[i].paths = _getPathsInRoom(rooms[i], pixels, img.size)
+        
     # Hacky transformation code
     rooms2 = {i.name: i for i in rooms}
     return rooms2
 
 
 # --- INTERNAL CODE - DO NOT USE OUTSIDE OF THIS FILE ---
-## [map_functions.py only] Converts a tuple to a string.
+# [map_functions.py only] Converts a tuple to a string.
 # @param t The tuple to convert.
 def _stringify(t):
 
@@ -97,53 +106,194 @@ def _stringify(t):
     return s
 
 
-## [map_functions.py only] Gets the closest pixel with the specified color. Returns NONE if no matches are found.
-# @param start A 2-tuple representing the point in the image to start searching from.
-# @param targetColor The color to search for
+# [map_functions.py only] Finds the shortest valid player path between two points using a BFS
+# @param start A 2-tuple representing the starting point of the path
+# @param end A 2-tuple representing the ending point of the path
+# @param roomColor The color of the current room (as a string)
 # @param pixels The pixels of the image (obtained using Image.load())
-# @param imgsize The size of the image as a tuple: (width, height).
+# @param imgSize The size of the image as a tuple: (width, height).
 # @param stepSize The number of pixels the algorithm moves per step
-def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
+def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
-    # Queues
-    nodeQueue = Queue.Queue()
-
-    nodeQueue.put(start)
-
-    width = imgsize[0]
-    height = imgsize[1]
-
-    # Make sure start is a 2-tuple of integers
-    if len(start) != 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
-        raise ValueError("Starting pixel must be a 2-tuple of integers.")
-
-    # Make sure this wasn't started on a wall or out of bounds
-    x = start[0]
-    y = start[1]
-    if (x < 0 or y < 0) or (width <= x or height <= y):
-        raise ValueError("Starting pixel must not be out of bounds.")
+    # Ace settings
+    playerSize = 4  # Should be 12, use 4 for testing
+    playerStep = 2
 
     # Visited
-    visited = []
-    for x in range(0, width):
-        col = []
-        for y in range(0, height):
-            col.append(False)
-        visited.append(col)
-    visited[start[0]][start[1]] = True
+    visited = dict()
+    visited[(start[0], start[1])] = (-1, -1)
 
-    # Search
+    # Queues
+    nodeQueue = Queue.PriorityQueue()
+    nodeQueue.put((0, 0, start[0], start[1]))
+
+    width = imgSize[0]
+    height = imgSize[1]
+
+    # Do BFS
+    pathFound = False
+    node = None
     while not nodeQueue.empty():
 
         node = nodeQueue.get()
+        coord = node[2:]
 
-        x = node[0]
-        y = node[1]
+        x = coord[0]
+        y = coord[1]
+
+        # Base case 1: too close to a wall
+        pathIsValid = True
+        for i in range(x - playerSize, x + playerSize + 1, playerStep):
+            if not pathIsValid:
+                break
+
+            # Bounds check (1/2)
+            if (i < 0 or width <= i):
+                continue
+
+            for j in range(y - playerSize, y + playerSize + 1, playerStep):
+
+                # Bounds check (2/2)
+                if (j < 0 or height <= j):
+                    continue
+
+                color = _stringify(pixels[i, j])
+                if color == wallColor:
+                    pathIsValid = False
+                    break
+        if not pathIsValid:
+            continue
+
+        # Base case 2: hit a different color
+        color = _stringify(pixels[x, y])
+        if color != roomColor and color in roomNames:
+            continue
+
+        # Base case 3: hit goal
+        if vecLen(coord, end) <= stepSize:
+            pathFound = True
+            break
+
+        # Iterative case
+        for mx in range(-1, 2):
+            for my in range(-1, 2):
+
+                # Skip identical pixels
+                if (mx == 0) and (my == 0):
+                    continue
+
+                px = x + mx * stepSize
+                py = y + my * stepSize
+
+                # Skip out of bounds pixels
+                if (px < 0 or width <= px or py < 0 or height <= py):
+                    continue
+
+                # Skip visited pixels
+                nextCoord = (px, py)
+                if not visited.get(nextCoord, None):
+                    visited[nextCoord] = coord
+
+                    # Add pixel to queue
+                    travelled = node[1] + stepSize
+                    dist = travelled + vecLen(nextCoord, end)
+                    nodeQueue.put((dist, travelled, px, py))
+
+    # Backtrack to start (if possible)
+    if not pathFound:
+        print "\033[91mDEST NOT REACHED " + str(start) + " --> " + str(end) + "\033[0m"
+        return None
+
+    path = list()
+    if coord != end:
+        path.append(end)
+    while coord != start:
+        path.append(coord)
+        coord = visited[coord]
+
+    return path
+
+
+# [map_functions.py only] Gets the paths within a room
+def _getPathsInRoom(room, pixels, imgSize):
+
+    # Get connected waypoints in a room
+    waypoints = room.snacktable + room.stand + room.chairs + room.doors
+
+    # Find paths
+    paths = dict()
+    for p1 in waypoints:
+        paths[p1] = dict()
+        for p2 in waypoints:
+
+            # Skip identical points
+            if p1 == p2:
+                continue
+
+            # Skip if the two items are both chairs (because moving between chairs doesn't happen)
+            if p1 in room.chairs and p2 in room.chairs:
+                continue
+
+            # Add path
+            path = _findShortestValidPath(p1, p2, room.name, pixels, imgSize, mapConstants["path_step_size"])
+
+            if path:
+                paths[p1][p2] = path
+            else:
+                print "\033[91mPath " + str(p1) + " --> " + str(p2) + " failed.\033[0m"
+
+            # Print progress
+            pathStatus["pathsCount"] += 1
+            sys.stdout.write('\r')
+            sys.stdout.write('Paths found: {}/{} ({}%)'.format(
+                pathStatus["pathsCount"],
+                pathStatus["totalPaths"],
+                int(float(pathStatus["pathsCount"])/pathStatus["totalPaths"]*100)
+            ))
+            sys.stdout.flush()
+
+    return paths
+
+
+# [map_functions.py only] Gets the closest point with the specified color, else NONE.
+# @param inX The x coordinate in the image to start searching from.
+# @param inY The y coordinate in the image to start searching from.
+# @param targetColor The color to search for
+# @param pixels The pixels of the image (obtained using Image.load())
+# @param imgSize The size of the image as a tuple: (width, height).
+# @param searchRadius The max distance the search can have from start
+# @param stepSize The number of pixels the algorithm moves per step
+def _findClosestPixel(inX, inY, targetColor, pixels, imgSize, searchRadius, stepSize=1):
+
+    start = (inX, inY)
+
+    # Queues
+    coordQueue = Queue.Queue()
+    coordQueue.put(start)
+
+    width = imgSize[0]
+    height = imgSize[1]
+
+    # Visited
+    visited = dict()
+    visited[start] = True
+
+    # Search
+    while not coordQueue.empty():
+
+        coord = coordQueue.get()
+
+        x = coord[0]
+        y = coord[1]
 
         # Base case 1: hit target
         curColor = _stringify(pixels[x, y])
         if curColor == targetColor:
-            return (x, y)
+            return coord
+
+        # Base case 2: out of search range
+        if vecLen(coord, start) > searchRadius:
+            continue
 
         # Iterative case 1: further iteration (basically recursion)
         for mx in range(-1, 2):
@@ -157,7 +307,7 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
             for my in range(-1, 2):
 
                 # Skip identical pixels
-                if mx == 0 and my == 0:
+                if (mx == 0) and (my == 0):
                     continue
 
                 py = y + my * stepSize
@@ -167,121 +317,124 @@ def _findClosestPixel(start, targetColor, pixels, imgsize, stepSize=1):
                     continue
 
                 # Add pixel to queue
-                if not visited[px][py]:
-                    visited[px][py] = True
-                    nodeQueue.put((px, py))
+                nextPos = (px, py)
+                if not visited.get(nextPos, False):
+                    visited[nextPos] = True
+                    coordQueue.put((px, py))
 
     # No match found
     return None
 
 
-## [map_functions.py only] Gets the connections between rooms
-# @param start A 2-tuple representing the point in the image to start searching from. MUST NOT be a wall or an exception will be thrown.
+# [map_functions.py only] Gets the connections between rooms
+# @param start The non-wall point in the image to start searching from.
 # @param connections (Output) A dictionary of rooms used to store connections
 # @param roomObjects (Output) A dictionary of lists of objects and their positions in a room
 # @param pixels The pixels of the image (obtained using Image.load())
-# @param visited (Output) An array indicating which pixels have been visited
-# @param imgsize The size of the image as a tuple: (width, height).
+# @param imgSize The size of the image as a tuple: (width, height).
 # @param stepSize The number of pixels the algorithm moves per step
 def _floodFillConnectionsIter(
-        start, connections, roomObjects, pixels,
-        visited, imgsize, stepSize=1):
+        start, connections, roomObjects, pixels, imgSize, stepSize=1):
+
+    # Find connecting rooms
+    visited = []
+    for x in range(0, imgSize[0]):
+        col = []
+        for y in range(0, imgSize[1]):
+            col.append(False)
+        visited.append(col)
 
     # Queues
     nodeQueue = Queue.Queue()
-    parentQueue = Queue.Queue()
+    roomColor = _stringify(pixels[start[0], start[1]])
+    nodeQueue.put((start[0], start[1], start[0], start[1], roomColor))
 
-    nodeQueue.put(start)
-    parentQueue.put(start)
-
-    width = imgsize[0]
-    height = imgsize[1]
-
-    # Make sure start is a 2-tuple of integers
-    if len(start) != 2 or not isinstance(start[0], int) or not isinstance(start[1], int):
-        raise ValueError("Starting pixel must be a 2-tuple of integers.")
+    width = imgSize[0]
+    height = imgSize[1]
 
     # Make sure this wasn't started on a wall or out of bounds
     x = start[0]
     y = start[1]
-    if (x < 0 or y < 0) or (width <= x or height <= y):
-        raise ValueError("Starting pixel must not be out of bounds.")
-    if pixels[x, y] in wallColors:
+    if pixels[x, y] == wallColor:
         raise ValueError("Starting pixel must not be a wall.")
+
+    # Initialize roomObjects/connections
+    for color in roomNames:
+        roomObjects[color] = set()
+        connections[color] = set()
 
     # Begin flood search
     while not nodeQueue.empty():
 
         node = nodeQueue.get()
-        parent = parentQueue.get()
 
         x = node[0]
         y = node[1]
 
         # Base case 1: hit black
-        curColor = _stringify(pixels[parent[0], parent[1]])
+        curColor = node[4]
         nextColor = _stringify(pixels[x, y])
-        if nextColor in wallColors:
+        updateRoomColor = False
+        if nextColor == wallColor:
             continue
 
         # Base case 2: hit an object (don't do Iterative Case 1a if this triggers)
-        if nextColor in roomObjectColorDict:
-            if curColor not in roomObjects:
-                roomObjects[curColor] = []
+        if nextColor in roomObjectColorDict and nextColor != doorColor:
 
-            if roomObjectColorDict[nextColor] != "door":
-                roomObjects[curColor].append((x, y, roomObjectColorDict[nextColor]))
+            # Find the top left coord of the object marker
+            objX = x
+            objY = y
+            if _stringify(pixels[x - 1, y]) == nextColor:
+                (objX, objY) = (x - 1, y)
+            if _stringify(pixels[x, y - 1]) == nextColor:
+                (objX, objY) = (x, y - 1)
+            if _stringify(pixels[x - 1, y - 1]) == nextColor:
+                (objX, objY) = (x - 1, y - 1)
 
-        # Iterative case 1a: hit another color (not black), so record the connection
-        elif curColor not in roomObjectColorDict:
-            if curColor not in connections:
-                connections[curColor] = []
-            if nextColor != curColor and nextColor not in connections[curColor]:
-                connections[curColor].append(nextColor)
+            roomObjects[curColor].update({(objX, objY, roomObjectColorDict[nextColor])})
 
-                if curColor not in roomObjects:
-                    roomObjects[curColor] = []
-                if nextColor not in roomObjects:
-                    roomObjects[nextColor] = []
+        # Iterative case 1a: hit another room, so record the connection
+        elif curColor in roomNames and nextColor in roomNames:
+            updateRoomColor = True
+            if nextColor != curColor:
 
-                # Doors
-                doorPos = _findClosestPixel((x, y), doorColor, pixels, imgsize)
+                # Update connections if necessary
+                if nextColor not in connections[curColor]:
+                    connections[curColor].update({nextColor})
+                    connections[nextColor].update({curColor})
 
-                dx = doorPos[0]
-                dy = doorPos[1]
+                # Skip door finding process if we're within a known one's search radius
+                doDoorSearch = True
+                for obj in roomObjects[curColor]:
+                    if obj[2] != "door":
+                        continue
+                    if abs(obj[0] - x) + abs(obj[1] - y) <= doorSearchRadius + 2:
+                        doDoorSearch = False
+                        break
 
-                roomObjects[curColor].append((dx, dy, "door", nextColor))
-                roomObjects[nextColor].append((dx, dy, "door", curColor))
+                # Find nearest door (if appropriate)
+                if doDoorSearch:
+                    doorPos = _findClosestPixel(x, y, doorColor, pixels, imgSize, doorSearchRadius)
+                    if doorPos:
+                        roomObjects[curColor].update({(doorPos[0], doorPos[1], "door")})
+                        roomObjects[nextColor].update({(doorPos[0], doorPos[1], "door")})
 
-                # Add a connection going the opposite direction (since edges SHOULDN'T be directed)
-                if nextColor not in connections:
-                    connections[nextColor] = []
-                if curColor not in connections[nextColor]:  # Redundant, but kept for code clarity
-                    connections[nextColor].append(curColor)
+        # Determine room color
+        roomColor = nextColor if updateRoomColor else curColor
 
         # Iterative case 1b: further iteration (basically recursion)
         for mx in range(-1, 2):
-
-            px = x + mx * stepSize
-
-            # Skip out of bounds pixels (pt 1/3)
-            if (px < 0 or width <= px):
-                continue
-
             for my in range(-1, 2):
 
-                # Skip identical pixels
-                if mx == 0 and my == 0:
+                # Skip identical pixels and diagonals
+                if (mx == 0) == (my == 0):
                     continue
 
+                px = x + mx * stepSize
                 py = y + my * stepSize
 
-                # Skip out of bounds pixels (pt 2/3)
-                if (py < 0 or height <= py):
-                    continue
-
-                # Skip diagonal checks (pt 3/3)
-                if mx != 0 and my != 0:
+                # Skip out of bounds pixels
+                if (px < 0 or width <= px or py < 0 or height <= py):
                     continue
 
                 # Skip visited pixels
@@ -289,22 +442,30 @@ def _floodFillConnectionsIter(
                     visited[px][py] = True
 
                     # Add pixel to queue
-                    nodeQueue.put((px, py))
-                    parentQueue.put((x, y))
+                    nodeQueue.put((px, py, x, y, roomColor))
 
 # Run a simple test
 if __name__ == "__main__":
 
     # Execute function
-    rooms = map_reader("./rooms_full.bmp")
+    serverConstants = config.handle_constants.retrieveConstants("serverDefaults")
+    mapPath = serverConstants['map']
+    rooms = map_reader(mapPath, tuple(serverConstants["mapParseStartPos"]))
+
     for loc in rooms:
         r = rooms[loc]
+        
+        """
         print '-----------------------------------'
         print loc
-        #print r.stand
-        #print r.chairs
-        #print r.desks
+        print r.stand
+        print r.chairs
+        print r.desks
         print r.doors
-        #print r.snacktables
-
-    print repr(rooms)
+        if (290, 227) in r.paths:
+            print loc
+            print r.paths[(290, 227)][(244, 445)]
+        print r.paths
+        print r.snacktable
+        print r.connectedRooms.keys()
+        """

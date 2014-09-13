@@ -23,7 +23,7 @@ class Game(object):
         if rooms:
             self.rooms = rooms
         else:
-            self.rooms = map_functions.map_reader(map_file)
+            self.rooms = map_functions.map_reader(map_file, tuple(config.handle_constants.retrieveConstants("serverDefaults")["mapParseStartPos"]))
         self.turn = 0
         defaults = config.handle_constants.retrieveConstants('generalInfo')
         self.turn_limit = defaults["TICKSINHOUR"] * 24
