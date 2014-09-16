@@ -39,6 +39,8 @@ class Game(object):
         self.events = {}
         self.professorroom = ""
         self.professortime = 0
+        self.professorhours = defaults["PROFESSORHOURS"]
+        self.snackrefill = defaults["SNACKREFILL"]
 
     ##  Adds a new team and returns success / failure message
     # @param data
@@ -102,7 +104,7 @@ class Game(object):
         # Add new spawns
         if self.professorroom == "" and random.random() < self.spawnchance:
             self.professorroom = random.choice(self.rooms.keys())
-            self.professortime = self.turn_limit / 24
+            self.professortime = self.professorhours * self.turn_limit / 24
             self.rooms[self.professorroom].addResource("PROFESSOR")
             self.event_notification("PROFESSOR", self.professorroom)
         for r in self.rooms.values():
