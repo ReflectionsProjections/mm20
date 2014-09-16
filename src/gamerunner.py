@@ -8,6 +8,7 @@ import sys
 import os
 import pickle
 import vis.visualizer
+import time
 
 
 FNULL = open(os.devnull, 'w')
@@ -142,7 +143,8 @@ class FileLogger(object):
         with open(self.file, 'a') as f:
             f.write(stuff + '\n')
         if self.vis:
-            self.vis.frame(stuff)
+            self.vis.turn(stuff)
+            
 
 def main():
     global parameters

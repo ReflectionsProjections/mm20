@@ -116,7 +116,7 @@ class Visualizer(object):
 
         # Run the game
         for turn_str in json_file:
-            self.frame(turn_str)
+            self.test(turn_str)
             turn_count += 1
 
         # If game is done and we're supposed to quit on exit, wait a while then exit
@@ -193,7 +193,7 @@ class Visualizer(object):
         print '\033[91mERROR at construct_path: no path found between ' + str(start) + ' --> ' + str(end) + '\033[0m'
         return []
     
-    def frame(self, turn=None):
+    def turn(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
 
             # Get paths
@@ -283,27 +283,28 @@ class Visualizer(object):
                     )
 
                 # DBG
-                for c in self.availableConnections:
-                    for c2 in self.availableConnections[c]:
+                if self.debug:
+                    for c in self.availableConnections:
+                        for c2 in self.availableConnections[c]:
 
-                        drawLine = False
-                        for p in self.people:
-                            if p.name in lastCachedPos and c == lastCachedPos[p.name]:
-                                drawLine = True
-                                break
-                            if p.name in lastCachedPos and c == p.pos:
-                                lastCachedPos[p.name] = c
+                            drawLine = False
+                            for p in self.people:
+                                if p.name in lastCachedPos and c == lastCachedPos[p.name]:
+                                    drawLine = True
+                                    break
+                                if p.name in lastCachedPos and c == p.pos:
+                                    lastCachedPos[p.name] = c
 
-                        if drawLine:
-                            qpath = self.allPaths[c][c2]
-                            for q in range(0, len(qpath) - 1):
-                                pygame.draw.line(
-                                    self.ScreenSurface,
-                                    (0, 0, 255),
-                                    self.scale(qpath[q]),
-                                    self.scale(qpath[q+1]),
-                                    1
-                                )
+                            if drawLine:
+                                qpath = self.allPaths[c][c2]
+                                for q in range(0, len(qpath) - 1):
+                                    pygame.draw.line(
+                                        self.ScreenSurface,
+                                        (0, 0, 255),
+                                        self.scale(qpath[q]),
+                                        self.scale(qpath[q+1]),
+                                        1
+                                    )
 
         # Draw AI info
         namefont = pygame.font.SysFont("monospace", 40)
