@@ -190,7 +190,8 @@ class Visualizer(object):
                 frontierPaths.put([travelled + dist, currentPath + [nextWaypoint], travelled])
 
         # No paths found
-        return None
+        print '\033[91mERROR at construct_path: no path found between ' + str(start) + ' --> ' + str(end) + '\033[0m'
+        return []
     
     def frame(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
