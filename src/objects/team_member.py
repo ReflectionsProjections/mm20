@@ -130,12 +130,13 @@ class TeamMember(object):
     def code(self, code_type, turn):
         self._can_move()
         ai = self.team.ai
+        roombonus = self.getRoomBonus(self.location)
         effectmod = 1.0
         if self.turns_coding < TeamMember.turns_to_bonus:
             self.turns_coding += 1
         if not self.sitting:
             effectmod = 0.5
-        effective = effectmod * self.getEffectiveness() * (TeamMember.coding_bonus * self.turns_coding / TeamMember.turns_to_bonus)
+        effective = roombonus * effectmod * self.getEffectiveness() * (TeamMember.coding_bonus * self.turns_coding / TeamMember.turns_to_bonus)
         if code_type == "refactor":
             ai.complexity -= effective * self.stats["refactor"]
             ai.complexity = max(ai.complexity, ai.implementation * .25)
@@ -168,10 +169,11 @@ class TeamMember(object):
     #     The turn so that the player knows how long they've been theorizing
     def theorize(self, turn):
         self._can_move()
+        roombonus = self.getRoomBonus(self.location)
         effectmod = 1.0
         if not self.sitting:
             effectmod = 0.5
-        effective = effectmod * self.getEffectiveness()
+        effective = effectmod * self.getEffectiveness() * roombonus
         self.team.ai.theory += self.stats["theorize"] * effective
         self.acted = "theorize"
 
@@ -190,6 +192,9 @@ class TeamMember(object):
         if not self.location.isAvailable('FOOD'):
             raise client_action.ActionError('NOFOODHERE',
                                             "This room does not contain food")
+        if self.location.snacksupply < 1:
+            raise client_action.ActionError('OUTOFFOOD',
+                                            "This food table has depleted")
         self.hunger -= 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))
         if self.hunger < 0.0:
             self.hunger = 0.0
@@ -272,6 +277,15 @@ class TeamMember(object):
                 (100 - TeamMember.effectiveness_drops)
         return effective
 
+    ## Look at room resources and calculate room bonus
+    def getRoomBonus(self, r):
+        bonus = 1.0
+        if "STAFF" in r.resources:
+            bonus += 0.5
+        if "PROFESSOR" in r.resources:
+            bonus += 1.0
+        return bonus
+
     def _can_move(self):
         if self.acted:
             if self.acted == "distracted":
@@ -306,6 +320,8 @@ class TeamMember(object):
             timetoremovefatigue = 5.5 + .5 * len(self.location.people)
             if timetoremovefatigue > 12.0:
                 timetoremovefatigue = 12.0
+            if "PROFESSOR" in self.location.resources:
+                timetoremovefatigue = timetoremovefatigue/2
             self.fatigue -= 100.0 / (timetoremovefatigue * TeamMember.ticks_in_hour)
             if self.hunger > 100:
                 self.hunger = 100.0
@@ -322,12 +338,15 @@ class TestTeamMember(unittest.TestCase):
                 pass
         TestTeamMember.PseudoTeam = PseudoTeam
         self.testRoom = room.Room("testRoom")
+        self.testRoom.stand = [(4,8), (4,7), (4,6)]
+        self.testRoom.snacksupply = 100
         self.testTeam = TestTeamMember.PseudoTeam()
         self.testMember = TeamMember("Joe", "Coder", self.testRoom,
                                      self.testTeam, 0)
 
     def testInitCorrect(self):
         testRoom = room.Room("testRoom")
+        testRoom.stand = [(4,8), (4,7), (4,6)]
         testTeam = TestTeamMember.PseudoTeam()
         testMember = TeamMember("Joe", "Coder", testRoom, testTeam, 0)
         self.assertEqual(testMember.name, "Joe")
@@ -360,12 +379,20 @@ class TestTeamMember(unittest.TestCase):
 
     def testValidMove(self):
         roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
         self.testRoom.connectToRoom(roomTwo)
         self.testMember.move(roomTwo)
         self.assertEquals(self.testMember.location, roomTwo)
 
     def testInvalidMove(self):
         roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
+        with self.assertRaises(client_action.ActionError):
+            self.testMember.move(roomTwo)
+
+    def testRoomFull(self):
+        roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
         with self.assertRaises(client_action.ActionError):
             self.testMember.move(roomTwo)
 
@@ -383,6 +410,31 @@ class TestTeamMember(unittest.TestCase):
 
     @unittest.skip("Not yet implemented")
     def testSleep(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testCode(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testTheorize(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testWake(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testDistract(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testUpdate(self):
         # TODO
         self.assertTrue(False)
 
