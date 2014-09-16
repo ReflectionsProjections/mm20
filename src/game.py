@@ -155,6 +155,7 @@ class Game(object):
     # @return
     #   A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
+        print self.turn
         if self.turn >= self.turn_limit:
             winner = self.find_victor()
             win = False

@@ -134,7 +134,7 @@ class Visualizer(object):
     # Determine which points a player moves through to reach a certain position
     # (using A*, since performance here matters unlike in the map reader)
     def construct_path(self, start, end):
-
+        print "construct paths"
         # Rooms the path can go through
         allowedRooms = [self.waypointRooms[p] for p in [start, end]]
 
@@ -225,6 +225,11 @@ class Visualizer(object):
                         if vecLen(p.pos, p.targetPos) > 10:
                             print "THIS IS A BUG!"
                         p.pos = p.targetPos
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        self.running = False
+                        movementFinalized = True
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -356,7 +361,7 @@ class Visualizer(object):
                     visPlayer = self.people[person["person_id"]]
                     acted = person.get("acted", "asleep" if person["asleep"] else None)
 
-                    currentRoom = self.rooms[person["location"]]
+                    currentRoom = self.rooms[visPlayer.room]
                     newRoom = self.rooms[person["location"]]
 
                     # Determine player position
@@ -364,8 +369,10 @@ class Visualizer(object):
                         visPlayer.targetPos = currentRoom.snacktable[0]
                         if visPlayer in currentRoom.sitting:
                             currentRoom.sitting.remove(visPlayer)
-                    elif acted in ["code", "move", "theorize"]:
+                    elif acted in ["code", "theorize"]:
                         visPlayer.sit_in_room(newRoom, currentRoom)
+                    elif acted in ["move"]:
+                        visPlayer.stand_in_room(newRoom, currentRoom)
 
                     # Update visPlayer
                     visPlayer.set_data(
@@ -397,7 +404,7 @@ class Visualizer(object):
 
                 visPlayer.set_image(teamImage)
 
-                visPlayer.sit_in_room(room)
+                visPlayer.stand_in_room(room, None)
                 visPlayer.pos = visPlayer.targetPos
                 visPlayer.set_data(
                     person["location"],
@@ -433,29 +440,85 @@ class VisPerson(object):
     def set_image(self, image):
         self.image = image
 
-    def sit_in_room(self, newRoom, currentRoom=None):
-
+    def stand_in_room(self, newRoom, currentRoom):
+        print "stand:"
         # No-op case
-        if self in newRoom.sitting:
+        if self in newRoom.people and self not in newRoom.sitting:
+            print "In new room somehow??"
             return
 
-        # Assign person a new spot
-        numPeople = len(newRoom.sitting)
-        numChairs = len(newRoom.chairs)
-        numStand = len(newRoom.stand)
-        if numPeople < numChairs:
-            self.targetPos = newRoom.chairs[numPeople]
-        elif numPeople < numChairs + numStand:
-            self.targetPos = newRoom.stand[numPeople - numChairs]
-        else:
-            print "NOT ENOUGH ROOM!\n"
+        # Loop through all standing positions, find an unoccupied one and take it.
+        # To find unoccupied, we first compile a list of positions NOT to take.
+        # If no standing, we can take a sitting spot too.
+        badpos = set()
+        found = False
+        for person in newRoom.people:
+            if person.pos != None:
+                if person.targetPos != None:
+                    badpos.add(person.targetPos)
+                else:
+                    badpos.add(person.pos)
+        for position in newRoom.stand:
+            if position not in badpos:
+                self.targetPos = position
+                found = True
+                break
+        # TODO: Sniping seats is possible, so if we're standing on a chair one turn we may not be the next!
+        if not found:
+            for position in newRoom.chairs:
+               if position not in badpos:
+                self.targetPos = position
+                found = True
+                break
+        if not found:
+            print "NOT ENOUGH ROOM"
 
         # Add person to room if they aren't there already
         if currentRoom and self in currentRoom.sitting:
             currentRoom.sitting.remove(self)
-        newRoom.sitting.add(self)
+        if currentRoom and self in currentRoom.people:
+            currentRoom.people.remove(self)
+        newRoom.people.add(self)
         self.room = newRoom.name
 
+        print self.targetPos
+
+        return
+
+    def sit_in_room(self, newRoom, currentRoom):
+        print "sit"
+        # No-op case
+        if self in newRoom.sitting:
+            return
+
+        # Loop through all sitting positions, find an unoccupied one and take it.
+        # To find unoccupied, we first compile a list of positions NOT to take.
+        badpos = set()
+        found = False
+        for person in newRoom.people:
+            if person.pos != None:
+                if person.targetPos != None:
+                    badpos.add(person.targetPos)
+                else:
+                    badpos.add(person.pos)
+        for position in newRoom.chairs:
+            if position not in badpos:
+                self.targetPos = position
+                found = True
+                break
+        if not found:
+            print "NOT ENOUGH ROOM"
+
+        # Add person to room if they aren't there already
+        if currentRoom and self in currentRoom.sitting:
+            currentRoom.sitting.remove(self)
+        if currentRoom and self in currentRoom.people:
+            currentRoom.people.remove(self)
+        newRoom.people.add(self)
+        if len(newRoom.sitting) < len(newRoom.chairs):
+            newRoom.sitting.add(self)
+        self.room = newRoom.name
+        print self.targetPos
         return
 
     def set_data(self, room, act, team, name, visualizer):
