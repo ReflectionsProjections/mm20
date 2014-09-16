@@ -4,6 +4,8 @@ import objects.room
 import config.handle_constants
 from vector import vecLen
 import sys
+import os
+import pickle
 
 mapConstants = config.handle_constants.retrieveConstants("map_reader_constants")
 
@@ -83,8 +85,15 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
     for i in range(0, len(rooms)):
         rooms[i].paths = _getPathsInRoom(rooms[i], pixels, img.size)
         
-    # Hacky transformation code
-    rooms2 = {i.name: i for i in rooms}
+    # Room naming code - since the map parser depends on color room names
+    rooms2 = {roomNames[i.name]: i for i in rooms}
+    for r in rooms2.values():
+        connectedRooms2 = dict()
+        for c in r.connectedRooms:
+            connectedRooms2[roomNames[c]] = r.connectedRooms[c]
+        r.connectedRooms = connectedRooms2
+        r.name = roomNames[r.name]
+
     return rooms2
 
 
@@ -245,7 +254,7 @@ def _getPathsInRoom(room, pixels, imgSize):
             # Print progress
             pathStatus["pathsCount"] += 1
             sys.stdout.write('\r')
-            sys.stdout.write('Paths found: {}/{} ({}%)'.format(
+            sys.stdout.write('Paths found: \033[92m{}\033[0m/{} (\033[92m{}%\033[0m)'.format(
                 pathStatus["pathsCount"],
                 pathStatus["totalPaths"],
                 int(float(pathStatus["pathsCount"])/pathStatus["totalPaths"]*100)
@@ -450,22 +459,33 @@ if __name__ == "__main__":
     # Execute function
     serverConstants = config.handle_constants.retrieveConstants("serverDefaults")
     mapPath = serverConstants['map']
-    rooms = map_reader(mapPath, tuple(serverConstants["mapParseStartPos"]))
+    
 
-    for loc in rooms:
-        r = rooms[loc]
-        
-        """
-        print '-----------------------------------'
+    map_cache_str = "map.cache"
+    rooms = None
+    if os.path.isfile(map_cache_str):
+        with open(map_cache_str, 'r') as f:
+            rooms = pickle.load(f)
+    else:
+        rooms = map_reader(mapPath, tuple(serverConstants["mapParseStartPos"]))
+
+    r1 = rooms["118 131 83 255"]
+    r2 = rooms["198 221 229 255"]
+    print roomNames[r1.name] + ": " + str([roomNames[k] for k in r1.connectedRooms.keys()])
+    print '----------------'
+    print roomNames[r2.name] + ": " + str([roomNames[k] for k in r2.connectedRooms.keys()])
+
+    """
+    print '-----------------------------------'
+    print loc
+    print r.stand
+    print r.chairs
+    print r.desks
+    print r.doors
+    if (290, 227) in r.paths:
         print loc
-        print r.stand
-        print r.chairs
-        print r.desks
-        print r.doors
-        if (290, 227) in r.paths:
-            print loc
-            print r.paths[(290, 227)][(244, 445)]
-        print r.paths
-        print r.snacktable
-        print r.connectedRooms.keys()
-        """
+        print r.paths[(290, 227)][(244, 445)]
+    print r.paths
+    print r.snacktable
+    print r.connectedRooms.keys()
+    """

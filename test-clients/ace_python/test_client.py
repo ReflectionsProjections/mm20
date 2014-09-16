@@ -53,7 +53,7 @@ def setActions(members, value, map_dict):
         act["person_id"] = m["person_id"]
 
         # Move into room with a snacktable
-        TARGET = "255 114 0 255" # Has a snacktable
+        TARGET = "DEADBEEF" #"255 114 0 255" # Has a snacktable
         if m["location"] != TARGET:
             act["action"] = "move"
             connected_rooms = map_dict[m["location"]]["connectedRooms"]

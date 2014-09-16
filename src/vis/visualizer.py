@@ -6,6 +6,7 @@ import time
 import Queue
 from map_functions import map_reader
 from vector import vecLen, angleBetween
+import sys
 
 NO_CHAIR = (-100, -100)
 
@@ -76,7 +77,10 @@ class Visualizer(object):
         # [Pathfinding] Get waypoints --> rooms mapping
         for r in self.rooms.values():
             for o in r.snacktable + r.stand + r.chairs + r.doors:
-                self.waypointRooms[o] = r.name
+                if o not in self.waypointRooms:
+                    self.waypointRooms[o] = set()
+                print r.name
+                self.waypointRooms[o].update((r.name,))
 
         # [Pathfinding] Get all paths
         for r in self.rooms.values():
@@ -85,6 +89,8 @@ class Visualizer(object):
                     self.allPaths[p1] = dict()
                 for p2 in r.paths[p1]:
                     self.allPaths[p1][p2] = r.paths[p1][p2]
+
+        print self.allPaths[(867, 144)]
 
         # [Pathfinding] Get connected paths
         for startPt in self.allPaths.keys():
@@ -111,6 +117,7 @@ class Visualizer(object):
         # Run the game
         for turn_str in json_file:
             self.frame(turn_str)
+            turn_count += 1
 
         # If game is done and we're supposed to quit on exit, wait a while then exit
         if self.quitWhenDone:
@@ -131,9 +138,12 @@ class Visualizer(object):
         # Rooms the path can go through
         allowedRooms = [self.waypointRooms[p] for p in [start, end]]
 
+        # DBG
+        print str(allowedRooms[0]) + " and " + str(allowedRooms[1]) + " should be connected!"
+
         # Queue of paths so far
         frontierPaths = Queue.PriorityQueue()
-        frontierPaths.put([0, [start]])
+        frontierPaths.put([0, [start], 0])
 
         # Dict of points reached so far (to keep contains() at O(1))
         visited = dict()
@@ -168,23 +178,21 @@ class Visualizer(object):
                     continue
 
                 # Don't include waypoints in non-allowed rooms
-                #if self.waypointRooms[nextWaypoint] not in allowedRooms:
+                #if not self.waypointRooms[nextWaypoint].issubset(allowedRooms):
                 #    continue
 
                 # Mark next waypoint as visited
                 visited[nextWaypoint] = True
 
                 # Add path to frontier
-                travelled = len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
+                travelled = currentNode[2] + len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
                 dist = vecLen(end, nextWaypoint)
-                print "VDIST " + str(dist) + " / Steps " + str(travelled)
-                frontierPaths.put([currentNode[0] + travelled + dist, currentPath + [nextWaypoint]])
+                frontierPaths.put([travelled + dist, currentPath + [nextWaypoint], travelled])
 
         # No paths found
         return None
     
     def frame(self, turn=None):
-
         while self.running and self.update_state(json.loads(turn)):
 
             # Get paths
@@ -213,6 +221,8 @@ class Visualizer(object):
                             p.setRotation(angleBetween(p.pos, p.path[2]))
 
                     else:
+                        if vecLen(p.pos, p.targetPos) > 10:
+                            print "THIS IS A BUG!"
                         p.pos = p.targetPos
 
             for event in pygame.event.get():
@@ -253,6 +263,15 @@ class Visualizer(object):
 
             # Debug
             if p.targetPos != p.pos and p.path:
+
+                pygame.draw.line(
+                        self.ScreenSurface,
+                        (0, 255, 0),
+                        self.scale(p.targetPos),
+                        self.scale(p.pos),
+                        3
+                    )
+
                 for q in range(0, len(p.path) - 1):
                     pygame.draw.line(
                         self.ScreenSurface,
@@ -262,9 +281,7 @@ class Visualizer(object):
                         1
                     )
 
-                
                 # DBG
-                """
                 for c in self.availableConnections:
                     for c2 in self.availableConnections[c]:
 
@@ -277,15 +294,15 @@ class Visualizer(object):
                                 lastCachedPos[p.name] = c
 
                         if drawLine:
-                            pygame.draw.line(
-                                self.ScreenSurface,
-                                (0, 0, 255),
-                                c2,
-                                c,
-                                1
-                            )
-                """
-                
+                            qpath = self.allPaths[c][c2]
+                            for q in range(0, len(qpath) - 1):
+                                pygame.draw.line(
+                                    self.ScreenSurface,
+                                    (0, 0, 255),
+                                    self.scale(qpath[q]),
+                                    self.scale(qpath[q+1]),
+                                    1
+                                )
 
         # Draw AI info
         namefont = pygame.font.SysFont("monospace", 40)
