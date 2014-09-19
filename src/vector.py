@@ -1,5 +1,5 @@
 # Contains common vector methods used in both the visualizer and map parser
-from math import atan2
+from math import atan2, pi
 
 # Get the distance between 2-tuples
 # @param a The first tuple
@@ -9,6 +9,6 @@ def vecLen(a, b):
     return int(pow(pow(a[0] - b[0], 2) + pow(a[1] - b[1], 2), 0.5))
 
 def angleBetween(a, b):
-	return atan2(b[1] - a[1], a[0] - b[0])
+	return float(180/pi) * atan2(b[1] - a[1], a[0] - b[0])
 
 # http://www.pygame.org/wiki/RotateCenter?parent=CookBook

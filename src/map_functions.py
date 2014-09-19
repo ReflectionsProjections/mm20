@@ -11,6 +11,7 @@ mapConstants = config.handle_constants.retrieveConstants("map_reader_constants")
 
 wallColor = mapConstants["wall_color"]
 doorColor = mapConstants["door_color"]
+dirMarkerColor = mapConstants["dir_marker_color"]
 doorSearchRadius = mapConstants["door_search_radius"]
 
 # Furniture
@@ -54,7 +55,7 @@ def map_reader(map_path, start=(2, 2), stepSize=2):
         rooms[i].desks = [(r[0], r[1]) for r in curRoomObjects if r[2] == "desk"]
         rooms[i].doors = [(r[0], r[1]) for r in curRoomObjects if r[2] == "door"]
         rooms[i].snacktable = [(r[0], r[1]) for r in curRoomObjects if r[2] == "snacktable"]
-        rooms[i].chair_dirs = [(r[0], r[1]) for r in curRoomObjects if r[2] == "chair_dir"]
+        rooms[i].dirmarkers = [(r[0], r[1]) for r in curRoomObjects if r[2] == "dir_marker"]
 
         for r in roomObjects[rooms[i].name]:
             if r[2] == "projector":
@@ -393,12 +394,12 @@ def _floodFillConnectionsIter(
             # Find the top left coord of the object marker
             objX = x
             objY = y
-            if _stringify(pixels[x - 1, y]) == nextColor:
-                (objX, objY) = (x - 1, y)
-            if _stringify(pixels[x, y - 1]) == nextColor:
-                (objX, objY) = (x, y - 1)
             if _stringify(pixels[x - 1, y - 1]) == nextColor:
                 (objX, objY) = (x - 1, y - 1)
+            elif _stringify(pixels[x - 1, y]) == nextColor:
+                (objX, objY) = (x - 1, y)
+            elif _stringify(pixels[x, y - 1]) == nextColor:
+                (objX, objY) = (x, y - 1)
 
             roomObjects[curColor].update({(objX, objY, roomObjectColorDict[nextColor])})
 

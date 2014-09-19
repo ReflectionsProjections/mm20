@@ -218,13 +218,23 @@ class Visualizer(object):
                         p.path.pop(0)
 
                         # Adjust rotation
-                        if len(p.path) > 2:
-                            p.setRotation(angleBetween(p.pos, p.path[2]))
+                        if len(p.path) > 5:
+                            p.set_rotation(angleBetween(p.pos, p.path[5]) - 90)
+                        else:
+                            p.set_rotation(angleBetween(p.pos, p.targetPos) - 90)
 
                     else:
                         if vecLen(p.pos, p.targetPos) > 10:
                             print "THIS IS A BUG!"
                         p.pos = p.targetPos
+
+                        # Check for direction marker, otherwise just keep current rotation
+                        for d in self.rooms[p.room].dirmarkers:
+                            if vecLen(d, p.pos) < self.constants["DIR_MARKER_RADIUS"]:
+                                p.set_rotation(angleBetween(p.pos, d) - 90)
+                                rotated = True
+                                break
+
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -265,7 +275,7 @@ class Visualizer(object):
 
             else:
                 scale_pos = self.scale((p.pos[0], p.pos[1]))
-                self.ScreenSurface.blit(p.image, [q - 16 for q in scale_pos])
+                self.ScreenSurface.blit(p.rotatedImage, [q - 16 for q in scale_pos])
 
             # Debug
             if p.targetPos != p.pos and p.path:
@@ -429,16 +439,26 @@ class VisPerson(object):
         self.team = None
         self.name = None
         self.image = None
+        self.rotatedImage = None
         self.rotation = 0
         self.path = []
 
-    def setRotation(self, rotation):
-        # BROKEN!
-        #self.image = pygame.transform.rotate(self.image, rotation - self.rotation)
+    def set_rotation(self, rotation):
+
+        # Rotate an image while keeping its center and size
+        # @source http://www.pygame.org/wiki/RotateCenter
+        orig_rect = self.image.get_rect()
+        rot_image = pygame.transform.rotate(self.image, rotation)
+        rot_rect = orig_rect.copy()
+        rot_rect.center = rot_image.get_rect().center
+
+        # Update properties
+        self.rotatedImage = rot_image.subsurface(rot_rect).copy()
         self.rotation = rotation
 
     def set_image(self, image):
         self.image = image
+        self.set_rotation(self.rotation)
 
     def stand_in_room(self, newRoom, currentRoom):
         print "stand:"
