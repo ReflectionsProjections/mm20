@@ -4,6 +4,7 @@ import json
 import random
 import time
 import math
+from animation import Animation
 from map_functions import map_reader
 
 NO_CHAIR = (-100, -100)
@@ -36,6 +37,8 @@ class Visualizer(object):
         self.map_overlay = map_overlay or self.constants["map_overlay"]
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
         self.set_scaleFactor()
+        self.Animations = {}
+        self.frameNumber = 0
         
         # shuffle seat assignment
         if self.rooms:
@@ -93,6 +96,11 @@ class Visualizer(object):
                 return False
         return True
 
+    def update(self):
+        self.frameNumber += 1
+        if self.frameNumber > self.constants["MAX_FRAMES_PER_TURN"]:
+            self.frameNumber = 0;
+
     def frame(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
 
@@ -100,10 +108,12 @@ class Visualizer(object):
             movementFinalized = False
             frameCount = 0
             while not movementFinalized or frameCount < self.constants["MIN_FRAMES"]:
+
                 frameCount += 1
                 movementFinalized = self.movementIsComplete()
 
                 self.draw()
+                self.update()
                 self.GameClock.tick(self.MAX_FPS)
 
                 for p in self.people:
@@ -150,8 +160,9 @@ class Visualizer(object):
                     0)
 
             else:
-                scale_pos = self.scale((p.pos[0], p.pos[1]))
-                self.ScreenSurface.blit(p.image, [p - 16 for p in scale_pos])
+                # scale_pos = self.scale((p.pos[0], p.pos[1]))
+                # self.ScreenSurface.blit(p.image, [p - 16 for p in scale_pos])
+                self.Animations[p.team].draw(p, self.frameNumber)
 
 
         #Draw AI info
@@ -217,7 +228,8 @@ class Visualizer(object):
                         acted,
                         person["team"], person["name"], self)
         return True
-                        
+    
+    # Initialization of the teams
     def add_teams(self, teams):
         """
         set up the visualizer to view the teams
@@ -226,32 +238,62 @@ class Visualizer(object):
         self.team_names = list(self.ai)
         number_of_people = 0
         
+        # for i, player in enumerate(teams):
+        #     self.team_names[i] = player["team_name"]
+        #     number_of_people += len(player["team"])
+        # self.people = [VisPerson() for _ in xrange(number_of_people)]
+        # for player in teams:
+
+        #     teamImage = self.personImage.copy()
+
+        #     for person in player["team"].values():
+
+        #         visPlayer = self.people[person["person_id"]]
+        #         room = self.rooms[person["location"]]
+
+        #         visPlayer.set_image(teamImage)
+
+        #         visPlayer.sit_in_room(room)
+        #         visPlayer.pos = visPlayer.targetPos
+        #         visPlayer.set_data(
+        #             person["location"],
+        #             None,
+        #             person["team"], person["name"], self)
+
+        #     color = self.colors[-1]
+        #     if visPlayer.team < len(self.colors):
+        #         color = self.colors[visPlayer.team]
+        #     pygame.PixelArray(teamImage).replace(pygame.Color(255, 0, 255, 255), color)
+        
         for i, player in enumerate(teams):
             self.team_names[i] = player["team_name"]
             number_of_people += len(player["team"])
         self.people = [VisPerson() for _ in xrange(number_of_people)]
-        for player in teams:
 
-            teamImage = self.personImage.copy()
+        for i, player in enumerate(teams):
+            self.Animations[i] = {}
 
+            # teamImage = self.personImage.copy()
+            # for animation_type in ANIMATION_TYPES: #these don't exist yet, modify config/constants to make these
             for person in player["team"].values():
-
                 visPlayer = self.people[person["person_id"]]
                 room = self.rooms[person["location"]]
-
-                visPlayer.set_image(teamImage)
-
                 visPlayer.sit_in_room(room)
                 visPlayer.pos = visPlayer.targetPos
                 visPlayer.set_data(
                     person["location"],
                     None,
                     person["team"], person["name"], self)
-
-            color = self.colors[-1]
+                
+            team_color = self.colors[-1]
             if visPlayer.team < len(self.colors):
-                color = self.colors[visPlayer.team]
-            pygame.PixelArray(teamImage).replace(pygame.Color(255, 0, 255, 255), color)
+                team_color = self.colors[visPlayer.team]
+
+            self.Animations[i] = Animation(team_color, self)
+
+
+
+
         
 
 class VisPerson(object):
