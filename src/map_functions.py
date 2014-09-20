@@ -127,7 +127,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
     # Ace settings
     playerSize = 4  # Should be 12, use 4 for testing
-    playerStep = 2
+    playerStep = 4
 
     # Visited
     visited = dict()
@@ -135,7 +135,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
     # Queues
     nodeQueue = Queue.PriorityQueue()
-    nodeQueue.put((0, 0, start[0], start[1]))
+    nodeQueue.put((0.0, 0.0, start[0], start[1]))
 
     width = imgSize[0]
     height = imgSize[1]
@@ -205,8 +205,8 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
                     visited[nextCoord] = coord
 
                     # Add pixel to queue
-                    travelled = node[1] + stepSize
-                    dist = travelled + vecLen(nextCoord, end)
+                    travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
+                    dist = float(travelled) + vecLen(nextCoord, end)
                     nodeQueue.put((dist, travelled, px, py))
 
     # Backtrack to start (if possible)

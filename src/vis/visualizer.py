@@ -134,12 +134,9 @@ class Visualizer(object):
     # Determine which points a player moves through to reach a certain position
     # (using A*, since performance here matters unlike in the map reader)
     def construct_path(self, start, end):
-        print "construct paths"
+        print "construct paths " + str(start) + " --> " + str(end)
         # Rooms the path can go through
         allowedRooms = [self.waypointRooms[p] for p in [start, end]]
-
-        # DBG
-        print str(allowedRooms[0]) + " and " + str(allowedRooms[1]) + " should be connected!"
 
         # Queue of paths so far
         frontierPaths = Queue.PriorityQueue()
@@ -168,6 +165,7 @@ class Visualizer(object):
                     fullPath = self.allPaths[a][b]
                     currentSteps.extend(fullPath)
 
+                print '-- Done --'
                 return currentSteps
 
             # Expand it
@@ -186,6 +184,7 @@ class Visualizer(object):
 
                 # Add path to frontier
                 travelled = currentNode[2] + len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
+                print "PATH TOTAL: " + str(travelled) + " / " + str(currentPath + [nextWaypoint])
                 dist = vecLen(end, nextWaypoint)
                 frontierPaths.put([travelled + dist, currentPath + [nextWaypoint], travelled])
 
