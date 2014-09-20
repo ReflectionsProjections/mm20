@@ -289,7 +289,7 @@ class Visualizer(object):
                 self.Animations[p.team].draw(p, self.frameNumber)
 
             # Debug
-            if p.targetPos != p.pos and p.path:
+            if self.debug and p.targetPos != p.pos and p.path:
 
                 pygame.draw.line(
                         self.ScreenSurface,
@@ -462,28 +462,13 @@ class VisPerson(object):
         self.action = None
         self.team = None
         self.name = None
-        self.image = None
-        self.rotatedImage = None
         self.rotation = 0
         self.path = []
         self.waypoints = []
 
     def set_rotation(self, rotation):
 
-        # Rotate an image while keeping its center and size
-        # @source http://www.pygame.org/wiki/RotateCenter
-        orig_rect = self.image.get_rect()
-        rot_image = pygame.transform.rotate(self.image, rotation)
-        rot_rect = orig_rect.copy()
-        rot_rect.center = rot_image.get_rect().center
-
-        # Update properties
-        self.rotatedImage = rot_image.subsurface(rot_rect).copy()
         self.rotation = rotation
-
-    def set_image(self, image):
-        self.image = image
-        self.set_rotation(self.rotation)
 
     def stand_in_room(self, newRoom, currentRoom):
         print "stand:"
