@@ -71,6 +71,7 @@
       "66 77 88 255":     "stand",
       "220 22 22 255":    "door",
       "40 40 40 255":     "snacktable",
+      "150 150 150 255":  "projector",
       "255 168 0 255":    "dir_marker"
     },
     "path_step_size": 2,
