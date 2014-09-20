@@ -1,4 +1,5 @@
 from objects.team import Team
+from objects.room import RoomIsFullError
 import map_functions
 import action_handler
 import config.handle_constants
@@ -163,7 +164,6 @@ class Game(object):
     # @return
     #   A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
-        print self.turn
         if self.turn >= self.turn_limit:
             winner = self.find_victor()
             win = False

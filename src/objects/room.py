@@ -96,7 +96,9 @@ class Room(object):
         if "PROFESSOR" in self.resources:
             additionalpeople += 1
         if len(self.people) + 1 + additionalpeople > len(self.chairs + self.stand):
-            raise RoomIsFullError(self)
+            raise client_action.ActionError(
+                "ROOMISFULL",
+                "Cannot move to destination, it is full.")
         self.people.add(member)
         member.sitting = False
         

@@ -480,7 +480,6 @@ class VisPerson(object):
         self.rotation = rotation
 
     def stand_in_room(self, newRoom, currentRoom):
-        print "stand:"
         # No-op case
         if self in newRoom.people and self not in newRoom.sitting:
             print "In new room somehow??"
@@ -509,8 +508,8 @@ class VisPerson(object):
                 self.targetPos = position
                 found = True
                 break
-        if not found:
-            print "NOT ENOUGH ROOM"
+        #if not found:
+            #print "NOT ENOUGH ROOM"
 
         # Add person to room if they aren't there already
         if currentRoom and self in currentRoom.sitting:
@@ -520,12 +519,9 @@ class VisPerson(object):
         newRoom.people.add(self)
         self.room = newRoom.name
 
-        print self.targetPos
-
         return
 
     def sit_in_room(self, newRoom, currentRoom):
-        print "sit"
         # No-op case
         if self in newRoom.sitting:
             return
@@ -545,8 +541,8 @@ class VisPerson(object):
                 self.targetPos = position
                 found = True
                 break
-        if not found:
-            print "NOT ENOUGH ROOM"
+        #if not found:
+           #print "NOT ENOUGH ROOM"
 
         # Add person to room if they aren't there already
         if currentRoom and self in currentRoom.sitting:
@@ -557,7 +553,6 @@ class VisPerson(object):
         if len(newRoom.sitting) < len(newRoom.chairs):
             newRoom.sitting.add(self)
         self.room = newRoom.name
-        print self.targetPos
         return
 
     def set_data(self, room, act, team, name, visualizer):
