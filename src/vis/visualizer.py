@@ -10,7 +10,8 @@ import sys
 
 NO_CHAIR = (-100, -100)
 
-lastCachedPos = dict({"atest1":(-1,-1), "atest2":(-1,-1), "atest3":(-1,-1)})
+lastCachedPos = dict({"atest1": (-1, -1), "atest2": (-1, -1), "atest3": (-1, -1)})
+
 
 class Visualizer(object):
 
@@ -59,6 +60,7 @@ class Visualizer(object):
 
     def scale(self, pos):
         return (int(pos[0] * self.scaleMod[0]), int(pos[1] * self.scaleMod[1]))
+
 
     def setup(self):
         pygame.display.set_caption(self.TITLE)
@@ -300,7 +302,7 @@ class Visualizer(object):
                     pygame.draw.circle(
                         self.ScreenSurface,
                         (0, 0, 255),
-                        self.scale(p.path[q]),
+                        self.scale(q),
                         5
                     )
 
