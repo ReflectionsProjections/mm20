@@ -48,7 +48,8 @@
       [255, 255, 255]
     ],
     "QUIT_WHEN_DONE": false,
-    "PERSON_SIZE": 8
+    "PERSON_SIZE": 8,
+    "DIR_MARKER_RADIUS": 4
   },
   "map_reader_constants": {
     "objects":{
@@ -58,10 +59,11 @@
       "220 22 22 255":    "door",
       "40 40 40 255":     "snacktable",
       "150 150 150 255":  "projector",
-      "255 168 0 255":    "chair_dir"
+      "255 168 0 255":    "dir_marker"
     },
     "path_step_size": 2,
     "door_color": "220 22 22 255",
+    "dir_marker_color": "255 168 0 255",
     "wall_color": "0 0 0 255",
     "door_search_radius": 18,
     "room_names": {

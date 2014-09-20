@@ -10,7 +10,8 @@ import sys
 
 NO_CHAIR = (-100, -100)
 
-lastCachedPos = dict({"atest1":(-1,-1), "atest2":(-1,-1), "atest3":(-1,-1)})
+lastCachedPos = dict({"atest1": (-1, -1), "atest2": (-1, -1), "atest3": (-1, -1)})
+
 
 class Visualizer(object):
 
@@ -59,6 +60,7 @@ class Visualizer(object):
 
     def scale(self, pos):
         return (int(pos[0] * self.scaleMod[0]), int(pos[1] * self.scaleMod[1]))
+
 
     def setup(self):
         pygame.display.set_caption(self.TITLE)
@@ -134,12 +136,9 @@ class Visualizer(object):
     # Determine which points a player moves through to reach a certain position
     # (using A*, since performance here matters unlike in the map reader)
     def construct_path(self, start, end):
-        print "construct paths"
+        print "construct paths " + str(start) + " --> " + str(end)
         # Rooms the path can go through
         allowedRooms = [self.waypointRooms[p] for p in [start, end]]
-
-        # DBG
-        print str(allowedRooms[0]) + " and " + str(allowedRooms[1]) + " should be connected!"
 
         # Queue of paths so far
         frontierPaths = Queue.PriorityQueue()
@@ -168,7 +167,8 @@ class Visualizer(object):
                     fullPath = self.allPaths[a][b]
                     currentSteps.extend(fullPath)
 
-                return currentSteps
+                print '-- Done --'
+                return (currentSteps, currentPath)
 
             # Expand it
             for nextWaypoint in self.availableConnections[currentWaypoint]:
@@ -186,12 +186,13 @@ class Visualizer(object):
 
                 # Add path to frontier
                 travelled = currentNode[2] + len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
+                print "PATH TOTAL: " + str(travelled) + " / " + str(currentPath + [nextWaypoint])
                 dist = vecLen(end, nextWaypoint)
                 frontierPaths.put([travelled + dist, currentPath + [nextWaypoint], travelled])
 
         # No paths found
         print '\033[91mERROR at construct_path: no path found between ' + str(start) + ' --> ' + str(end) + '\033[0m'
-        return []
+        return ([], [])
     
     def turn(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
@@ -200,7 +201,7 @@ class Visualizer(object):
             for p in self.people:
                 p.path = []
                 if p.pos != p.targetPos:
-                    p.path = self.construct_path(p.pos, p.targetPos)
+                    (p.path, p.waypoints) = self.construct_path(p.pos, p.targetPos)
 
             # Smooth moving
             movementFinalized = False
@@ -218,13 +219,23 @@ class Visualizer(object):
                         p.path.pop(0)
 
                         # Adjust rotation
-                        if len(p.path) > 2:
-                            p.setRotation(angleBetween(p.pos, p.path[2]))
+                        if len(p.path) > 5:
+                            p.set_rotation(angleBetween(p.pos, p.path[5]) - 90)
+                        else:
+                            p.set_rotation(angleBetween(p.pos, p.targetPos) - 90)
 
                     else:
                         if vecLen(p.pos, p.targetPos) > 10:
                             print "THIS IS A BUG!"
                         p.pos = p.targetPos
+
+                        # Check for direction marker, otherwise just keep current rotation
+                        for d in self.rooms[p.room].dirmarkers:
+                            if vecLen(d, p.pos) < self.constants["DIR_MARKER_RADIUS"]:
+                                p.set_rotation(angleBetween(p.pos, d) - 90)
+                                rotated = True
+                                break
+
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
@@ -265,7 +276,7 @@ class Visualizer(object):
 
             else:
                 scale_pos = self.scale((p.pos[0], p.pos[1]))
-                self.ScreenSurface.blit(p.image, [q - 16 for q in scale_pos])
+                self.ScreenSurface.blit(p.rotatedImage, [q - 16 for q in scale_pos])
 
             # Debug
             if p.targetPos != p.pos and p.path:
@@ -285,6 +296,14 @@ class Visualizer(object):
                         self.scale(p.path[q]),
                         self.scale(p.path[q+1]),
                         1
+                    )
+
+                for q in p.waypoints:
+                    pygame.draw.circle(
+                        self.ScreenSurface,
+                        (0, 0, 255),
+                        self.scale(q),
+                        5
                     )
 
                 # DBG
@@ -429,16 +448,27 @@ class VisPerson(object):
         self.team = None
         self.name = None
         self.image = None
+        self.rotatedImage = None
         self.rotation = 0
         self.path = []
+        self.waypoints = []
 
-    def setRotation(self, rotation):
-        # BROKEN!
-        #self.image = pygame.transform.rotate(self.image, rotation - self.rotation)
+    def set_rotation(self, rotation):
+
+        # Rotate an image while keeping its center and size
+        # @source http://www.pygame.org/wiki/RotateCenter
+        orig_rect = self.image.get_rect()
+        rot_image = pygame.transform.rotate(self.image, rotation)
+        rot_rect = orig_rect.copy()
+        rot_rect.center = rot_image.get_rect().center
+
+        # Update properties
+        self.rotatedImage = rot_image.subsurface(rot_rect).copy()
         self.rotation = rotation
 
     def set_image(self, image):
         self.image = image
+        self.set_rotation(self.rotation)
 
     def stand_in_room(self, newRoom, currentRoom):
         print "stand:"
