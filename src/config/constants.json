@@ -47,7 +47,18 @@
       [255, 255, 255]
     ],
     "QUIT_WHEN_DONE": false,
-    "PERSON_SIZE": 8
+    "PERSON_SIZE": 8,
+    "animations" : {
+      "WALK" : ["../img/Assets/PersonAnimations/Walk1.png", "../img/Assets/PersonAnimations/Walk2.png", "../img/Assets/PersonAnimations/Walk3.png", "../img/Assets/PersonAnimations/Walk4.png"],
+      "STAND" : ["../img/Assets/PersonAnimations/Stand1.png", "../img/Assets/PersonAnimations/Stand2.png"],
+      "SLEEP" : ["../img/Assets/PersonAnimations/Sleep.png", "../img/Assets/BubbleAnimations/SleepBubble.png"],
+      "EAT" : ["../img/Assets/PersonAnimations/Eat1.png", "../img/Assets/PersonAnimations/Eat2.png", "../img/Assets/PersonAnimations/Eat3.png"],
+      "SPY" : ["../img/Assets/PersonAnimations/Binocular1.png", "../img/Assets/PersonAnimations/Binocular2.png", "../img/Assets/PersonAnimations/Binocular3.png", "../img/Assets/PersonAnimations/Binocular4.png", "../img/Assets/PersonAnimations/Binocular5.png"],
+      "CODE" : ["../img/Assets/BubbleAnimations/Code.png"],
+      "DISTRACT" : ["../img/Assets/BubbleAnimations/Distract.png"],
+      "DISTRACTED" : ["../img/Assets/BubbleAnimations/Distracted.png"],
+      "THEORIZE" : ["../img/Assets/BubbleAnimations/Theorize.png"]
+    }
   },
   "actions": {
     "validActions": [
