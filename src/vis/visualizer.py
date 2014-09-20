@@ -166,7 +166,7 @@ class Visualizer(object):
                     currentSteps.extend(fullPath)
 
                 print '-- Done --'
-                return currentSteps
+                return (currentSteps, currentPath)
 
             # Expand it
             for nextWaypoint in self.availableConnections[currentWaypoint]:
@@ -190,7 +190,7 @@ class Visualizer(object):
 
         # No paths found
         print '\033[91mERROR at construct_path: no path found between ' + str(start) + ' --> ' + str(end) + '\033[0m'
-        return []
+        return ([], [])
     
     def turn(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
@@ -199,7 +199,7 @@ class Visualizer(object):
             for p in self.people:
                 p.path = []
                 if p.pos != p.targetPos:
-                    p.path = self.construct_path(p.pos, p.targetPos)
+                    (p.path, p.waypoints) = self.construct_path(p.pos, p.targetPos)
 
             # Smooth moving
             movementFinalized = False
@@ -294,6 +294,14 @@ class Visualizer(object):
                         self.scale(p.path[q]),
                         self.scale(p.path[q+1]),
                         1
+                    )
+
+                for q in p.waypoints:
+                    pygame.draw.circle(
+                        self.ScreenSurface,
+                        (0, 0, 255),
+                        self.scale(p.path[q]),
+                        5
                     )
 
                 # DBG
@@ -441,6 +449,7 @@ class VisPerson(object):
         self.rotatedImage = None
         self.rotation = 0
         self.path = []
+        self.waypoints = []
 
     def set_rotation(self, rotation):
 
