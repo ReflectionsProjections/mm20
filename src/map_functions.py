@@ -206,7 +206,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
                     # Add pixel to queue
                     travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
-                    dist = float(travelled) + vecLen(nextCoord, end)
+                    dist = float(travelled)# + vecLen(nextCoord, end) <-- disable A* because bugs
                     nodeQueue.put((dist, travelled, px, py))
 
     # Backtrack to start (if possible)
