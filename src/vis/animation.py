@@ -24,7 +24,23 @@ class Animation(object):
         pygame.PixelArray(teamImage).replace(pygame.Color(255, 0, 255, 255), color)
         return teamImage
 
-    def draw(self, person, frame, a_type):
+    def draw(self, person, frame):
         scale_pos = self.scale((person.pos[0], person.pos[1]))
-        self.ScreenSurface.blit(self.animations["STAND"][0], [p - 16 for p in scale_pos])
+        if person.action == "move":
+            self.ScreenSurface.blit(self.animations["WALK"][(frame / 4) % 4], [p - 16 for p in scale_pos])
+        elif person.action == "spy":
+            self.ScreenSurface.blit(self.animations["SPY"][(frame / 4) % 5], [p - 16 for p in scale_pos])
+        elif person.action == "eat":
+            self.ScreenSurface.blit(self.animations["SPY"][(frame / 4) % 3], [p - 16 for p in scale_pos])
+        elif person.action == "sleep":
+            self.ScreenSurface.blit(self.animations["SLEEP"][0], [p - 16 for p in scale_pos])
+        else:
+            self.ScreenSurface.blit(self.animations["STAND"][0], [p - 16 for p in scale_pos])
+        if person.action == "code":
+            self.ScreenSurface.blit(self.animations["CODE"][0], [scale_pos[0] - 8, scale_pos[1] - 48])
+            
+
+
+        
+
         

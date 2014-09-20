@@ -48,6 +48,7 @@
     ],
     "QUIT_WHEN_DONE": false,
     "PERSON_SIZE": 8,
+    "MAX_FRAMES_PER_TURN": 60,
     "animations" : {
       "WALK" : ["../img/Assets/PersonAnimations/Walk1.png", "../img/Assets/PersonAnimations/Walk2.png", "../img/Assets/PersonAnimations/Walk3.png", "../img/Assets/PersonAnimations/Walk4.png"],
       "STAND" : ["../img/Assets/PersonAnimations/Stand1.png", "../img/Assets/PersonAnimations/Stand2.png"],

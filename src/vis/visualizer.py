@@ -38,6 +38,7 @@ class Visualizer(object):
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
         self.set_scaleFactor()
         self.Animations = {}
+        self.frameNumber = 0
         
         # shuffle seat assignment
         if self.rooms:
@@ -95,6 +96,11 @@ class Visualizer(object):
                 return False
         return True
 
+    def update(self):
+        self.frameNumber += 1
+        if self.frameNumber > self.constants["MAX_FRAMES_PER_TURN"]:
+            self.frameNumber = 0;
+
     def frame(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
 
@@ -102,10 +108,12 @@ class Visualizer(object):
             movementFinalized = False
             frameCount = 0
             while not movementFinalized or frameCount < self.constants["MIN_FRAMES"]:
+
                 frameCount += 1
                 movementFinalized = self.movementIsComplete()
 
                 self.draw()
+                self.update()
                 self.GameClock.tick(self.MAX_FPS)
 
                 for p in self.people:
@@ -154,7 +162,7 @@ class Visualizer(object):
             else:
                 # scale_pos = self.scale((p.pos[0], p.pos[1]))
                 # self.ScreenSurface.blit(p.image, [p - 16 for p in scale_pos])
-                self.Animations[p.team].draw(p, 0, {})
+                self.Animations[p.team].draw(p, self.frameNumber)
 
 
         #Draw AI info
