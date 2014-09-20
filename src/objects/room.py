@@ -92,7 +92,10 @@ class Room(object):
     def addMember(self, member):
         if member in self.people:
             raise AlreadyInRoomError(self, member)
-        if len(self.people) + 1 > len(self.chairs + self.stand):
+        additionalpeople = 0
+        if "PROFESSOR" in self.resources:
+            additionalpeople += 1
+        if len(self.people) + 1 + additionalpeople > len(self.chairs + self.stand):
             raise RoomIsFullError(self)
         self.people.add(member)
         member.sitting = False

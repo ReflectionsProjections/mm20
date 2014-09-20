@@ -258,11 +258,11 @@ class Visualizer(object):
                         pygame.quit()
                         self.running = False
                         movementFinalized = True
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    self.running = False
+            if self.running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        self.running = False
             if not self.game_done:
                 break
 

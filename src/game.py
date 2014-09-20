@@ -96,15 +96,22 @@ class Game(object):
                     r.addResource("PRACTICE")
             self.event_notification("PRACTICE", "The projectors are now showing practice games")
         # If professor, see if we can despawn
-            if self.professorroom != "":
-                self.professortime -= 1
-                if self.professortime < 1:
-                    self.rooms[self.professorroom].removeResource("PROFESSOR")
-                    self.event_notification("NOPROFESSOR", self.professorroom)
-                    self.professorroom = ""
+        if self.professorroom != "":
+            self.professortime -= 1
+            if self.professortime < 1:
+                self.rooms[self.professorroom].removeResource("PROFESSOR")
+                #self.rooms[self.professorroom].people.remove("Professor")
+                self.event_notification("NOPROFESSOR", self.professorroom)
+                self.professorroom = ""
         # Add new spawns
         if self.professorroom == "" and random.random() < self.spawnchance:
-            self.professorroom = random.choice(self.rooms.keys())
+            while self.professorroom == "":
+                possibleroom = random.choice(self.rooms.keys())
+                room = self.rooms[possibleroom]
+                if len(room.people) + 1 > len(room.chairs + room.stand):
+                    continue
+                #room.people.add("Professor")
+                self.professorroom = possibleroom
             self.professortime = self.professorhours * self.turn_limit / 24
             self.rooms[self.professorroom].addResource("PROFESSOR")
             self.event_notification("PROFESSOR", self.professorroom)
