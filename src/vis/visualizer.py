@@ -186,7 +186,6 @@ class Visualizer(object):
 
                 # Add path to frontier
                 travelled = currentNode[2] + len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
-                print "PATH TOTAL: " + str(travelled) + " / " + str(currentPath + [nextWaypoint])
                 dist = vecLen(end, nextWaypoint)
                 frontierPaths.put([travelled + dist, currentPath + [nextWaypoint], travelled])
 
@@ -202,8 +201,10 @@ class Visualizer(object):
                 p.path = []
                 if p.pos != p.targetPos:
                     (p.path, p.waypoints) = self.construct_path(p.pos, p.targetPos)
+                    p.pathLength = len(p.path)
 
             # Smooth moving
+            turns = int(self.constants["TURN_FRAMES"])
             movementFinalized = False
             while not movementFinalized:
                 movementFinalized = self.movementIsComplete()
@@ -211,18 +212,25 @@ class Visualizer(object):
                 self.draw()
                 self.GameClock.tick(self.MAX_FPS)
 
+                turns -= 1
+
                 for p in self.people:
-                    if p.path and len(p.path):
 
-                        # Increment path
-                        p.pos = p.path[0]
-                        p.path.pop(0)
+                    # Calculate path length
+                    if p.path and turns > 0:
+                        iterSteps = int(p.pathLength / float(self.constants["TURN_FRAMES"]))
 
-                        # Adjust rotation
-                        if len(p.path) > 5:
-                            p.set_rotation(angleBetween(p.pos, p.path[5]) - 90)
-                        else:
-                            p.set_rotation(angleBetween(p.pos, p.targetPos) - 90)
+                        if len(p.path) >= iterSteps:
+
+                            for i in range(0, iterSteps):
+                                p.pos = p.path[0]
+                                p.path.pop(0)
+
+                            # Adjust rotation
+                            if len(p.path) > 5:
+                                p.set_rotation(angleBetween(p.pos, p.path[5]) - 90)
+                            else:
+                                p.set_rotation(angleBetween(p.pos, p.targetPos) - 90)
 
                     else:
                         if vecLen(p.pos, p.targetPos) > 10:
@@ -451,6 +459,7 @@ class VisPerson(object):
         self.rotatedImage = None
         self.rotation = 0
         self.path = []
+        self.pathLength = 0
         self.waypoints = []
 
     def set_rotation(self, rotation):
