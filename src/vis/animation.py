@@ -41,6 +41,17 @@ class Animation(object):
             
 
 
-        
+
+"""        
+ # Rotate an image while keeping its center and size
+        # @source http://www.pygame.org/wiki/RotateCenter
+        orig_rect = self.image.get_rect()
+        rot_image = pygame.transform.rotate(self.image, rotation)
+        rot_rect = orig_rect.copy()
+        rot_rect.center = rot_image.get_rect().center
+
+        # Update properties
+        self.rotatedImage = rot_image.subsurface(rot_rect).copy()
+"""        
 
         
