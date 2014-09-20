@@ -74,15 +74,17 @@ class Room(object):
                 "Attempted to initialize Room with room_id of None")
         self.connectedRooms = dict()
         self.name = room_id
-        self.people = set()
-        self.sitting = set()
+        self.people = set() # All people in the room
+        self.sitting = set() # People sitting in the room
         self.resources = set()
-        self.chairs = list()
-        self.stand = list()
+        self.chairs = list() # All chairs in the room
+        self.stand = list() # All standing positions in the room
         self.desks = list()
         self.doors = list()
         self.snacktable = list()
+        self.dirmarkers = list()
         self.snacksupply = 0
+        self.paths = None
 
     ## Adds a member to this room
     # @param member
