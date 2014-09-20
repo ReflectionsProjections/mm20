@@ -23,6 +23,7 @@
     "map": "rooms_full.bmp",
     "mapWidth": 1024,
     "mapHeight": 768,
+    "mapParseStartPos": [147, 139],
     "log": "log.txt",
     "port": 8080,
     "time": 0.1,
@@ -32,11 +33,11 @@
     "log": "serverlog.json"
   },
   "visualizerDefaults": {
-    "map_overlay": "rooms_overlay.png",
+    "map_overlay": "rooms_overlay.bmp",
     "SCREEN_WIDTH": 1224,
     "SCREEN_HEIGHT": 768,
-    "MAX_FPS": 60,
-    "WALK_SPEED": 2,
+    "MAX_FPS": 20,
+    "WALK_SPEED": 20,
     "MIN_FRAMES": 20,
     "TITLE": "Visualizer",
     "STATSBARWIDTH": 200,
@@ -48,17 +49,57 @@
     ],
     "QUIT_WHEN_DONE": false,
     "PERSON_SIZE": 8,
-    "MAX_FRAMES_PER_TURN": 60,
-    "animations" : {
-      "WALK" : ["../img/Assets/PersonAnimations/Walk1.png", "../img/Assets/PersonAnimations/Walk2.png", "../img/Assets/PersonAnimations/Walk3.png", "../img/Assets/PersonAnimations/Walk4.png"],
-      "STAND" : ["../img/Assets/PersonAnimations/Stand1.png", "../img/Assets/PersonAnimations/Stand2.png"],
-      "SLEEP" : ["../img/Assets/PersonAnimations/Sleep.png", "../img/Assets/BubbleAnimations/SleepBubble.png"],
-      "EAT" : ["../img/Assets/PersonAnimations/Eat1.png", "../img/Assets/PersonAnimations/Eat2.png", "../img/Assets/PersonAnimations/Eat3.png"],
-      "SPY" : ["../img/Assets/PersonAnimations/Binocular1.png", "../img/Assets/PersonAnimations/Binocular2.png", "../img/Assets/PersonAnimations/Binocular3.png", "../img/Assets/PersonAnimations/Binocular4.png", "../img/Assets/PersonAnimations/Binocular5.png"],
-      "CODE" : ["../img/Assets/BubbleAnimations/Code.png"],
-      "DISTRACT" : ["../img/Assets/BubbleAnimations/Distract.png"],
-      "DISTRACTED" : ["../img/Assets/BubbleAnimations/Distracted.png"],
-      "THEORIZE" : ["../img/Assets/BubbleAnimations/Theorize.png"]
+    "DIR_MARKER_RADIUS": 4,
+      "MAX_FRAMES_PER_TURN": 30,
+      "animations" : {
+          "WALK" : ["../img/Assets/PersonAnimations/Walk1.png", "../img/Assets/PersonAnimations/Walk2.png", "../img/Assets/PersonAnimations/Walk3.png", "../img/Assets/PersonAnimations/Walk4.png"],
+          "STAND" : ["../img/Assets/PersonAnimations/Stand1.png", "../img/Assets/PersonAnimations/Stand2.png"],
+          "SLEEP" : ["../img/Assets/PersonAnimations/Sleep.png", "../img/Assets/BubbleAnimations/SleepBubble.png"],
+          "EAT" : ["../img/Assets/PersonAnimations/Eat1.png", "../img/Assets/PersonAnimations/Eat2.png", "../img/Assets/PersonAnimations/Eat3.png"],
+          "SPY" : ["../img/Assets/PersonAnimations/Binocular1.png", "../img/Assets/PersonAnimations/Binocular2.png", "../img/Assets/PersonAnimations/Binocular3.png", "../img/Assets/PersonAnimations/Binocular4.png", "../img/Assets/PersonAnimations/Binocular5.png"],
+          "CODE" : ["../img/Assets/BubbleAnimations/Code.png"],
+          "DISTRACT" : ["../img/Assets/BubbleAnimations/Distract.png"],
+          "DISTRACTED" : ["../img/Assets/BubbleAnimations/Distracted.png"],
+          "THEORIZE" : ["../img/Assets/BubbleAnimations/Theorize.png"]
+      }
+
+  },
+  "map_reader_constants": {
+    "objects":{
+      "57 234 49 255":    "chair",
+      "255 0 234 255":    "desk",
+      "66 77 88 255":     "stand",
+      "220 22 22 255":    "door",
+      "40 40 40 255":     "snacktable",
+      "255 168 0 255":    "dir_marker"
+    },
+    "path_step_size": 2,
+    "door_color": "220 22 22 255",
+    "dir_marker_color": "255 168 0 255",
+    "wall_color": "0 0 0 255",
+    "door_search_radius": 18,
+    "room_names": {
+      "234 100 100 255": "2",
+      "255 66 100 255": "3",
+      "255 66 0 255": "4",
+      "186 255 0 255": "5",
+      "252 255 0 255": "6",
+      "255 114 0 255": "7",
+      "0 12 255 255": "8",
+      "128 83 183 255": "20",
+      "180 0 255 255": "17",
+      "52 6 71 255": "18",
+      "111 92 76 255": "19",
+      "255 180 119 255": "12",
+      "221 255 119 255": "11",
+      "207 177 219 255": "16",
+      "118 131 83 255": "15",
+      "161 164 154 255": "14",
+      "198 221 229 255": "13",
+      "0 186 255 255": "1",
+      "0 255 204 255": "9",
+      "183 108 67 255": "10",
+      "240 240 240 255": "21"
     }
   },
   "actions": {

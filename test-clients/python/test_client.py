@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 data += s.recv(1024)
             else:
                 value = json.loads(data[0])
-                print 'Received', repr(data[0])
+                #print 'Received', repr(data[0])
                 if 'winner' in value:
                     game_running = False
                 else:

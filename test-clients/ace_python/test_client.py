@@ -23,24 +23,47 @@ def updateMembers(members, value):
 #@param members A dictionary of team member's current state indexed by their person_id
 #@param value The dictionary with turn info sent by the server
 def setActions(members, value, map_dict):
+
+    debugRoomNames = {
+      "234 100 100 255": "Hallway",
+      "186 255 0 255": "Key Lime Pie",
+      "252 255 0 255": "Sunny Side Up",
+      "255 114 0 255": "Pride without the Blue",
+      "0 12 255 255": "Pride without the Orange",
+      "128 83 183 255": "Lighter Purple",
+      "180 0 255 255": "Actually Purple",
+      "52 6 71 255": "The darker side of Purple",
+      "111 92 76 255": "Graybrown",
+      "255 180 119 255": "Puke Orange",
+      "221 255 119 255": "Puke Green",
+      "207 177 219 255": "Lightest Purple",
+      "118 131 83 255": "Army Green",
+      "161 164 154 255": "Overcast",
+      "198 221 229 255": "Light Baby Blue",
+      "0 186 255 255": "Halfway to Cyan",
+      "0 255 204 255": "Cyan",
+      "183 108 67 255": "Stairwell",
+      "41 249 0 255": "Background Green",
+      "240 240 240 255": "Out There"
+    }
+
     actions = []
     for m_id, m in members.iteritems():
-
         act = {}
         act["person_id"] = m["person_id"]
 
         # Move into room with a snacktable
-        TARGET = "255 114 0 255" # Has a snacktable
-        if m["location"] != TARGET and m["name"] != "atest1":
+        TARGET = "DEADBEEF" #"255 114 0 255" # Has a snacktable
+        if m["location"] != TARGET:
             act["action"] = "move"
             connected_rooms = map_dict[m["location"]]["connectedRooms"]
-            
-            sys.stdout.write(", ".join(connected_rooms) + "\n")
             
             if TARGET in connected_rooms:
                 act["room"] = TARGET
             else:
                 act["room"] = random.choice(connected_rooms)
+
+            #sys.stderr.write("%s: %s --> %s \n" % (m["name"], debugRoomNames[m["location"]], debugRoomNames[act["room"]]));
             
         # Standard actions
         else:

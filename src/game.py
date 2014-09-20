@@ -24,7 +24,7 @@ class Game(object):
         if rooms:
             self.rooms = rooms
         else:
-            self.rooms = map_functions.map_reader(map_file)
+            self.rooms = map_functions.map_reader(map_file, tuple(config.handle_constants.retrieveConstants("serverDefaults")["mapParseStartPos"]))
         self.turn = 0
         defaults = config.handle_constants.retrieveConstants('generalInfo')
         self.turn_limit = defaults["TICKSINHOUR"] * 24
@@ -39,7 +39,7 @@ class Game(object):
         self.practice_games = False
         self.events = {}
         self.professorroom = ""
-        self. professortime = 0
+        self.professortime = 0
         self.professorhours = defaults["PROFESSORHOURS"]
         self.snackrefill = defaults["SNACKREFILL"]
 
@@ -156,6 +156,7 @@ class Game(object):
     # @return
     #   A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
+        print self.turn
         if self.turn >= self.turn_limit:
             winner = self.find_victor()
             win = False
