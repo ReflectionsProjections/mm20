@@ -129,9 +129,12 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
     playerSize = 4  # Should be 12, use 4 for testing
     playerStep = 4
 
+    # Parent positions
+    parents = dict()
+    parents[(start[0], start[1])] = (-1, -1)
+
     # Visited
     visited = dict()
-    visited[(start[0], start[1])] = (-1, -1)
 
     # Queues
     nodeQueue = Queue.PriorityQueue()
@@ -147,6 +150,11 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
         node = nodeQueue.get()
         coord = node[2:]
+
+        # Skip visited nodes
+        #if visited.get(coord, False):
+        #    continue
+        #visited[coord] = True
 
         x = coord[0]
         y = coord[1]
@@ -201,12 +209,12 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
                 # Skip visited pixels
                 nextCoord = (px, py)
-                if not visited.get(nextCoord, None):
-                    visited[nextCoord] = coord
+                if not parents.get(nextCoord, None):
+                    parents[nextCoord] = coord
 
                     # Add pixel to queue
                     travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
-                    dist = float(travelled)# + vecLen(nextCoord, end) <-- disable A* because bugs
+                    dist = float(travelled) + vecLen(nextCoord, end) # <-- disable A* because bugs
                     nodeQueue.put((dist, travelled, px, py))
 
     # Backtrack to start (if possible)
@@ -219,7 +227,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
         path.append(end)
     while coord != start:
         path.append(coord)
-        coord = visited[coord]
+        coord = parents[coord]
 
     return path
 
