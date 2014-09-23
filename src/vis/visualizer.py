@@ -85,7 +85,7 @@ class Visualizer(object):
             for o in r.snacktable + r.stand + r.chairs + r.doors:
                 if o not in self.waypointRooms:
                     self.waypointRooms[o] = set()
-                print r.name
+                #print r.name
                 self.waypointRooms[o].update((r.name,))
 
         # [Pathfinding] Get all paths
@@ -96,7 +96,7 @@ class Visualizer(object):
                 for p2 in r.paths[p1]:
                     self.allPaths[p1][p2] = r.paths[p1][p2]
 
-        print self.allPaths[(867, 144)]
+        #print self.allPaths[(867, 144)]
 
         # [Pathfinding] Get connected paths
         for startPt in self.allPaths.keys():
@@ -144,7 +144,7 @@ class Visualizer(object):
     # Determine which points a player moves through to reach a certain position
     # (using A*, since performance here matters unlike in the map reader)
     def construct_path(self, start, end):
-        print "construct paths " + str(start) + " --> " + str(end)
+        #print "construct paths " + str(start) + " --> " + str(end)
         # Rooms the path can go through
         allowedRooms = [self.waypointRooms[p] for p in [start, end]]
 
@@ -175,7 +175,7 @@ class Visualizer(object):
                     fullPath = self.allPaths[a][b]
                     currentSteps.extend(fullPath)
 
-                print '-- Done --'
+                #print '-- Done --'
                 return (currentSteps, currentPath)
 
             # Expand it
@@ -198,7 +198,7 @@ class Visualizer(object):
                 frontierPaths.put([travelled + dist, currentPath + [nextWaypoint], travelled])
 
         # No paths found
-        print '\033[91mERROR at construct_path: no path found between ' + str(start) + ' --> ' + str(end) + '\033[0m'
+        #print '\033[91mERROR at construct_path: no path found between ' + str(start) + ' --> ' + str(end) + '\033[0m'
         return ([], [])
     
     def turn(self, turn=None):
@@ -242,8 +242,8 @@ class Visualizer(object):
                                 p.set_rotation(angleBetween(p.pos, p.targetPos) - 90)
 
                     else:
-                        if vecLen(p.pos, p.targetPos) > 10:
-                            print "THIS IS A BUG!"
+                        #if vecLen(p.pos, p.targetPos) > 10:
+                            #print "THIS IS A BUG!"
                         p.pos = p.targetPos
 
                         # Check for direction marker, otherwise just keep current rotation
@@ -401,6 +401,8 @@ class Visualizer(object):
                     currentRoom = self.rooms[visPlayer.room]
                     newRoom = self.rooms[person["location"]]
 
+                    # TODO: Don't assume success
+                    # TODO: if asleep, they stand on snack table. Catc more possible actions
                     # Determine player position
                     if acted == "eat":
                         visPlayer.targetPos = currentRoom.snacktable[0]
@@ -483,17 +485,8 @@ class VisPerson(object):
 
     def stand_in_room(self, newRoom, currentRoom):
         # No-op case
-        if self in newRoom.people and self not in newRoom.sitting:
-            if self.pos in newRoom.stand:
-                #print "Already standing"
-                return
-            if self.pos in newRoom.chairs:
-                found = False
-                for person in newRoom.people:
-                    if person.targetPos == self.pos:
-                        found = True
-                if not found:
-                    return
+        if self in newRoom.people and self not in newRoom.sitting and self.pos in newRoom.stand:
+            return
 
         # Loop through all standing positions, find an unoccupied one and take it.
         # To find unoccupied, we first compile a list of positions NOT to take.
@@ -514,21 +507,17 @@ class VisPerson(object):
         # TODO: Sniping seats is possible, so if we're standing on a chair one turn we may not be the next!
         if not found:
             for position in newRoom.chairs:
-               if position not in badpos:
-                self.targetPos = position
-                found = True
-                break
-        #if not found:
-            #print "NOT ENOUGH ROOM"
-
-        # Add person to room if they aren't there already
-        if currentRoom and self in currentRoom.sitting:
-            currentRoom.sitting.remove(self)
-        if currentRoom and self in currentRoom.people:
-            currentRoom.people.remove(self)
-        newRoom.people.add(self)
-        self.room = newRoom.name
-
+                if position not in badpos:
+                    self.targetPos = position
+                    found = True
+                    break
+        if found:
+            if currentRoom != None:
+                if self in currentRoom.sitting:
+                    currentRoom.sitting.remove(self)
+                currentRoom.people.remove(self)
+            newRoom.people.add(self)
+            self.room = newRoom.name
         return
 
     def sit_in_room(self, newRoom, currentRoom):
@@ -540,7 +529,6 @@ class VisPerson(object):
         # To find unoccupied, we first compile a list of positions NOT to take.
         badpos = set()
         found = False
-        ejectperson = None
         for person in newRoom.people:
             if person.pos != None:
                 if person.targetPos != None:
@@ -552,27 +540,15 @@ class VisPerson(object):
                 self.targetPos = position
                 found = True
                 break
-        if not found:
-            for person in newRoom.people:
-                if person.pos in newRoom.chairs and person not in newRoom.sitting and (person.targetPos == None or person.pos == person.targetPos):
-                        found = True
-                        self.targetPos = person.pos
-                        ejectperson = person
-                        break
-        #if not found:
-           #print "NOT ENOUGH ROOM"
-
         # Add person to room if they aren't there already
-        if currentRoom and self in currentRoom.sitting:
-            currentRoom.sitting.remove(self)
-        if currentRoom and self in currentRoom.people:
-            currentRoom.people.remove(self)
-        newRoom.people.add(self)
-        if len(newRoom.sitting) < len(newRoom.chairs):
+        if found:
+            if currentRoom != None:
+                if self in currentRoom.sitting:
+                    currentRoom.sitting.remove(self)
+                currentRoom.people.remove(self)
+            newRoom.people.add(self)
             newRoom.sitting.add(self)
-        self.room = newRoom.name
-        if ejectperson != None:
-            ejectperson.stand_in_room(newRoom, newRoom)
+            self.room = newRoom.name
         return
 
     def set_data(self, room, act, team, name, visualizer):
