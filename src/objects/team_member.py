@@ -280,6 +280,9 @@ class TeamMember(object):
         bonus = 1.0
         if "PROFESSOR" in r.resources:
             bonus += 1.0
+        for person in r.people:
+            if person != self and person.team == self.team:
+                bonus += 0.1
         return bonus
 
     def _can_move(self):
