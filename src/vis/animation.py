@@ -33,7 +33,7 @@ class Animation(object):
         rot_image = rot_image.subsurface(rot_rect).copy()
         return rot_image
 
-    def draw(self, person, frame):
+    def draw(self, person, frame, ):
         scale_pos = self.scale((person.pos[0], person.pos[1]))
         if person.action == "move":
             rot_image = self.rot_center(self.animations["WALK"][(frame / 4) % 4], person.rotation)
@@ -44,7 +44,7 @@ class Animation(object):
         elif person.action == "eat":
             rot_image = self.rot_center(self.animations["EAT"][(frame / 4) % 3], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
-        elif person.action == "sleep":
+        elif person.asleep:
             rot_image = self.rot_center(self.animations["SLEEP"][0], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         else:
@@ -52,6 +52,17 @@ class Animation(object):
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         if person.action == "code":
             self.ScreenSurface.blit(self.animations["CODE"][0], [scale_pos[0] - 8, scale_pos[1] - 48])
+        elif person.action == "theorize":
+            self.ScreenSurface.blit(self.animations["THEORIZE"][0], [scale_pos[0] - 8, scale_pos[1] - 48])
+        elif person.asleep:
+            self.ScreenSurface.blit(self.animations["SLEEP"][1], [scale_pos[0] - 8, scale_pos[1] - 48])
+        elif person.action == "distract":
+            self.ScreenSurface.blit(self.animations["DISTRACT"][0], [scale_pos[0] - 8, scale_pos[1] - 48])
+        elif person.isDistracted:
+            self.ScreenSurface.blit(self.animations["DISTRACTED"][0], [scale_pos[0] - 8, scale_pos[1] - 48])
+
+
+            
             
 
 
