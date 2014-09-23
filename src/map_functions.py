@@ -138,7 +138,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
     # Queues
     nodeQueue = Queue.PriorityQueue()
-    nodeQueue.put((0.0, 0.0, start[0], start[1]))
+    nodeQueue.put((0.0, 0.0, start[0], start[1], []))
 
     width = imgSize[0]
     height = imgSize[1]
@@ -149,12 +149,12 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
     while not nodeQueue.empty():
 
         node = nodeQueue.get()
-        coord = node[2:]
+        coord = node[2:4]
 
         # Skip visited nodes
-        #if visited.get(coord, False):
-        #    continue
-        #visited[coord] = True
+        if visited.get(coord, False):
+            continue
+        visited[coord] = True
 
         x = coord[0]
         y = coord[1]
@@ -209,25 +209,22 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
                 # Skip visited pixels
                 nextCoord = (px, py)
-                if not parents.get(nextCoord, None):
-                    parents[nextCoord] = coord
+                if visited.get(nextCoord, False):
+                    continue
 
-                    # Add pixel to queue
-                    travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
-                    dist = float(travelled) + vecLen(nextCoord, end) # <-- disable A* because bugs
-                    nodeQueue.put((dist, travelled, px, py))
+                # Add pixel to queue
+                travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
+                dist = float(travelled) + vecLen(nextCoord, end) # <-- disable A* because bugs
+                nodeQueue.put((dist, travelled, px, py, [nextCoord] + node[4]))
 
     # Backtrack to start (if possible)
     if not pathFound:
         print "\033[91mDEST NOT REACHED " + str(start) + " --> " + str(end) + "\033[0m"
         return None
 
-    path = list()
-    if coord != end:
-        path.append(end)
-    while coord != start:
-        path.append(coord)
-        coord = parents[coord]
+    path = node[4]
+    #if coord != end:
+    #    path.append(end)
 
     return path
 

@@ -217,7 +217,7 @@ class Visualizer(object):
                 for p in self.people:
 
                     # Calculate path length
-                    if p.path and turns > 0:
+                    if p.path and turns >= 0:
                         iterSteps = int(p.pathLength / float(self.constants["TURN_FRAMES"]))
 
                         if len(p.path) >= iterSteps:
@@ -233,8 +233,6 @@ class Visualizer(object):
                                 p.set_rotation(angleBetween(p.pos, p.targetPos) - 90)
 
                     else:
-                        if vecLen(p.pos, p.targetPos) > 10:
-                            print "THIS IS A BUG!"
                         p.pos = p.targetPos
 
                         # Check for direction marker, otherwise just keep current rotation
