@@ -298,7 +298,7 @@ class TestRoom(unittest.TestCase):
         from objects.team_member import TeamMember
         for i in range(1, len(self.room.chairs + self.room.stand)):
             TeamMember(str(i), "Coder", self.room, None, i)
-        with self.assertRaises(RoomIsFullError):
+        with self.assertRaises(client_action.ActionError):
             TeamMember("Jim", "Coder", self.room, None, 18)
 
     def testSit(self):
