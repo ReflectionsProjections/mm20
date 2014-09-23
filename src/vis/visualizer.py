@@ -4,6 +4,8 @@ import json
 import random
 import time
 import Queue
+import math
+from animation import Animation
 from map_functions import map_reader
 from vector import vecLen, angleBetween
 import sys
@@ -44,7 +46,9 @@ class Visualizer(object):
             float(self.SCREEN_MAP_WIDTH) / self.MAP_WIDTH,
             float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT
             )
-
+        self.Animations = {}
+        self.frameNumber = 0
+        
         # shuffle seat assignment
         if self.rooms:
             for r in self.rooms.values():
@@ -132,6 +136,10 @@ class Visualizer(object):
             if p.targetPos != p.pos:
                 return False
         return True
+    def update(self):
+        self.frameNumber += 1
+        if self.frameNumber > self.constants["MAX_FRAMES_PER_TURN"]:
+            self.frameNumber = 0
 
     # Determine which points a player moves through to reach a certain position
     # (using A*, since performance here matters unlike in the map reader)
@@ -210,6 +218,7 @@ class Visualizer(object):
                 movementFinalized = self.movementIsComplete()
 
                 self.draw()
+                self.update()
                 self.GameClock.tick(self.MAX_FPS)
 
                 turns -= 1
@@ -247,11 +256,11 @@ class Visualizer(object):
                         pygame.quit()
                         self.running = False
                         movementFinalized = True
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    self.running = False
+            if self.running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        self.running = False
             if not self.game_done:
                 break
 
@@ -281,11 +290,12 @@ class Visualizer(object):
                     0)
 
             else:
-                scale_pos = self.scale((p.pos[0], p.pos[1]))
-                self.ScreenSurface.blit(p.rotatedImage, [q - 16 for q in scale_pos])
+                # scale_pos = self.scale((p.pos[0], p.pos[1]))
+                # self.ScreenSurface.blit(p.image, [p - 16 for p in scale_pos])
+                self.Animations[p.team].draw(p, self.frameNumber)
 
             # Debug
-            if p.targetPos != p.pos and p.path:
+            if self.debug and p.targetPos != p.pos and p.path:
 
                 pygame.draw.line(
                         self.ScreenSurface,
@@ -405,7 +415,8 @@ class Visualizer(object):
                         acted,
                         person["team"], person["name"], self)
         return True
-
+    
+    # Initialization of the teams
     def add_teams(self, teams):
         """
         set up the visualizer to view the teams
@@ -418,16 +429,15 @@ class Visualizer(object):
             self.team_names[i] = player["team_name"]
             number_of_people += len(player["team"])
         self.people = [VisPerson() for _ in xrange(number_of_people)]
-        for player in teams:
 
-            teamImage = self.personImage.copy()
+        for i, player in enumerate(teams):
+            self.Animations[i] = {}
 
+            # teamImage = self.personImage.copy()
+            # for animation_type in ANIMATION_TYPES: #these don't exist yet, modify config/constants to make these
             for person in player["team"].values():
-
                 visPlayer = self.people[person["person_id"]]
                 room = self.rooms[person["location"]]
-
-                visPlayer.set_image(teamImage)
 
                 visPlayer.stand_in_room(room, None)
                 visPlayer.pos = visPlayer.targetPos
@@ -435,12 +445,17 @@ class Visualizer(object):
                     person["location"],
                     None,
                     person["team"], person["name"], self)
-
-            color = self.colors[-1]
+                
+            team_color = self.colors[-1]
             if visPlayer.team < len(self.colors):
-                color = self.colors[visPlayer.team]
-            pygame.PixelArray(teamImage).replace((255, 0, 255), color)
+                team_color = self.colors[visPlayer.team]
 
+            self.Animations[i] = Animation(team_color, self)
+
+
+
+
+        
 
 class VisPerson(object):
     """
@@ -453,8 +468,6 @@ class VisPerson(object):
         self.action = None
         self.team = None
         self.name = None
-        self.image = None
-        self.rotatedImage = None
         self.rotation = 0
         self.path = []
         self.pathLength = 0
@@ -462,23 +475,9 @@ class VisPerson(object):
 
     def set_rotation(self, rotation):
 
-        # Rotate an image while keeping its center and size
-        # @source http://www.pygame.org/wiki/RotateCenter
-        orig_rect = self.image.get_rect()
-        rot_image = pygame.transform.rotate(self.image, rotation)
-        rot_rect = orig_rect.copy()
-        rot_rect.center = rot_image.get_rect().center
-
-        # Update properties
-        self.rotatedImage = rot_image.subsurface(rot_rect).copy()
         self.rotation = rotation
 
-    def set_image(self, image):
-        self.image = image
-        self.set_rotation(self.rotation)
-
     def stand_in_room(self, newRoom, currentRoom):
-        print "stand:"
         # No-op case
         if self in newRoom.people and self not in newRoom.sitting:
             print "In new room somehow??"
@@ -507,8 +506,8 @@ class VisPerson(object):
                 self.targetPos = position
                 found = True
                 break
-        if not found:
-            print "NOT ENOUGH ROOM"
+        #if not found:
+            #print "NOT ENOUGH ROOM"
 
         # Add person to room if they aren't there already
         if currentRoom and self in currentRoom.sitting:
@@ -518,12 +517,9 @@ class VisPerson(object):
         newRoom.people.add(self)
         self.room = newRoom.name
 
-        print self.targetPos
-
         return
 
     def sit_in_room(self, newRoom, currentRoom):
-        print "sit"
         # No-op case
         if self in newRoom.sitting:
             return
@@ -543,8 +539,8 @@ class VisPerson(object):
                 self.targetPos = position
                 found = True
                 break
-        if not found:
-            print "NOT ENOUGH ROOM"
+        #if not found:
+           #print "NOT ENOUGH ROOM"
 
         # Add person to room if they aren't there already
         if currentRoom and self in currentRoom.sitting:
@@ -555,7 +551,6 @@ class VisPerson(object):
         if len(newRoom.sitting) < len(newRoom.chairs):
             newRoom.sitting.add(self)
         self.room = newRoom.name
-        print self.targetPos
         return
 
     def set_data(self, room, act, team, name, visualizer):

@@ -280,8 +280,6 @@ class TeamMember(object):
     ## Look at room resources and calculate room bonus
     def getRoomBonus(self, r):
         bonus = 1.0
-        if "STAFF" in r.resources:
-            bonus += 0.5
         if "PROFESSOR" in r.resources:
             bonus += 1.0
         return bonus

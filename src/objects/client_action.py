@@ -326,13 +326,6 @@ class Action:
 class TestClientActions(unittest.TestCase):
     def testUnavailableAction(self):
         Action.actions = {}
-        test = Action('Not-An-Action', {'team_member': 'banjos'}, 0)
-        result = test.execute(None)
-        self.assertFalse(result['success'])
-        self.assertEqual(result['reason'], 'INVALID')
-
-    def testUnavailableAction(self):
-        Action.actions = {}
         test = Action('Not-An-Action', {'team_member': 'banjos', 'person_id': 3}, 0)
         result = test.execute(None)
         self.assertFalse(result['success'])

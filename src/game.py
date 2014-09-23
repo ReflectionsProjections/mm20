@@ -1,8 +1,10 @@
 from objects.team import Team
+from objects.room import RoomIsFullError
 import map_functions
 import action_handler
 import config.handle_constants
 import random
+import unittest
 
 ## Holds the gamestate and represents the game to the server
 class Game(object):
@@ -95,15 +97,22 @@ class Game(object):
                     r.addResource("PRACTICE")
             self.event_notification("PRACTICE", "The projectors are now showing practice games")
         # If professor, see if we can despawn
-            if self.professorroom != "":
-                self.professortime -= 1
-                if self.professortime < 1:
-                    self.rooms[self.professorroom].removeResource("PROFESSOR")
-                    self.event_notification("NOPROFESSOR", self.professorroom)
-                    self.professorroom = ""
+        if self.professorroom != "":
+            self.professortime -= 1
+            if self.professortime < 1:
+                self.rooms[self.professorroom].removeResource("PROFESSOR")
+                #self.rooms[self.professorroom].people.remove("Professor")
+                self.event_notification("NOPROFESSOR", self.professorroom)
+                self.professorroom = ""
         # Add new spawns
         if self.professorroom == "" and random.random() < self.spawnchance:
-            self.professorroom = random.choice(self.rooms.keys())
+            while self.professorroom == "":
+                possibleroom = random.choice(self.rooms.keys())
+                room = self.rooms[possibleroom]
+                if len(room.people) + 1 > len(room.chairs + room.stand):
+                    continue
+                #room.people.add("Professor")
+                self.professorroom = possibleroom
             self.professortime = self.professorhours * self.turn_limit / 24
             self.rooms[self.professorroom].addResource("PROFESSOR")
             self.event_notification("PROFESSOR", self.professorroom)
@@ -155,7 +164,6 @@ class Game(object):
     # @return
     #   A dictionary containing the info to be sent to the player
     def get_info(self, client_id):
-        print self.turn
         if self.turn >= self.turn_limit:
             winner = self.find_victor()
             win = False
@@ -192,3 +200,54 @@ class Game(object):
         return ((ai.implementation - ai.optimization) *
                 self.unoptimized_weight + ai.optimization *
                 self.optimized_weight) * ai.stability
+
+class TestGame(unittest.TestCase):
+    def setUp(self):
+        pass
+
+    @unittest.skip("Not yet implemented")
+    def testInit(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testAddTeam(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testQueueTurn(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testGetInfo(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testExecuteTurn(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testProfessorSpawn(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testProfessorDespawn(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testPractice(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testSnackdeplete(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testSnackrefill(self):
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testFindvictor(self):
+        self.assertTrue(False)
+
+if __name__ == "__main__":
+    unittest.main()
