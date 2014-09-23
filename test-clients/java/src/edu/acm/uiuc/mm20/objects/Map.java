@@ -1,5 +1,5 @@
 
-package edu.acm.uiuc.mm20;
+package edu.acm.uiuc.mm20.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
@@ -13,17 +13,17 @@ public class Map {
 
     @SerializedName("7")
     @Expose
-    private edu.acm.uiuc.mm20._7 _7;
+    private edu.acm.uiuc.mm20.objects._7 _7;
 
-    public edu.acm.uiuc.mm20._7 get7() {
+    public edu.acm.uiuc.mm20.objects._7 get7() {
         return _7;
     }
 
-    public void set7(edu.acm.uiuc.mm20._7 _7) {
+    public void set7(edu.acm.uiuc.mm20.objects._7 _7) {
         this._7 = _7;
     }
 
-    public Map with7(edu.acm.uiuc.mm20._7 _7) {
+    public Map with7(edu.acm.uiuc.mm20.objects._7 _7) {
         this._7 = _7;
         return this;
     }

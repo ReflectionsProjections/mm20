@@ -1,5 +1,5 @@
 
-package edu.acm.uiuc.mm20;
+package edu.acm.uiuc.mm20.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;

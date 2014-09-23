@@ -1,5 +1,5 @@
 
-package edu.acm.uiuc.mm20;
+package edu.acm.uiuc.mm20.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
@@ -9,10 +9,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Generated("org.jsonschema2pojo")
-public class _0 {
+public class _2 {
 
     @Expose
-    private Stats stats;
+    private Stats__ stats;
     @Expose
     private String name;
     @Expose
@@ -38,15 +38,15 @@ public class _0 {
     @Expose
     private String archetype;
 
-    public Stats getStats() {
+    public Stats__ getStats() {
         return stats;
     }
 
-    public void setStats(Stats stats) {
+    public void setStats(Stats__ stats) {
         this.stats = stats;
     }
 
-    public _0 withStats(Stats stats) {
+    public _2 withStats(Stats__ stats) {
         this.stats = stats;
         return this;
     }
@@ -59,7 +59,7 @@ public class _0 {
         this.name = name;
     }
 
-    public _0 withName(String name) {
+    public _2 withName(String name) {
         this.name = name;
         return this;
     }
@@ -72,7 +72,7 @@ public class _0 {
         this.sitting = sitting;
     }
 
-    public _0 withSitting(Boolean sitting) {
+    public _2 withSitting(Boolean sitting) {
         this.sitting = sitting;
         return this;
     }
@@ -85,7 +85,7 @@ public class _0 {
         this.acted = acted;
     }
 
-    public _0 withActed(String acted) {
+    public _2 withActed(String acted) {
         this.acted = acted;
         return this;
     }
@@ -98,7 +98,7 @@ public class _0 {
         this.hunger = hunger;
     }
 
-    public _0 withHunger(Double hunger) {
+    public _2 withHunger(Double hunger) {
         this.hunger = hunger;
         return this;
     }
@@ -111,7 +111,7 @@ public class _0 {
         this.turnsCoding = turnsCoding;
     }
 
-    public _0 withTurnsCoding(Long turnsCoding) {
+    public _2 withTurnsCoding(Long turnsCoding) {
         this.turnsCoding = turnsCoding;
         return this;
     }
@@ -124,7 +124,7 @@ public class _0 {
         this.fatigue = fatigue;
     }
 
-    public _0 withFatigue(Double fatigue) {
+    public _2 withFatigue(Double fatigue) {
         this.fatigue = fatigue;
         return this;
     }
@@ -137,7 +137,7 @@ public class _0 {
         this.location = location;
     }
 
-    public _0 withLocation(String location) {
+    public _2 withLocation(String location) {
         this.location = location;
         return this;
     }
@@ -150,7 +150,7 @@ public class _0 {
         this.team = team;
     }
 
-    public _0 withTeam(Long team) {
+    public _2 withTeam(Long team) {
         this.team = team;
         return this;
     }
@@ -163,7 +163,7 @@ public class _0 {
         this.personId = personId;
     }
 
-    public _0 withPersonId(Long personId) {
+    public _2 withPersonId(Long personId) {
         this.personId = personId;
         return this;
     }
@@ -176,7 +176,7 @@ public class _0 {
         this.asleep = asleep;
     }
 
-    public _0 withAsleep(Boolean asleep) {
+    public _2 withAsleep(Boolean asleep) {
         this.asleep = asleep;
         return this;
     }
@@ -189,7 +189,7 @@ public class _0 {
         this.archetype = archetype;
     }
 
-    public _0 withArchetype(String archetype) {
+    public _2 withArchetype(String archetype) {
         this.archetype = archetype;
         return this;
     }

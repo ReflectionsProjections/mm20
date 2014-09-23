@@ -1,5 +1,5 @@
 
-package edu.acm.uiuc.mm20;
+package edu.acm.uiuc.mm20.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Generated("org.jsonschema2pojo")
-public class _4 {
+public class _5 {
 
     @SerializedName("person_id")
     @Expose
@@ -27,7 +27,7 @@ public class _4 {
         this.personId = personId;
     }
 
-    public _4 withPersonId(Long personId) {
+    public _5 withPersonId(Long personId) {
         this.personId = personId;
         return this;
     }
@@ -40,7 +40,7 @@ public class _4 {
         this.name = name;
     }
 
-    public _4 withName(String name) {
+    public _5 withName(String name) {
         this.name = name;
         return this;
     }
@@ -53,7 +53,7 @@ public class _4 {
         this.team = team;
     }
 
-    public _4 withTeam(Long team) {
+    public _5 withTeam(Long team) {
         this.team = team;
         return this;
     }

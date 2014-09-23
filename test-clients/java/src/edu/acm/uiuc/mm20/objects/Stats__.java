@@ -1,5 +1,5 @@
 
-package edu.acm.uiuc.mm20;
+package edu.acm.uiuc.mm20.objects;
 
 import javax.annotation.Generated;
 import com.google.gson.annotations.Expose;
@@ -8,7 +8,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Generated("org.jsonschema2pojo")
-public class Stats {
+public class Stats__ {
 
     @Expose
     private Long spy;
@@ -31,7 +31,7 @@ public class Stats {
         this.spy = spy;
     }
 
-    public Stats withSpy(Long spy) {
+    public Stats__ withSpy(Long spy) {
         this.spy = spy;
         return this;
     }
@@ -44,7 +44,7 @@ public class Stats {
         this.theorize = theorize;
     }
 
-    public Stats withTheorize(Long theorize) {
+    public Stats__ withTheorize(Long theorize) {
         this.theorize = theorize;
         return this;
     }
@@ -57,7 +57,7 @@ public class Stats {
         this.refactor = refactor;
     }
 
-    public Stats withRefactor(Long refactor) {
+    public Stats__ withRefactor(Long refactor) {
         this.refactor = refactor;
         return this;
     }
@@ -70,7 +70,7 @@ public class Stats {
         this.codingProwess = codingProwess;
     }
 
-    public Stats withCodingProwess(Long codingProwess) {
+    public Stats__ withCodingProwess(Long codingProwess) {
         this.codingProwess = codingProwess;
         return this;
     }
@@ -83,7 +83,7 @@ public class Stats {
         this.test = test;
     }
 
-    public Stats withTest(Long test) {
+    public Stats__ withTest(Long test) {
         this.test = test;
         return this;
     }
@@ -96,7 +96,7 @@ public class Stats {
         this.optimize = optimize;
     }
 
-    public Stats withOptimize(Long optimize) {
+    public Stats__ withOptimize(Long optimize) {
         this.optimize = optimize;
         return this;
     }
