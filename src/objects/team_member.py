@@ -67,7 +67,6 @@ class TeamMember(object):
         my_info["team"] = self.team.my_id
         my_info["person_id"] = self.person_id
         my_info["name"] = self.name
-        self.asleep = False
         
         return my_info
 
@@ -79,7 +78,6 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         my_info["acted"] = self.acted
         my_info["asleep"] = self.asleep
-        self.asleep = False
         
         return my_info
 
@@ -406,10 +404,13 @@ class TestTeamMember(unittest.TestCase):
         with self.assertRaises(client_action.ActionError):
             self.testMember.eat()
 
-    @unittest.skip("Not yet implemented")
     def testSleep(self):
-        # TODO
-        self.assertTrue(False)
+        self.testMember.asleep = True
+        roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
+        self.testRoom.connectToRoom(roomTwo)
+        with self.assertRaises(client_action.ActionError):
+            self.testMember.move(roomTwo)
 
     @unittest.skip("Not yet implemented")
     def testCode(self):
