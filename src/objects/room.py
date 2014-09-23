@@ -1,63 +1,5 @@
 import unittest
 import client_action
-
-class AlreadyConnectedError(Exception):
-    def __init__(self, roomOne, roomTwo):
-        self.msg = "Room {0} and {1} are already connected.".format(roomOne,
-                                                                    roomTwo)
-
-    def __str__(self):
-        return self.msg
-
-
-class NotConnectedError(Exception):
-    def __init__(self, roomOne, roomTwo):
-        self.msg = "Room {0} and {1} are not connected!".format(roomOne,
-                                                                roomTwo)
-
-    def __str__(self):
-        return self.msg
-
-
-class AlreadyInRoomError(Exception):
-    def __init__(self, room, member):
-        self.msg = "{0} is already in {1}.".format(member, room)
-
-    def __str__(self):
-        return self.msg
-
-
-class NotInRoomError(Exception):
-    def __init__(self, room, member):
-        self.msg = "{0} is not in {1}.".format(member, room)
-
-    def __str__(self):
-        return self.msg
-
-
-class AlreadyAvailableError(Exception):
-    def __init__(self, room, resource):
-        self.msg = "{0} is already available in {1}".format(resource, room)
-
-    def __str__(self):
-        return self.msg
-
-
-class NotAvailableError(Exception):
-    def __init__(self, room, resource):
-        self.msg = "{0} is not an available resource in {1}".format(resource,
-                                                                    room)
-
-    def __str__(self):
-        return self.msg
-
-class RoomIsFullError(Exception):
-    def __init__(self, room):
-        self.msg = "Room {0} is already full of people.".format(room)
-
-    def __str__(self):
-        return self.msg
-
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
 #  Rooms contain team members, chairs, standing spots,
@@ -91,7 +33,9 @@ class Room(object):
     #   The member to add to this room
     def addMember(self, member):
         if member in self.people:
-            raise AlreadyInRoomError(self, member)
+            raise client_action.ActionError(
+                "ALREADYINROOM",
+                "Cannot move to destination, you are in the room already")
         additionalpeople = 0
         if "PROFESSOR" in self.resources:
             additionalpeople += 1
@@ -107,7 +51,9 @@ class Room(object):
     #   The member to remove from this room
     def removeMember(self, member):
         if not member in self.people:
-            raise NotInRoomError(self, member)
+            raise client_action.ActionError(
+                "NOTINROOM",
+                "This person is not in this room")
         self.people.remove(member)
         if member in self.sitting:
             self.sitting.remove(member)
@@ -118,7 +64,9 @@ class Room(object):
     #   The member trying to sit
     def sitDown(self, member):
         if not member in self.people:
-            raise NotInRoomError(self, member)
+            raise client_action.ActionError(
+                "NOTINROOM",
+                "This person is not in this room")
         elif len(self.sitting) + 1 > len(self.chairs):
             return
         elif not member in self.sitting:
@@ -130,7 +78,9 @@ class Room(object):
     #   The member trying to stand
     def standUp(self, member):
         if not member in self.people:
-            raise NotInRoomError(self, member)
+            raise client_action.ActionError(
+                "NOTINROOM",
+                "This person is not in this room")
         if member in self.sitting:
             self.sitting.remove(member)
             member.sitting = False
@@ -139,16 +89,12 @@ class Room(object):
     # @param resource
     #   the resource to make available as a string.
     def addResource(self, resource):
-        if resource in self.resources:
-            raise AlreadyAvailableError(self, resource)
         self.resources.add(resource)
 
     ## Remove a resource from a this room
     # @parameter resource
     #   The resource to remove from this room
     def removeResource(self, resource):
-        if not (resource in self.resources):
-            raise NotAvailableError(self, resource)
         self.resources.remove(resource)
 
     ## Returns whether or not a given resource is available in this room
