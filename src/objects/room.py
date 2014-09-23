@@ -123,22 +123,14 @@ class Room(object):
     ## Connects one room to another
     # @param room
     #   The room to connect to this room
-    # @throws ValueError
-    #   Throws a value error if this room and the passed in
-    #   room are already connected.
     def connectToRoom(self, room):
-        if self.isConnectedTo(room):
-            raise AlreadyConnectedError(self, room)
-        else:
-            self.connectedRooms[room.name] = room
-            room.connectedRooms[self.name] = self
+        self.connectedRooms[room.name] = room
+        room.connectedRooms[self.name] = self
 
     ## Disconnects two rooms
     # @param room
     #   The room to disconnect from this room
     def disconnectRoom(self, room):
-        if not self.isConnectedTo(room):
-            raise NotConnectedError(self, room)
         del self.connectedRooms[room.name]
         del room.connectedRooms[self.name]
 
@@ -180,7 +172,7 @@ class TestRoom(unittest.TestCase):
         self.assertTrue(self.team_member in self.room.people)
 
     def testAddMemberAlreadyThere(self):
-        with self.assertRaises(AlreadyInRoomError):
+        with self.assertRaises(client_action.ActionError):
             self.room.addMember(self.team_member)
 
     def testRemoveMember(self):
@@ -188,17 +180,12 @@ class TestRoom(unittest.TestCase):
         self.assertFalse(self.team_member in self.room.people)
 
     def testRemoveMemberNotInRoom(self):
-        with self.assertRaises(NotInRoomError):
+        with self.assertRaises(client_action.ActionError):
             self.room.removeMember("Jim")
 
     def testAddResource(self):
         self.room.addResource('food')
         self.assertTrue(self.room.isAvailable('food'))
-
-    def testAddResourceAlreadyAdded(self):
-        self.room.addResource('food')
-        with self.assertRaises(AlreadyAvailableError):
-            self.room.addResource('food')
 
     def testRemoveResource(self):
         self.room.addResource('food')
@@ -206,19 +193,13 @@ class TestRoom(unittest.TestCase):
         self.assertFalse(self.room.isAvailable('food'))
 
     def testRemoveResourceNotAvailable(self):
-        with self.assertRaises(NotAvailableError):
+        with self.assertRaises(KeyError):
             self.room.removeResource('food')
 
     def testConnectAValidRoom(self):
         roomTwo = Room("testRoom2")
         self.room.connectToRoom(roomTwo)
         self.assertListEqual(self.room.getConnectedRooms(), [roomTwo.name])
-
-    def testConnectARoomAlreadyConnected(self):
-        roomTwo = Room("testRoom2")
-        self.room.connectToRoom(roomTwo)
-        with self.assertRaises(AlreadyConnectedError):
-            self.room.connectToRoom(roomTwo)
 
     def testDisconnectRoom(self):
         roomTwo = Room("testRoom2")
@@ -228,7 +209,7 @@ class TestRoom(unittest.TestCase):
 
     def testDisconnectNotConnectedRoom(self):
         roomTwo = Room("testRoom2")
-        with self.assertRaises(NotConnectedError):
+        with self.assertRaises(KeyError):
             self.room.disconnectRoom(roomTwo)
 
     def testIsConnectedToActuallyConnected(self):
