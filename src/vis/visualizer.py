@@ -408,6 +408,8 @@ class Visualizer(object):
                             currentRoom.sitting.remove(visPlayer)
                     elif acted in ["code", "theorize"]:
                         visPlayer.sit_in_room(newRoom, currentRoom)
+                        if not visPlayer in newRoom.sitting:
+                            visPlayer.stand_in_room(newRoom, currentRoom)
                     elif acted in ["move"]:
                         visPlayer.stand_in_room(newRoom, currentRoom)
 
@@ -482,8 +484,9 @@ class VisPerson(object):
     def stand_in_room(self, newRoom, currentRoom):
         # No-op case
         if self in newRoom.people and self not in newRoom.sitting:
-            print "In new room somehow??"
-            return
+            if self.pos in newRoom.stand or self.pos in newRoom.chairs:
+                #print "Already standing"
+                return
 
         # Loop through all standing positions, find an unoccupied one and take it.
         # To find unoccupied, we first compile a list of positions NOT to take.
