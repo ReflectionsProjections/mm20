@@ -408,7 +408,7 @@ class Visualizer(object):
                             currentRoom.sitting.remove(visPlayer)
                     elif acted in ["code", "theorize"]:
                         visPlayer.sit_in_room(newRoom, currentRoom)
-                        if not visPlayer in newRoom.sitting:
+                        if visPlayer not in newRoom.sitting:
                             visPlayer.stand_in_room(newRoom, currentRoom)
                     elif acted in ["move"]:
                         visPlayer.stand_in_room(newRoom, currentRoom)
@@ -484,9 +484,16 @@ class VisPerson(object):
     def stand_in_room(self, newRoom, currentRoom):
         # No-op case
         if self in newRoom.people and self not in newRoom.sitting:
-            if self.pos in newRoom.stand or self.pos in newRoom.chairs:
+            if self.pos in newRoom.stand:
                 #print "Already standing"
                 return
+            if self.pos in newRoom.chairs:
+                found = False
+                for person in newRoom.people:
+                    if person.targetPos == self.pos:
+                        found = True
+                if not found:
+                    return
 
         # Loop through all standing positions, find an unoccupied one and take it.
         # To find unoccupied, we first compile a list of positions NOT to take.
@@ -533,6 +540,7 @@ class VisPerson(object):
         # To find unoccupied, we first compile a list of positions NOT to take.
         badpos = set()
         found = False
+        ejectperson = None
         for person in newRoom.people:
             if person.pos != None:
                 if person.targetPos != None:
@@ -544,6 +552,13 @@ class VisPerson(object):
                 self.targetPos = position
                 found = True
                 break
+        if not found:
+            for person in newRoom.people:
+                if person.pos in newRoom.chairs and person not in newRoom.sitting and (person.targetPos == None or person.pos == person.targetPos):
+                        found = True
+                        self.targetPos = person.pos
+                        ejectperson = person
+                        break
         #if not found:
            #print "NOT ENOUGH ROOM"
 
@@ -556,6 +571,8 @@ class VisPerson(object):
         if len(newRoom.sitting) < len(newRoom.chairs):
             newRoom.sitting.add(self)
         self.room = newRoom.name
+        if ejectperson != None:
+            ejectperson.stand_in_room(newRoom, newRoom)
         return
 
     def set_data(self, room, act, team, name, visualizer):
