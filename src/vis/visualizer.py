@@ -59,6 +59,8 @@ class Visualizer(object):
         self.availableConnections = dict()
         self.waypointRooms = dict()
 
+        # self.statsVisualizer = StatsVisualizer()
+
         pygame.init()
         self.setup()
 
@@ -349,20 +351,20 @@ class Visualizer(object):
                                     )
 
         # Draw AI info
-        namefont = pygame.font.SysFont("monospace", 40)
-        aifont = pygame.font.SysFont("monospace", 20)
-        x_pos = 0
-        for i in range(len(self.ai)):
-            color = self.colors[-1]
-            if i < len(self.colors):
-                color = self.colors[i]
-            label = namefont.render(self.team_names[i], 2, color)
-            self.ScreenSurface.blit(label, (self.SCREEN_MAP_WIDTH, x_pos))
-            x_pos += 40
-            for key, val in self.ai[i].iteritems():
-                label = aifont.render(key + ": " + str(val), 1, (255, 255, 255))
-                self.ScreenSurface.blit(label, (self.SCREEN_MAP_WIDTH, x_pos))
-                x_pos += 20
+        # namefont = pygame.font.SysFont("monospace", 40)
+        # aifont = pygame.font.SysFont("monospace", 20)
+        # x_pos = 0
+        # for i in range(len(self.ai)):
+        #     color = self.colors[-1]
+        #     if i < len(self.colors):
+        #         color = self.colors[i]
+        #     label = namefont.render(self.team_names[i], 2, color)
+        #     self.ScreenSurface.blit(label, (self.SCREEN_MAP_WIDTH, x_pos))
+        #     x_pos += 40
+        #     for key, val in self.ai[i].iteritems():
+        #         label = aifont.render(key + ": " + str(val), 1, (255, 255, 255))
+        #         self.ScreenSurface.blit(label, (self.SCREEN_MAP_WIDTH, x_pos))
+        #         x_pos += 20
 
         # Draw actions (move animations? failure prompts?)
 
@@ -413,11 +415,17 @@ class Visualizer(object):
                     elif acted in ["move"]:
                         visPlayer.stand_in_room(newRoom, currentRoom)
 
+                    VisPerson.asleep = person["asleep"]
+
                     # Update visPlayer
                     visPlayer.set_data(
                         person["location"],
                         acted,
                         person["team"], person["name"], self)
+            for message in player["messages"]:
+                if message["success"] == False:
+                    self.people[message["person_id"]].isDistracted = True
+
         return True
     
     # Initialization of the teams
@@ -476,6 +484,8 @@ class VisPerson(object):
         self.path = []
         self.pathLength = 0
         self.waypoints = []
+        self.isDistracted = False
+        self.asleep = None
 
     def set_rotation(self, rotation):
 
