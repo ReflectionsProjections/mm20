@@ -38,7 +38,8 @@
     "SCREEN_HEIGHT": 768,
     "MAX_FPS": 20,
     "WALK_SPEED": 20,
-    "TURN_FRAMES": 20,
+    "TURN_FRAMES": 50,
+    "ROTATION_LOOKAHEAD": 5,
     "TITLE": "Visualizer",
     "STATSBARWIDTH": 200,
     "TEAMCOLORS": [
