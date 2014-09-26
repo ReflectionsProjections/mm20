@@ -158,7 +158,7 @@ class MMServer( object ):
                 for i in range(0, self.maxPlayers):
                     if turnObjects[i] is None:
                         turnObjects[i] = {}
-                        errors[player] = ["Timeout. Make sure that your message ends with '\n'"]
+                        errors[i] = ["Timeout. Make sure that your message ends with '\n'"]
                         validTurns = validTurns + 1
             else:
                 for connection in ready[0]:
