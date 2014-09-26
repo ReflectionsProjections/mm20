@@ -263,11 +263,6 @@ class Visualizer(object):
                         pygame.quit()
                         self.running = False
                         movementFinalized = True
-
-            # DBG
-            if not self.movementIsComplete():
-                print "WHAT!?!?! mf: " + str(movementFinalized)
-
             if self.running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -326,7 +321,7 @@ class Visualizer(object):
                         1
                     )
 
-                """
+                
                 for q in p.waypoints:
                     pygame.draw.circle(
                         self.ScreenSurface,
@@ -334,10 +329,10 @@ class Visualizer(object):
                         self.scale(q),
                         5
                     )
-                """
+                
 
                 # DBG
-                if False and self.debug:
+                if self.debug:
                     for c in self.availableConnections:
                         for c2 in self.availableConnections[c]:
 
