@@ -20,7 +20,7 @@
   },
   "serverDefaults": {
     "players": 2,
-    "map": "rooms_full.bmp",
+    "map": "rooms_full.png",
     "mapWidth": 1024,
     "mapHeight": 768,
     "mapParseStartPos": [147, 139],
@@ -33,7 +33,7 @@
     "log": "serverlog.json"
   },
   "visualizerDefaults": {
-    "map_overlay": "rooms_overlay.bmp",
+    "map_overlay": "rooms_overlay.png",
     "SCREEN_WIDTH": 1224,
     "SCREEN_HEIGHT": 768,
     "MAX_FPS": 20,

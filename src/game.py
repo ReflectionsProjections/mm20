@@ -1,5 +1,4 @@
 from objects.team import Team
-from objects.room import RoomIsFullError
 import map_functions
 import action_handler
 import config.handle_constants
