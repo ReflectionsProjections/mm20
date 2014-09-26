@@ -223,8 +223,6 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
         return None
 
     path = node[4]
-    #if coord != end:
-    #    path.append(end)
 
     return path
 
@@ -493,24 +491,5 @@ if __name__ == "__main__":
     else:
         rooms = map_reader(mapPath, tuple(serverConstants["mapParseStartPos"]))
 
-    """
-    r = rooms["6"]
-    print r.chairs
-    print r.doors
-    print r.snacktable
-    print r.stand
-    print r.paths
-
-    print '-----------------------------------'
-    print loc
-    print r.stand
-    print r.chairs
-    print r.desks
-    print r.doors
-    if (290, 227) in r.paths:
-        print loc
-        print r.paths[(290, 227)][(244, 445)]
-    print r.paths
-    print r.snacktable
-    print r.connectedRooms.keys()
-    """
+    print rooms["2"].doors
+    print rooms["8"].doors

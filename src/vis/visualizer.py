@@ -147,7 +147,7 @@ class Visualizer(object):
     def construct_path(self, start, end):
         #print "construct paths " + str(start) + " --> " + str(end)
         # Rooms the path can go through
-        allowedRooms = [self.waypointRooms[p] for p in [start, end]]
+        allowedRooms = list(self.waypointRooms[start] | self.waypointRooms[end])
 
         # Queue of paths so far
         frontierPaths = Queue.PriorityQueue()
@@ -187,8 +187,13 @@ class Visualizer(object):
                     continue
 
                 # Don't include waypoints in non-allowed rooms
-                #if not self.waypointRooms[nextWaypoint].issubset(allowedRooms):
-                #    continue
+                inAllowedRooms = False
+                for r in self.waypointRooms[nextWaypoint]:
+                    if r in allowedRooms:
+                        inAllowedRooms = True
+                        break
+                if not inAllowedRooms:
+                    continue
 
                 # Mark next waypoint as visited
                 visited[nextWaypoint] = True
@@ -332,7 +337,7 @@ class Visualizer(object):
                 """
 
                 # DBG
-                if self.debug:
+                if False and self.debug:
                     for c in self.availableConnections:
                         for c2 in self.availableConnections[c]:
 
