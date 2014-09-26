@@ -14,7 +14,6 @@ NO_CHAIR = (-100, -100)
 
 lastCachedPos = dict({"atest1": (-1, -1), "atest2": (-1, -1), "atest3": (-1, -1)})
 
-
 class Visualizer(object):
 
     def __init__(self, rooms=None, map_overlay=None, **kwargs):
