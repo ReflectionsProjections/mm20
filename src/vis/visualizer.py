@@ -417,16 +417,18 @@ class Visualizer(object):
                     elif acted in ["move"]:
                         visPlayer.stand_in_room(newRoom, currentRoom)
 
-                    VisPerson.asleep = person["asleep"]
+                    visPlayer.asleep = person["asleep"]
 
                     # Update visPlayer
+                    # Disregard the name, visPlayer is actually a person
                     visPlayer.set_data(
                         person["location"],
                         acted,
                         person["team"], person["name"], self)
-            for message in player["messages"]:
-                if message["success"] == False:
-                    self.people[message["person_id"]].isDistracted = True
+                    # visPlayer
+            # for message in player["messages"]:
+            #     if message["success"] == False:
+            #         self.people[message["person_id"]].isDistracted = True
 
         return True
     
