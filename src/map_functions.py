@@ -138,7 +138,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
     # Queues
     nodeQueue = Queue.PriorityQueue()
-    nodeQueue.put((0.0, 0.0, start[0], start[1]))
+    nodeQueue.put((0.0, 0.0, start[0], start[1], []))
 
     width = imgSize[0]
     height = imgSize[1]
@@ -149,12 +149,12 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
     while not nodeQueue.empty():
 
         node = nodeQueue.get()
-        coord = node[2:]
+        coord = node[2:4]
 
         # Skip visited nodes
-        #if visited.get(coord, False):
-        #    continue
-        #visited[coord] = True
+        if visited.get(coord, False):
+            continue
+        visited[coord] = True
 
         x = coord[0]
         y = coord[1]
@@ -209,25 +209,20 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
                 # Skip visited pixels
                 nextCoord = (px, py)
-                if not parents.get(nextCoord, None):
-                    parents[nextCoord] = coord
+                if visited.get(nextCoord, False):
+                    continue
 
-                    # Add pixel to queue
-                    travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
-                    dist = float(travelled) + vecLen(nextCoord, end) # <-- disable A* because bugs
-                    nodeQueue.put((dist, travelled, px, py))
+                # Add pixel to queue
+                travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
+                dist = float(travelled) + vecLen(nextCoord, end) # <-- disable A* because bugs
+                nodeQueue.put((dist, travelled, px, py, [nextCoord] + node[4]))
 
     # Backtrack to start (if possible)
     if not pathFound:
         print "\033[91mDEST NOT REACHED " + str(start) + " --> " + str(end) + "\033[0m"
         return None
 
-    path = list()
-    if coord != end:
-        path.append(end)
-    while coord != start:
-        path.append(coord)
-        coord = parents[coord]
+    path = node[4]
 
     return path
 
@@ -343,6 +338,27 @@ def _findClosestPixel(inX, inY, targetColor, pixels, imgSize, searchRadius, step
     # No match found
     return None
 
+# [map_functions.py only] Finds the top left corner of a marker
+# @param pos The initial position of the marker
+# @param pixekls The pixels of the image (obtained using Image.load())
+def _findTopLeftCorner(pos, pixels):
+
+    ox = x = pos[0]
+    oy = y = pos[1]
+    c = _stringify(pixels[x, y])
+
+    if _stringify(pixels[x - 1, y - 1]) == c:
+        ox = x - 1
+        oy = y - 1
+    elif _stringify(pixels[x - 1, y]) == c:
+        ox = x - 1
+        oy = y
+    elif _stringify(pixels[x, y - 1]) == c:
+        ox = x
+        oy = y - 1
+
+    return (ox, oy)
+
 
 # [map_functions.py only] Gets the connections between rooms
 # @param start The non-wall point in the image to start searching from.
@@ -400,15 +416,7 @@ def _floodFillConnectionsIter(
         if nextColor in roomObjectColorDict and nextColor != doorColor:
 
             # Find the top left coord of the object marker
-            objX = x
-            objY = y
-            if _stringify(pixels[x - 1, y - 1]) == nextColor:
-                (objX, objY) = (x - 1, y - 1)
-            elif _stringify(pixels[x - 1, y]) == nextColor:
-                (objX, objY) = (x - 1, y)
-            elif _stringify(pixels[x, y - 1]) == nextColor:
-                (objX, objY) = (x, y - 1)
-
+            (objX, objY) = _findTopLeftCorner((x, y), pixels)
             roomObjects[curColor].update({(objX, objY, roomObjectColorDict[nextColor])})
 
         # Iterative case 1a: hit another room, so record the connection
@@ -434,6 +442,11 @@ def _floodFillConnectionsIter(
                 if doDoorSearch:
                     doorPos = _findClosestPixel(x, y, doorColor, pixels, imgSize, doorSearchRadius)
                     if doorPos:
+
+                        # Find top left corner
+                        doorPos = _findTopLeftCorner(doorPos, pixels)
+
+                        # Add door to room objects list
                         roomObjects[curColor].update({(doorPos[0], doorPos[1], "door")})
                         roomObjects[nextColor].update({(doorPos[0], doorPos[1], "door")})
 
@@ -478,23 +491,5 @@ if __name__ == "__main__":
     else:
         rooms = map_reader(mapPath, tuple(serverConstants["mapParseStartPos"]))
 
-    r1 = rooms["118 131 83 255"]
-    r2 = rooms["198 221 229 255"]
-    print roomNames[r1.name] + ": " + str([roomNames[k] for k in r1.connectedRooms.keys()])
-    print '----------------'
-    print roomNames[r2.name] + ": " + str([roomNames[k] for k in r2.connectedRooms.keys()])
-
-    """
-    print '-----------------------------------'
-    print loc
-    print r.stand
-    print r.chairs
-    print r.desks
-    print r.doors
-    if (290, 227) in r.paths:
-        print loc
-        print r.paths[(290, 227)][(244, 445)]
-    print r.paths
-    print r.snacktable
-    print r.connectedRooms.keys()
-    """
+    print rooms["2"].doors
+    print rooms["8"].doors
