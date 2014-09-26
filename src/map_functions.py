@@ -340,6 +340,27 @@ def _findClosestPixel(inX, inY, targetColor, pixels, imgSize, searchRadius, step
     # No match found
     return None
 
+# [map_functions.py only] Finds the top left corner of a marker
+# @param pos The initial position of the marker
+# @param pixekls The pixels of the image (obtained using Image.load())
+def _findTopLeftCorner(pos, pixels):
+
+    ox = x = pos[0]
+    oy = y = pos[1]
+    c = _stringify(pixels[x, y])
+
+    if _stringify(pixels[x - 1, y - 1]) == c:
+        ox = x - 1
+        oy = y - 1
+    elif _stringify(pixels[x - 1, y]) == c:
+        ox = x - 1
+        oy = y
+    elif _stringify(pixels[x, y - 1]) == c:
+        ox = x
+        oy = y - 1
+
+    return (ox, oy)
+
 
 # [map_functions.py only] Gets the connections between rooms
 # @param start The non-wall point in the image to start searching from.
@@ -397,15 +418,7 @@ def _floodFillConnectionsIter(
         if nextColor in roomObjectColorDict and nextColor != doorColor:
 
             # Find the top left coord of the object marker
-            objX = x
-            objY = y
-            if _stringify(pixels[x - 1, y - 1]) == nextColor:
-                (objX, objY) = (x - 1, y - 1)
-            elif _stringify(pixels[x - 1, y]) == nextColor:
-                (objX, objY) = (x - 1, y)
-            elif _stringify(pixels[x, y - 1]) == nextColor:
-                (objX, objY) = (x, y - 1)
-
+            (objX, objY) = _findTopLeftCorner((x, y), pixels)
             roomObjects[curColor].update({(objX, objY, roomObjectColorDict[nextColor])})
 
         # Iterative case 1a: hit another room, so record the connection
@@ -431,6 +444,11 @@ def _floodFillConnectionsIter(
                 if doDoorSearch:
                     doorPos = _findClosestPixel(x, y, doorColor, pixels, imgSize, doorSearchRadius)
                     if doorPos:
+
+                        # Find top left corner
+                        doorPos = _findTopLeftCorner(doorPos, pixels)
+
+                        # Add door to room objects list
                         roomObjects[curColor].update({(doorPos[0], doorPos[1], "door")})
                         roomObjects[nextColor].update({(doorPos[0], doorPos[1], "door")})
 
@@ -475,13 +493,14 @@ if __name__ == "__main__":
     else:
         rooms = map_reader(mapPath, tuple(serverConstants["mapParseStartPos"]))
 
-    r1 = rooms["118 131 83 255"]
-    r2 = rooms["198 221 229 255"]
-    print roomNames[r1.name] + ": " + str([roomNames[k] for k in r1.connectedRooms.keys()])
-    print '----------------'
-    print roomNames[r2.name] + ": " + str([roomNames[k] for k in r2.connectedRooms.keys()])
-
     """
+    r = rooms["6"]
+    print r.chairs
+    print r.doors
+    print r.snacktable
+    print r.stand
+    print r.paths
+
     print '-----------------------------------'
     print loc
     print r.stand

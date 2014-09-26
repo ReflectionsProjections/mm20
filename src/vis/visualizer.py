@@ -212,50 +212,56 @@ class Visualizer(object):
                     p.pathLength = len(p.path)
 
             # Smooth moving
-            turns = int(self.constants["TURN_FRAMES"])
+            turns = float(self.constants["TURN_FRAMES"])
             movementFinalized = False
-            while not movementFinalized:
+            while turns >= 0 or not movementFinalized:
                 movementFinalized = self.movementIsComplete()
 
                 self.draw()
                 self.update()
                 self.GameClock.tick(self.MAX_FPS)
 
-                turns -= 1
+                turns -= 1.0
 
                 for p in self.people:
 
                     # Calculate path length
-                    if p.path and turns >= 0:
-                        iterSteps = int(p.pathLength / float(self.constants["TURN_FRAMES"]))
+                    iterSteps = float(p.pathLength) / float(self.constants["TURN_FRAMES"]) # Initial float
+                    iterSteps = math.ceil(turns * iterSteps) - math.floor((turns - 1) * iterSteps) # Smooth float part out over turns
+                    if p.path and len(p.path) > iterSteps:
 
-                        if len(p.path) >= iterSteps:
+                        for i in range(0, int(iterSteps)):
+                            p.pos = p.path[0]
+                            p.path.pop(0)
 
-                            for i in range(0, iterSteps):
-                                p.pos = p.path[0]
-                                p.path.pop(0)
-
-                            # Adjust rotation
-                            if len(p.path) > 5:
-                                p.set_rotation(angleBetween(p.pos, p.path[5]) - 90)
-                            else:
-                                p.set_rotation(angleBetween(p.pos, p.targetPos) - 90)
+                        # Adjust rotation
+                        rotationLookahead = int(self.constants["ROTATION_LOOKAHEAD"])
+                        if len(p.path) > rotationLookahead:
+                            p.set_rotation(angleBetween(p.pos, p.path[rotationLookahead]) - 90)
+                        else:
+                            p.set_rotation(angleBetween(p.pos, p.targetPos) - 90)
 
                     else:
                         p.pos = p.targetPos
 
                         # Check for direction marker, otherwise just keep current rotation
+                        rotated = False
                         for d in self.rooms[p.room].dirmarkers:
-                            if vecLen(d, p.pos) < self.constants["DIR_MARKER_RADIUS"]:
+                            if not rotated and vecLen(d, p.pos) < self.constants["DIR_MARKER_RADIUS"]:
                                 p.set_rotation(angleBetween(p.pos, d) - 90)
                                 rotated = True
-                                break
+
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         self.running = False
                         movementFinalized = True
+
+            # DBG
+            if not self.movementIsComplete():
+                print "WHAT!?!?! mf: " + str(movementFinalized)
+
             if self.running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -314,6 +320,7 @@ class Visualizer(object):
                         1
                     )
 
+                """
                 for q in p.waypoints:
                     pygame.draw.circle(
                         self.ScreenSurface,
@@ -321,6 +328,7 @@ class Visualizer(object):
                         self.scale(q),
                         5
                     )
+                """
 
                 # DBG
                 if self.debug:
