@@ -416,8 +416,6 @@ class Visualizer(object):
                         currentRoom.people.remove(visPlayer)
                     else:
                         visPlayer.targetPos = visPlayer.pos
-
-                    # TODO: if asleep after eating, they stand on snack table.
                     # Determine player position
                     if acted == "eat":
                         visPlayer.targetPos = currentRoom.snacktable[0]
