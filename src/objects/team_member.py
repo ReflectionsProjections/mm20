@@ -78,6 +78,7 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         my_info["acted"] = self.acted
         my_info["asleep"] = self.asleep
+        my_info["sitting"] = self.sitting
         
         return my_info
 
@@ -317,10 +318,12 @@ class TeamMember(object):
         else:
             self.hunger += 100.0 / (16.0 * TeamMember.ticks_in_hour)
             timetoremovefatigue = 5.5 + .5 * len(self.location.people)
-            if timetoremovefatigue > 12.0:
-                timetoremovefatigue = 12.0
+            if not self.sitting:
+                timetoremovefatigue *= 2
             if "PROFESSOR" in self.location.resources:
                 timetoremovefatigue = timetoremovefatigue/2
+            if timetoremovefatigue > 12.0:
+                timetoremovefatigue = 12.0
             self.fatigue -= 100.0 / (timetoremovefatigue * TeamMember.ticks_in_hour)
             if self.hunger > 100:
                 self.hunger = 100.0

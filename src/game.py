@@ -37,7 +37,7 @@ class Game(object):
         self.teams = {}
         self.people = []
         self.practice_games = False
-        self.events = {}
+        self.events = list()
         self.professorroom = ""
         self.professortime = 0
         self.professorhours = defaults["PROFESSORHOURS"]
@@ -89,7 +89,6 @@ class Game(object):
         self.action_buffer = []
         for person in self.people:
             person.update()
-        self.turn += 1
         if not self.practice_games and self.turn >= self.turn_limit / 2:
             self.practice_games = True
             for r in self.rooms.values():
@@ -122,18 +121,19 @@ class Game(object):
                     r.snacksupply = self.snackrefill
             if "FOOD" in r.resources and r.snacksupply < 1:
                 self.event_notification("DEPLETEDSNACKTABLE", r.name)
+        self.turn += 1
         if self.turn >= self.turn_limit:
             return False
         return True
 
     ## Notify all teams of an event that just occurred
     def event_notification(self, code, message):
-        self.events[code] = message
+        self.events.append({"name":code, "message":message})
 
     ## called by server to receive events for that turn
     def get_events(self):
         newevents = self.events
-        self.events = {}
+        self.events = list()
         return newevents
 
     ## Queues all of the actions one client is attempting to execute this turn
