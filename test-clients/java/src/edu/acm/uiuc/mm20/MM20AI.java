@@ -3,8 +3,6 @@ package edu.acm.uiuc.mm20;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-
 import edu.acm.uiuc.mm20.objects.receive.GameState;
 import edu.acm.uiuc.mm20.objects.send.Action;
 import edu.acm.uiuc.mm20.objects.send.Archetypes;
@@ -32,6 +30,8 @@ public class MM20AI {
 	public ConnectionData makeTeam() {
 		ArrayList<NewPerson> team = new ArrayList<NewPerson>();
 		team.add(new NewPerson("java_lover", Archetypes.Coder));
+		team.add(new NewPerson("java_maniac", Archetypes.Theorist));
+		team.add(new NewPerson("java_fanataic", Archetypes.Architect));
 		return new ConnectionData("Cool Java", team);
 	}
 
