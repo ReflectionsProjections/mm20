@@ -58,7 +58,6 @@ class Visualizer(object):
         self.availableConnections = dict()
         self.waypointRooms = dict()
 
-        # self.statsVisualizer = StatsVisualizer()
 
         pygame.init()
         self.setup()
