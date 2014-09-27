@@ -3,7 +3,10 @@ package edu.acm.uiuc.mm20;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
+
+import edu.acm.uiuc.mm20.objects.receive.ConnectionValidation;
 import edu.acm.uiuc.mm20.objects.receive.GameState;
+import edu.acm.uiuc.mm20.objects.receive.Person;
 import edu.acm.uiuc.mm20.objects.send.Action;
 import edu.acm.uiuc.mm20.objects.send.Archetypes;
 import edu.acm.uiuc.mm20.objects.send.ConnectionData;
@@ -12,6 +15,7 @@ import edu.acm.uiuc.mm20.objects.send.NewPerson;
 public class MM20AI {
 	Gson gson = new Gson();
 	GameState gameState;
+	ArrayList<String> teamMembers = new ArrayList<String>();
 
 	public ArrayList<Action> processTurn(GameState gamestate) {
 		this.gameState = gamestate;
@@ -28,19 +32,16 @@ public class MM20AI {
 		team.add(new NewPerson("java_fanataic", Archetypes.Architect));
 		return new ConnectionData("Cool Java", team);
 	}
-
-	public void joinedGameMessage(String message,
-			NetCommunicator netCommunicator) {
-		// TODO make object to unpack values into
-		// then check to make sure connection succeeded
-		//if so make first move, if not throw an exception.
-		boolean connectionSuccsefull = true;
-		
-		if (connectionSuccsefull){
-			ArrayList<Action> actions = new ArrayList<Action>();
-			// ToDo: add some actions to the arraylist
-			netCommunicator.sendMessage(gson.toJson(actions));
+	
+	public ArrayList<Action> firstTurn(ConnectionValidation connection) {
+		ArrayList<Action> actions = new ArrayList<Action>();
+		for (Person person: connection.team.values())
+		{
+			teamMembers.add(person.getName());
 		}
+		// Begin First Turn Logic
+		// End First Turn Logic
+		return actions;
 	}
 
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import com.google.gson.Gson;
 
+import edu.acm.uiuc.mm20.objects.receive.ConnectionValidation;
 import edu.acm.uiuc.mm20.objects.receive.GameState;
 import edu.acm.uiuc.mm20.objects.send.Action;
 
@@ -51,7 +52,7 @@ public class NetCommunicator extends Thread {
 			message = in.readLine();
 			if (message != null)
 			{
-				ai.joinedGameMessage(message, this);
+				validateConnection(message);
 			}
 			// 4: Main Game Loop communicating with the server
 			do {
@@ -59,7 +60,7 @@ public class NetCommunicator extends Thread {
 				if (message == null) {
 					break;
 				}
-				System.out.println(message);
+				// System.out.println(message);
 				receiveTurn(message);
 			} while (this.alive);
 			in.close();
@@ -80,6 +81,21 @@ public class NetCommunicator extends Thread {
 			}
 		}
 	}
+	
+	public void validateConnection(String message) {
+		ConnectionValidation connect = gson.fromJson(message, ConnectionValidation.class);
+		if (connect.status.equals("Success"))
+		{
+			System.out.println("Connected to Server");
+			ArrayList<Action> actions = ai.firstTurn(connect);
+			sendMessage(gson.toJson(actions));
+		}
+		else
+		{
+			System.out.println("Could not connect to Server");
+			kill();
+		}
+	}
 
 	public void sendMessage(String msg) {
 		synchronized (out) {
@@ -90,9 +106,9 @@ public class NetCommunicator extends Thread {
 	}
 	
 	public void receiveTurn(String message) {
-		System.out.print(message);
+        // System.out.print(message);
 		ArrayList<Action> actions = ai.processTurn(gson.fromJson(message, GameState.class));
-		this.sendMessage(gson.toJson(actions));
+		sendMessage(gson.toJson(actions));
 	}
 	
 	private String initialConnection() {
