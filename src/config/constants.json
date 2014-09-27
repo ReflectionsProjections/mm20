@@ -38,7 +38,7 @@
     "SCREEN_HEIGHT": 768,
     "MAX_FPS": 60,
     "WALK_SPEED": 20,
-    "TURN_FRAMES": 40,
+    "FRAMES_PER_TURN": 10,
     "ROTATION_LOOKAHEAD": 5,
     "TITLE": "Visualizer",
     "STATSBARWIDTH": 200,

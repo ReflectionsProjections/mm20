@@ -15,7 +15,6 @@ def updateMembers(members, value):
                 members[person["person_id"]] = person
     return members
 
-
 #This function determines what actions should be performed each turn
 #
 #Edit this to change the behavior of the client
@@ -24,42 +23,29 @@ def updateMembers(members, value):
 #@param value The dictionary with turn info sent by the server
 def setActions(members, value, map_dict):
 
-    debugRoomNames = {
-      "234 100 100 255": "Hallway",
-      "186 255 0 255": "Key Lime Pie",
-      "252 255 0 255": "Sunny Side Up",
-      "255 114 0 255": "Pride without the Blue",
-      "0 12 255 255": "Pride without the Orange",
-      "128 83 183 255": "Lighter Purple",
-      "180 0 255 255": "Actually Purple",
-      "52 6 71 255": "The darker side of Purple",
-      "111 92 76 255": "Graybrown",
-      "255 180 119 255": "Puke Orange",
-      "221 255 119 255": "Puke Green",
-      "207 177 219 255": "Lightest Purple",
-      "118 131 83 255": "Army Green",
-      "161 164 154 255": "Overcast",
-      "198 221 229 255": "Light Baby Blue",
-      "0 186 255 255": "Halfway to Cyan",
-      "0 255 204 255": "Cyan",
-      "183 108 67 255": "Stairwell",
-      "41 249 0 255": "Background Green",
-      "240 240 240 255": "Out There"
-    }
-
+    aiStats = value.get("aiStats")
     actions = []
     for m_id, m in members.iteritems():
         act = {}
         act["person_id"] = m["person_id"]
 
         # Move into room with a snacktable
-        TARGET = "DEADBEEF" #"255 114 0 255" # Has a snacktable
-        if m["location"] != TARGET:
+        if "FOOD" not in global_map[m["location"]]["resources"]:
             act["action"] = "move"
-            connected_rooms = map_dict[m["location"]]["connectedRooms"]
+            connected_rooms = global_map[m["location"]]["connectedRooms"]
             
-            if TARGET in connected_rooms:
-                act["room"] = TARGET
+            # Find room with food
+            acmOffice = None
+            for r in connected_rooms:
+              if "FOOD" in global_map.get(r, dict()).get("resources", []):
+                acmOffice = r
+                break
+
+            # Go to room with food if one is visible
+            if acmOffice:
+                act["room"] = acmOffice
+
+            # Randomly explore
             else:
                 act["room"] = random.choice(connected_rooms)
 
@@ -73,13 +59,22 @@ def setActions(members, value, map_dict):
                             message["reason"] == "HUNGRY":
                         act["action"] = "eat"
             if "action" not in act:
+
+                # Basic needs
                 if m["hunger"] > 75:
                     act["action"] = "eat"
-                if m["stats"]["theorize"] == 10:
+                elif m["fatigue"] + m["hunger"] > 100:
+                    act["action"] = "sleep"
+
+                # AI work
+                elif m["stats"]["theorize"] == 10:
                     act["action"] = "theorize"
                 elif m["stats"]["test"] == 10:
                     act["action"] = "code"
-                    act["type"] = "test"
+                    if aiStats and aiStats["optimization"] < aiStats["implementation"]:
+                      act["type"] = "refactor"
+                    else:
+                      act["type"] = "test"
                 else:
                     act["action"] = "code"
                     act["type"] = "implement"
@@ -87,12 +82,19 @@ def setActions(members, value, map_dict):
     return actions
 
 if __name__ == "__main__":
+
+    # Connection config
     HOST = 'localhost'
     PORT = 8080
+
+    # Connect
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
     s.sendall('{"team":"ace_test", "members":[{"name":"atest1", "archetype":"Coder"},{"name":"atest2", "archetype":"Architect"},{"name":"atest3", "archetype":"Theorist"}]}\n')
     data = s.recv(1024)
+
+    # Start game
+    global_map = dict()
     game_running = True
     members = None
     map_dict = None
@@ -111,6 +113,7 @@ if __name__ == "__main__":
                 else:
                     if 'map' in value:
                         map_dict = value["map"]
+                        global_map.update(map_dict)
                 
                     members = updateMembers(members, value)
                     actions = setActions(members, value, map_dict)
