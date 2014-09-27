@@ -191,9 +191,6 @@ class TeamMember(object):
         if not self.location.isAvailable('FOOD'):
             raise client_action.ActionError('NOFOODHERE',
                                             "This room does not contain food")
-        if self.location.snacksupply < 1:
-            raise client_action.ActionError('OUTOFFOOD',
-                                            "This food table has depleted")
         self.hunger -= 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))
         if self.hunger < 0.0:
             self.hunger = 0.0
@@ -341,7 +338,6 @@ class TestTeamMember(unittest.TestCase):
         TestTeamMember.PseudoTeam = PseudoTeam
         self.testRoom = room.Room("testRoom")
         self.testRoom.stand = [(4,8), (4,7), (4,6)]
-        self.testRoom.snacksupply = 100
         self.testTeam = TestTeamMember.PseudoTeam()
         self.testMember = TeamMember("Joe", "Coder", self.testRoom,
                                      self.testTeam, 0)

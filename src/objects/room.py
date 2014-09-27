@@ -25,7 +25,6 @@ class Room(object):
         self.doors = list()
         self.snacktable = list()
         self.dirmarkers = list()
-        self.snacksupply = 0
         self.paths = None
 
     ## Adds a member to this room
