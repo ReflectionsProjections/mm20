@@ -32,6 +32,11 @@ class Visualizer(object):
         for i in range(len(self.colors)):
             self.colors[i] = tuple(self.colors[i])
         self.people = list()
+        self.professor = VisPerson()
+        self.professor.pos = (-300, -300)
+        self.professor.set_data(
+            None,
+            None, "PROFESSOR", self)
         self.ai = list()
         self.team_names = list()
         self.messages = list()
@@ -73,9 +78,11 @@ class Visualizer(object):
         self.MAP_WIDTH = image.get_width()
         image = image.convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
+        profimage = self.constants["animations"]["PROFESSOR"]
+        image = pygame.image.load(profimage[0]).convert_alpha()
+        self.professor_image = pygame.transform.scale(image, (32,32))
 
-        image = pygame.image.load("person.bmp").convert_alpha()
-        self.personImage = pygame.transform.scale(image, (32, 32))
+        # self.personImage = pygame.transform.scale(image, (32, 32))
         # self.teamPersonImages = []
 
         # [Pathfinding] Get waypoints --> rooms mapping
@@ -278,6 +285,9 @@ class Visualizer(object):
         self.ScreenSurface.fill((0, 0, 0))
         self.ScreenSurface.blit(self.background, (0, 0))
 
+        #TODO: Draw professor
+        self.ScreenSurface.blit(self.professor_image, [p - 16 for p in self.professor.pos])
+
         # Draw people in rooms
         for p in self.people:
             color = self.colors[-1]
@@ -399,6 +409,19 @@ class Visualizer(object):
             return False
 
         movePeople = list()
+
+        for e in firstTurn["events"]:
+            if e["name"] == "PROFESSOR":
+                print "PROFESSOR SPAWN"
+                self.professor.stand_in_room(self.rooms[e["message"]])
+                self.professor.room = e["message"]
+                self.professor.pos = self.professor.targetPos
+                print self.professor.pos
+            elif e["name"] == "NOPROFESSOR":
+                if self.professor in self.rooms[self.professor.room].people:
+                    self.rooms[self.professor.room].people.remove(self.professor)
+                self.professor.pos = (-300, -300)
+                self.professor.targetPos = (-300, -300)
 
         # Reshape data
         for i, player in enumerate(turn):
