@@ -112,6 +112,10 @@ class Room(object):
             "connectedRooms": self.connectedRooms.keys(),
             "peopleInRoom": [p.person_id for p in self.people],
             "resources": [resource for resource in self.resources],
+            "seatsTotal": len(self.chairs),
+            "standsTotal": len(self.stand),
+            "seatsAvailable": len(self.chairs) - len(self.sitting),
+            "standsAvailable": len(self.stand) - (len(self.people) - len(self.sitting))
         }
         return room_info
 
