@@ -65,3 +65,5 @@ serverlog.json
 #ignore map.cache
 */map.cache
 map.cache
+
+test-clients/c/client
