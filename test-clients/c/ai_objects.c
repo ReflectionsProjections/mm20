@@ -17,7 +17,8 @@ typedef enum {
     VIEW,
     WAKE_UP,
     SPY,
-    DISTRACTED
+    DISTRACTED,
+    NO_ACTION
 } action_enum_t;
 
 typedef enum {

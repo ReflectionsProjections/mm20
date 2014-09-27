@@ -54,27 +54,32 @@ person_t * json_to_people(json_t * json) {
             people[i].archetype = INFORMANT;
         }
 
-        const char * acted_s = json_string_value(json_object_get(person_json, "acted"));
-        if (!strcmp(acted_s, "move")) {
-            people[i].acted = MOVE;
-        } else if (!strcmp(acted_s, "eat")) {
-            people[i].acted = EAT;
-        } else if (!strcmp(acted_s, "distract")) {
-            people[i].acted = DISTRACT;
-        } else if (!strcmp(acted_s, "sleep")) {
-            people[i].acted = SLEEP;
-        } else if (!strcmp(acted_s, "code")) {
-            people[i].acted = CODE;
-        } else if (!strcmp(acted_s, "theorizer")) {
-            people[i].acted = THEORIZE;
-        } else if (!strcmp(acted_s, "view")) {
-            people[i].acted = VIEW;
-        } else if (!strcmp(acted_s, "wake")) {
-            people[i].acted = WAKE_UP;
-        } else if (!strcmp(acted_s, "spy")) {
-            people[i].acted = SPY;
-        } else if (!strcmp(acted_s, "distracted")) {
-            people[i].acted = DISTRACTED;
+        json_t * acted_json = json_object_get(person_json, "acted");
+        if (json_is_null(acted_json)) {
+            people[i].acted = NO_ACTION;
+        } else {
+            const char * acted_s = json_string_value(acted_json);
+            if (!strcmp(acted_s, "move")) {
+                people[i].acted = MOVE;
+            } else if (!strcmp(acted_s, "eat")) {
+                people[i].acted = EAT;
+            } else if (!strcmp(acted_s, "distract")) {
+                people[i].acted = DISTRACT;
+            } else if (!strcmp(acted_s, "sleep")) {
+                people[i].acted = SLEEP;
+            } else if (!strcmp(acted_s, "code")) {
+                people[i].acted = CODE;
+            } else if (!strcmp(acted_s, "theorizer")) {
+                people[i].acted = THEORIZE;
+            } else if (!strcmp(acted_s, "view")) {
+                people[i].acted = VIEW;
+            } else if (!strcmp(acted_s, "wake")) {
+                people[i].acted = WAKE_UP;
+            } else if (!strcmp(acted_s, "spy")) {
+                people[i].acted = SPY;
+            } else if (!strcmp(acted_s, "distracted")) {
+                people[i].acted = DISTRACTED;
+            }
         }
     }
     return people;
