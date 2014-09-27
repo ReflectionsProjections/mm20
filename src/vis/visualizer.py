@@ -412,11 +412,9 @@ class Visualizer(object):
 
         for e in firstTurn["events"]:
             if e["name"] == "PROFESSOR":
-                print "PROFESSOR SPAWN"
                 self.professor.stand_in_room(self.rooms[e["message"]])
                 self.professor.room = e["message"]
                 self.professor.pos = self.professor.targetPos
-                print self.professor.pos
             elif e["name"] == "NOPROFESSOR":
                 if self.professor in self.rooms[self.professor.room].people:
                     self.rooms[self.professor.room].people.remove(self.professor)
