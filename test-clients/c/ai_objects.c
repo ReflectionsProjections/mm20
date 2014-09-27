@@ -141,15 +141,6 @@ typedef struct {
     int team_id;
 } initial_received_t;
 
-void free_initial_received(initial_received_t * received) {
-    int i;
-    for (i = 0; i < received->num_errors; i++) {
-        free(received->errors[i]);
-    }
-    free(received->errors);
-    free(received->team_name);
-}
-
 
 void free_sent_turn(sent_turn_t * sent_turn) {
     int i;
@@ -157,6 +148,7 @@ void free_sent_turn(sent_turn_t * sent_turn) {
         free(sent_turn->actions[i].room_id);
     }
     free(sent_turn->actions);
+    free(sent_turn);
 }
 
 /**
@@ -169,6 +161,17 @@ void free_people(person_t * people, int num_people) {
         free(people[i].name);
     }
     free(people);
+}
+
+void free_initial_received(initial_received_t * received) {
+    int i;
+    for (i = 0; i < received->num_errors; i++) {
+        free(received->errors[i]);
+    }
+    free(received->errors);
+    free(received->team_name);
+    free_people(received->team_members, received->num_team_members);
+    free(received);
 }
 
 void free_received_turn(received_turn_t * received_turn) {
@@ -184,7 +187,7 @@ void free_received_turn(received_turn_t * received_turn) {
         free(received_turn->rooms[i].people_ids);
         free(received_turn->rooms[i].resources);
         for (j = 0; j < received_turn->rooms[i].num_connected_rooms; j++) {
-            received_turn->rooms[i].connected_rooms[j];
+            free(received_turn->rooms[i].connected_rooms[j]);
         }
         free(received_turn->rooms[i].connected_rooms);
     }
@@ -199,6 +202,7 @@ void free_received_turn(received_turn_t * received_turn) {
         free(received_turn->events[i].room_id);
     }
     free(received_turn->events);
+    free(received_turn);
 }
 
 #endif

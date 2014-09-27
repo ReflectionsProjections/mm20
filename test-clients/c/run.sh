@@ -1,4 +1,4 @@
 #!/bin/bash
 make clean
 make
-valgrind ./client
+valgrind --leak-check=full ./client
