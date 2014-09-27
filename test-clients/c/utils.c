@@ -1,13 +1,17 @@
-
+/*
+** Part of the testclient for mechmania 20
+**
+** The purpose of this file is to hold utility functions.
+*/
 
 //Credit to Beej's Guide
-int sendall(int s, char * buf, int * len) {
+int sendall(int sockfd, char * buf, int * len) {
     int total = 0; // how many bytes we've sent
     int bytesleft = *len; // how many we have left to send
     int n;
 
     while(total < *len) {
-        n = send(s, buf+total, bytesleft, 0);
+        n = send(sockfd, buf+total, bytesleft, 0);
         if (n == -1) { break; }
         total += n;
         bytesleft -= n;
@@ -16,6 +20,11 @@ int sendall(int s, char * buf, int * len) {
     *len = total; // return number actually sent here
 
     return n==-1?-1:0; // return -1 on failure, 0 on success
+}
+
+//Receive all data from server (ends in \n)
+int recvall(int sockfd, char * str) {
+    return 0;
 }
 
 // get sockaddr, IPv4 or IPv6:
@@ -53,7 +62,7 @@ char * load_file(char * filename) {
     }
 
     fread(content, 1, size, input);
-    if(ferror(input)) {
+    if (ferror(input)) {
         free(content);
         return NULL;
     }
