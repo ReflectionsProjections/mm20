@@ -1,5 +1,5 @@
 
-package edu.acm.uiuc.mm20.objects;
+package edu.acm.uiuc.mm20.objects.receive;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,16 +33,6 @@ public class GameState {
     public AiStats getAiStats() {
         return aiStats;
     }
-
-    public void setAiStats(AiStats aiStats) {
-        this.aiStats = aiStats;
-    }
-
-    public GameState withAiStats(AiStats aiStats) {
-        this.aiStats = aiStats;
-        return this;
-    }
-
     public Room getRoom(String name) {
         return map.get(name);
     }
@@ -67,21 +57,8 @@ public class GameState {
         return messages;
     }
 
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
-    }
-
-    public GameState withMessages(List<Message> messages) {
-        this.messages = messages;
-        return this;
-    }
-
     public Events getEvents() {
         return events;
-    }
-
-    public void setEvents(Events events) {
-        this.events = events;
     }
 
     public GameState withEvents(Events events) {
