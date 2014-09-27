@@ -8,6 +8,7 @@ import sys
 import os
 import pickle
 import vis.visualizer
+import vis.Scoreboard
 import time
 
 
@@ -101,9 +102,16 @@ def parse_args():
         action="store_const")
 
     parser.add_argument(
+        "-b", "--scoreboard",
+        help="Set this to have the scoreboard pop up in a window." +
+        "Fun to watch and helpful for debugging!",
+        const=True,
+        default=False,
+        action="store_const")
+    parser.add_argument(
         "-s", "--show",
         help="Set this to make the game be visualized in a window." +
-        "Fun to watch and helpful for debuging!",
+        "Fun to watch and helpful for debugging!",
         const=True,
         default=False,
         action="store_const")
@@ -135,6 +143,7 @@ class FileLogger(object):
     def __init__(self, fileName):
         self.file = fileName
         self.vis = False
+        self.score = False
 
     ## The function that logs will be sent to
     # @param stuff
@@ -144,6 +153,8 @@ class FileLogger(object):
             f.write(stuff + '\n')
         if self.vis:
             self.vis.turn(stuff)
+        if self.score:
+            self.score.turn(stuff)
             
 
 def main():
@@ -172,6 +183,8 @@ def main():
         rooms = pickle.loads(rooms_str)
     if parameters.show:
         fileLog.vis = vis.visualizer.Visualizer(rooms, parameters.mapOverlay, debug=parameters.debug_view)
+    if parameters.scoreboard:
+        fileLog.score = vis.Scoreboard.Scoreboard(debug=parameters.debug_view)
     serv = MMServer(parameters.teams,
                     my_game,
                     logger=fileLog)
