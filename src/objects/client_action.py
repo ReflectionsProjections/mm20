@@ -193,7 +193,7 @@ class Action:
                                         "distracting")
         if response['success'] is True:
             try:
-                game.people[parameters['person_id']].theorize(game.people[
+                game.people[parameters['person_id']].distract(game.people[
                     parameters['victim']])
             except ActionError as e:
                 response['success'] = False

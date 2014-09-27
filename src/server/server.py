@@ -103,7 +103,11 @@ class MMServer( object ):
                 for connection in ready[0]:
                     #Receive data
                     player = lookupPlayer[connection]
-                    recval[player] += connection.recv(self.maxDataSize)
+                    try:
+                        recval[player] += connection.recv(self.maxDataSize)
+                    except socket.error as e:
+                        forfeit[player] = True
+                        continue
                     validJson = True
                     if turnObjects[player] is None and "\n" in recval[player]:
                         data = recval[player].split("\n")[0]
@@ -164,7 +168,11 @@ class MMServer( object ):
                 for connection in ready[0]:
                     #Receive data
                     player = lookupPlayer[connection]
-                    recval[player] += connection.recv(self.maxDataSize)
+                    try:
+                        recval[player] += connection.recv(self.maxDataSize)
+                    except socket.error as e:
+                        forfeit[player] = True
+                        continue
                     if turnObjects[player] is None and "\n" in recval[player]:
                         try:
                             turnObjects[player] = json.loads(recval[player])

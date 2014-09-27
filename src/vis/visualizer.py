@@ -429,12 +429,16 @@ class Visualizer(object):
                     if message["reason"] == "ASLEEP":
                         self.people[message["person_id"]].asleep = True
                         self.people[message["person_id"]].sentNoAction = False
+                        self.people[message["person_id"]].isDistracted = False
                     elif message["reason"] == "INVALID":
                         self.people[message["person_id"]].isBlocked = True
+                        self.people[message["person_id"]].isDistracted = False
                         self.people[message["person_id"]].sentNoAction = False
                     elif message["reason"] == "DISTRACTED":
                         self.people[message["person_id"]].isDistracted = True
                         self.people[message["person_id"]].sentNoAction = False
+                    else:
+                        self.people[message["person_id"]].isDistracted = False
 
             for person in player["people"].values():
                 if person["team"] == i:
@@ -457,7 +461,8 @@ class Visualizer(object):
                         movePeople.append(person)
                         if visPlayer in currentRoom.sitting:
                             currentRoom.sitting.remove(visPlayer)
-                        currentRoom.people.remove(visPlayer)
+                        if visPlayer in currentRoom.people:
+                            currentRoom.people.remove(visPlayer)
                     else:
                         visPlayer.targetPos = visPlayer.pos
 
