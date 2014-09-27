@@ -39,12 +39,12 @@ class Animation(object):
             rot_image = self.rot_center(self.animations["WALK"][(frame / 4) % 4], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         elif person.action == "spy":
-            rot_image = self.rot_center(self.animations["SPY"][(frame / 4) % 5], person.rotation)
+            rot_image = self.rot_center(self.animations["SPY"][(frame / 12) % 5], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         elif person.action == "eat":
             rot_image = self.rot_center(self.animations["EAT"][(frame / 4) % 3], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
-        elif person.asleep:
+        elif person.action == "sleep":
             rot_image = self.rot_center(self.animations["SLEEP"][0], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         else:

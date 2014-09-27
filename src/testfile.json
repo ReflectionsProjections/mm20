@@ -1,0 +1,301 @@
+[
+    {
+        "aiStats": {
+            "complexity": 1.0,
+            "implementation": 0.0,
+            "optimization": 0.0,
+            "stability": 1.0,
+            "theory": 43.2
+        },
+        "errors": [],
+        "events": [],
+        "map": {
+            "4": {
+                "connectedRooms": [
+                    "11",
+                    "19",
+                    "3",
+                    "12",
+                    "21"
+                ],
+                "peopleInRoom": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "resources": [],
+                "room": "4"
+            }
+        },
+        "messages": [
+            {
+                "action": "distract",
+                "message": "atest1 is distracting",
+                "person_id": 0,
+                "reason": "SUCCESS",
+                "success": true,
+                "victim": 3
+            },
+            {
+                "action": "distract",
+                "message": "atest2 is distracting",
+                "person_id": 1,
+                "reason": "SUCCESS",
+                "success": true,
+                "victim": 3
+            },
+            {
+                "action": "distract",
+                "message": "atest3 is distracting",
+                "person_id": 2,
+                "reason": "SUCCESS",
+                "success": true,
+                "victim": 3
+            }
+        ],
+        "people": {
+            "0": {
+                "acted": "theorize",
+                "archetype": "Coder",
+                "asleep": false,
+                "fatigue": 50.52083333333332,
+                "hunger": 1.0416666666666667,
+                "location": "4",
+                "name": "atest1",
+                "person_id": 0,
+                "sitting": false,
+                "stats": {
+                    "codingProwess": 10,
+                    "optimize": 5,
+                    "refactor": 7,
+                    "spy": 5,
+                    "test": 7,
+                    "theorize": 3
+                },
+                "team": 0,
+                "turns_coding": 0
+            },
+            "1": {
+                "acted": "theorize",
+                "archetype": "Architect",
+                "asleep": false,
+                "fatigue": 50.52083333333332,
+                "hunger": 1.0416666666666667,
+                "location": "4",
+                "name": "atest2",
+                "person_id": 1,
+                "sitting": false,
+                "stats": {
+                    "codingProwess": 7,
+                    "optimize": 5,
+                    "refactor": 10,
+                    "spy": 5,
+                    "test": 10,
+                    "theorize": 5
+                },
+                "team": 0,
+                "turns_coding": 0
+            },
+            "2": {
+                "acted": "theorize",
+                "archetype": "Theorist",
+                "asleep": false,
+                "fatigue": 50.52083333333332,
+                "hunger": 1.0416666666666667,
+                "location": "4",
+                "name": "atest3",
+                "person_id": 2,
+                "sitting": false,
+                "stats": {
+                    "codingProwess": 5,
+                    "optimize": 5,
+                    "refactor": 5,
+                    "spy": 5,
+                    "test": 7,
+                    "theorize": 10
+                },
+                "team": 0,
+                "turns_coding": 0
+            },
+            "3": {
+                "acted": "code",
+                "asleep": false,
+                "location": "4",
+                "name": "test1",
+                "person_id": 3,
+                "sitting": false,
+                "team": 1
+            },
+            "4": {
+                "acted": "code",
+                "asleep": false,
+                "location": "4",
+                "name": "test2",
+                "person_id": 4,
+                "sitting": false,
+                "team": 1
+            },
+            "5": {
+                "acted": "theorize",
+                "asleep": false,
+                "location": "4",
+                "name": "test3",
+                "person_id": 5,
+                "sitting": false,
+                "team": 1
+            }
+        }
+    },
+    {
+        "aiStats": {
+            "complexity": 42.875406157328435,
+            "implementation": 11.875406157328435,
+            "optimization": 0.0,
+            "stability": 0.9094791959676314,
+            "theory": 30.000000000000004
+        },
+        "errors": [],
+        "events": [],
+        "map": {
+            "4": {
+                "connectedRooms": [
+                    "11",
+                    "19",
+                    "3",
+                    "12",
+                    "21"
+                ],
+                "peopleInRoom": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5
+                ],
+                "resources": [],
+                "room": "4"
+            }
+        },
+        "messages": [
+            {
+                "action": "code",
+                "message": "test1 is coding",
+                "person_id": 3,
+                "reason": "SUCCESS",
+                "success": true,
+                "type": "implement"
+            },
+            {
+                "action": "code",
+                "message": "test2 is coding",
+                "person_id": 4,
+                "reason": "SUCCESS",
+                "success": true,
+                "type": "test"
+            },
+            {
+                "action": "theorize",
+                "message": "test3 is theorizing",
+                "person_id": 5,
+                "reason": "SUCCESS",
+                "success": true
+            }
+        ],
+        "people": {
+            "0": {
+                "acted": "theorize",
+                "asleep": false,
+                "location": "4",
+                "name": "atest1",
+                "person_id": 0,
+                "sitting": false,
+                "team": 0
+            },
+            "1": {
+                "acted": "theorize",
+                "asleep": false,
+                "location": "4",
+                "name": "atest2",
+                "person_id": 1,
+                "sitting": false,
+                "team": 0
+            },
+            "2": {
+                "acted": "theorize",
+                "asleep": false,
+                "location": "4",
+                "name": "atest3",
+                "person_id": 2,
+                "sitting": false,
+                "team": 0
+            },
+            "3": {
+                "acted": "code",
+                "archetype": "Coder",
+                "asleep": false,
+                "fatigue": 50.52083333333332,
+                "hunger": 1.0416666666666667,
+                "location": "4",
+                "name": "test1",
+                "person_id": 3,
+                "sitting": false,
+                "stats": {
+                    "codingProwess": 10,
+                    "optimize": 5,
+                    "refactor": 7,
+                    "spy": 5,
+                    "test": 7,
+                    "theorize": 3
+                },
+                "team": 1,
+                "turns_coding": 5
+            },
+            "4": {
+                "acted": "code",
+                "archetype": "Architect",
+                "asleep": false,
+                "fatigue": 50.52083333333332,
+                "hunger": 1.0416666666666667,
+                "location": "4",
+                "name": "test2",
+                "person_id": 4,
+                "sitting": false,
+                "stats": {
+                    "codingProwess": 7,
+                    "optimize": 5,
+                    "refactor": 10,
+                    "spy": 5,
+                    "test": 10,
+                    "theorize": 5
+                },
+                "team": 1,
+                "turns_coding": 5
+            },
+            "5": {
+                "acted": "theorize",
+                "archetype": "Theorist",
+                "asleep": false,
+                "fatigue": 50.52083333333332,
+                "hunger": 1.0416666666666667,
+                "location": "4",
+                "name": "test3",
+                "person_id": 5,
+                "sitting": false,
+                "stats": {
+                    "codingProwess": 5,
+                    "optimize": 5,
+                    "refactor": 5,
+                    "spy": 5,
+                    "test": 7,
+                    "theorize": 10
+                },
+                "team": 1,
+                "turns_coding": 0
+            }
+        }
+    }
+]
