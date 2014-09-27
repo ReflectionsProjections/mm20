@@ -577,8 +577,6 @@ class VisPerson(object):
                     break
         if found:
             newRoom.people.add(self)
-        else:
-            print "STAND NOT FOUND"
         return
 
     def sit_in_room(self, newRoom):
@@ -608,8 +606,6 @@ class VisPerson(object):
         if found:
             newRoom.people.add(self)
             newRoom.sitting.add(self)
-        else:
-            print "SIT NOT FOUND"
         return
 
     def set_data(self, room, team, name, visualizer):

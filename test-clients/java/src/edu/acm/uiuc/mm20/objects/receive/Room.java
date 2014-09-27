@@ -1,5 +1,5 @@
 
-package edu.acm.uiuc.mm20.objects;
+package edu.acm.uiuc.mm20.objects.receive;
 
 import java.util.ArrayList;
 import java.util.List;
