@@ -62,6 +62,13 @@ class Scoreboard(object):
     def turn(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
             self.draw()
+            if self.running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        self.running = False
+            if not self.game_done:
+                break
 
     def draw(self):
         self.ScreenSurface.fill((0, 0, 0))
