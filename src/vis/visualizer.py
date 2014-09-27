@@ -453,10 +453,10 @@ class Visualizer(object):
                         self.people[message["person_id"]].asleep = True
                         self.people[message["person_id"]].sentNoAction = False
                         self.people[message["person_id"]].isDistracted = False
-                    elif message["reason"] == "INVALID":
-                        self.people[message["person_id"]].isBlocked = True
-                        self.people[message["person_id"]].isDistracted = False
-                        self.people[message["person_id"]].sentNoAction = False
+                    # elif message["reason"] == "INVALID":
+                        # self.people[message["person_id"]].isBlocked = True
+                        # self.people[message["person_id"]].isDistracted = False
+                        # self.people[message["person_id"]].sentNoAction = False
                     elif message["reason"] == "DISTRACTED":
                         self.people[message["person_id"]].isDistracted = True
                         self.people[message["person_id"]].sentNoAction = False
