@@ -58,7 +58,7 @@ class Game(object):
                 return (False, {"status": "Failure", "errors": [
                     "Number of team members exceeds team size"]})
             start_room = random.choice(self.rooms.values())
-            try_limit = 10
+            try_limit = 1000
             while(try_limit > 0 and not start_room.canAdd(len(data["members"]))):
                 start_room = self.rooms[random.choice(self.rooms.keys())]
                 try_limit = try_limit-1
@@ -80,6 +80,7 @@ class Game(object):
     # @return
     #   True if the game is running, False if the game ended
     def execute_turn(self):
+        #print self.turn
         if len(self.people) == 0:
             return False
         for person in self.people:
@@ -170,6 +171,7 @@ class Game(object):
                 win = True
             return {"winner": win, "score": self.calc_score(client_id)}
         response = {"aiStats": self.teams[client_id].ai.output_dict(),
+                    "events": self.get_events(),
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.result_buffer[client_id],
                     "people": self.teams[client_id].get_info_on_people(self.people)}
