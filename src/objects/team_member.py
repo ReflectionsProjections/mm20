@@ -78,6 +78,7 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         my_info["acted"] = self.acted
         my_info["asleep"] = self.asleep
+        my_info["sitting"] = self.sitting
         
         return my_info
 
