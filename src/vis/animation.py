@@ -39,7 +39,10 @@ class Animation(object):
             rot_image = self.rot_center(self.animations["WALK"][(frame / 4) % 4], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         elif person.action == "spy":
-            rot_image = self.rot_center(self.animations["SPY"][(frame / 12) % 5], person.rotation)
+            if frame % 40 < 20:
+                rot_image = self.rot_center(self.animations["SPY"][2], person.rotation + frame)
+            if frame % 40 >= 20:
+                rot_image = self.rot_center(self.animations["SPY"][2], person.rotation + (40 - frame))
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         elif person.action == "eat":
             rot_image = self.rot_center(self.animations["EAT"][(frame / 4) % 3], person.rotation)

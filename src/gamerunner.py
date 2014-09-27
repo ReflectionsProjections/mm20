@@ -203,7 +203,7 @@ class Scoreboard(object):
 
 class Client_program(object):
     """
-    This object holds and manages the prosses for the
+    This object holds and manages the processes for the
     connecting teams
     """
     first = True

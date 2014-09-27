@@ -10,16 +10,48 @@
 #include <errno.h>
 #include <string.h>
 #include "ai_objects.c"
+#include "utils.c"
 
 //Given name, set up initial message
 char * get_initial_message(char * name){
-    char * str = malloc(150);
-    return strcpy(str, "{\"team\":\"blarrgh!\", \"members\":[{\"name\":\"test1\", \"archetype\":\"Coder\"},{\"name\":\"test2\", \"archetype\":\"Architect\"},{\"name\":\"test3\", \"archetype\":\"Theorist\"}]}\n");
+    char * str = malloc(200);
+    return strcpy(str, "{\"team\":\"blarrgh!\", \"members\":[{\"name\":\"MastaCode\", \"archetype\":\"Coder\"},{\"name\":\"Builda\", \"archetype\":\"Architect\"},{\"name\":\"TheSage\", \"archetype\":\"Theorist\"}]}\n");
 }
 
-sent_turn_t * get_turn(received_turn_t * received_turn) {
+sent_turn_t * get_first_turn(initial_received_t * initial_received) {
     sent_turn_t * send_turn = (sent_turn_t *) malloc(sizeof(sent_turn_t));
     send_turn->actions = NULL;
     send_turn->num_actions = 0;
+}
+
+sent_turn_t * get_turn(received_turn_t * received_turn, int team_id, int num_team_members) {
+    sent_turn_t * send_turn = (sent_turn_t *) malloc(sizeof(sent_turn_t));
+    send_turn->actions = (action_t *) malloc(num_team_members * sizeof(action_t));
+    int i;
+    int team_ind = 0;
+    for (i = 0; i < received_turn->num_people; i++) {
+        if (received_turn->people[i].team != team_id) {
+            continue;
+        }
+        send_turn->actions[team_ind].action = MOVE;
+        send_turn->actions[team_ind].person_id = received_turn->people[i].person_id;
+
+        // get room player is currently in
+        char * current_room_id = received_turn->people[i].room_id;
+        room_t * room = NULL;
+        int j;
+        for (j = 0; j < received_turn->num_rooms; j++) {
+            if (!strcmp(received_turn->rooms[j].room_id, current_room_id)) {
+                room = &received_turn->rooms[j];
+                break;
+            }
+        }
+
+        //randomly select an adjacent room and go there.
+        int rand_room_ind = rand() % room->num_connected_rooms;
+        send_turn->actions[team_ind].room_id = str_clone(room->connected_rooms[rand_room_ind]);
+        team_ind++;
+    }
+    send_turn->num_actions = num_team_members;
     return send_turn;
 }
