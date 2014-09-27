@@ -8,6 +8,6 @@ public class MainClass {
 		MM20AI myAI = new MM20AI();
 		NetCommunicator nc = new NetCommunicator("127.0.0.1", 8080, myAI);
 		nc.run();
-		
+
 	}
 }

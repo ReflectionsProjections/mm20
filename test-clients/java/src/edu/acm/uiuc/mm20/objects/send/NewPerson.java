@@ -4,7 +4,7 @@ public class NewPerson {
 	private Object archetype;
 	private String name;
 
-	public NewPerson(String name, Archetypes archetype){
+	public NewPerson(String name, Archetypes archetype) {
 		this.name = name;
 		this.archetype = archetype;
 	}

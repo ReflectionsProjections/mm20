@@ -1,6 +1,5 @@
 package edu.acm.uiuc.mm20;
 
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,8 +8,6 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-
 
 public class NetCommunicator extends Thread {
 
@@ -23,7 +20,7 @@ public class NetCommunicator extends Thread {
 	private String IP;
 	private MM20AI ai;
 
-	public NetCommunicator(String IP, int port,MM20AI ai) {
+	public NetCommunicator(String IP, int port, MM20AI ai) {
 		// this.master = master;
 		this.IP = IP;
 		this.port = port;
@@ -42,16 +39,23 @@ public class NetCommunicator extends Thread {
 			// 2. get Input and Output streams
 			out = new PrintWriter(requestSocket.getOutputStream());
 			out.flush();
-			in = new BufferedReader(new InputStreamReader(requestSocket.getInputStream()));
+			in = new BufferedReader(new InputStreamReader(
+					requestSocket.getInputStream()));
+			// 3: set up the game
 			this.sendMessage(ai.connect());
-			// 3: Communicating with the server
+			message = in.readLine();
+			if (message != null)
+			{
+				ai.joinedGameMessage(message, this);
+			}
+			// 4: "gameloop" communicating with the server
 			do {
 				message = in.readLine();
-				if (message == null){
+				if (message == null) {
 					break;
 				}
 				System.out.println(message);
-				ai.receivedMessage(message);
+				ai.receivedMessage(message, this);
 			} while (this.alive);
 			in.close();
 			out.close();
@@ -74,9 +78,9 @@ public class NetCommunicator extends Thread {
 
 	public void sendMessage(String msg) {
 		synchronized (out) {
-				out.println(msg);
-				out.flush();
-				System.out.println("client>" + msg);	
+			out.println(msg);
+			out.flush();
+			System.out.println("client>" + msg);
 		}
 	}
 
