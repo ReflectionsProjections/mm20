@@ -1,26 +1,38 @@
 package edu.acm.uiuc.mm20;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import com.google.gson.Gson;
 
 import edu.acm.uiuc.mm20.objects.receive.ConnectionValidation;
 import edu.acm.uiuc.mm20.objects.receive.GameState;
 import edu.acm.uiuc.mm20.objects.receive.Person;
+import edu.acm.uiuc.mm20.objects.receive.Room;
 import edu.acm.uiuc.mm20.objects.send.Action;
 import edu.acm.uiuc.mm20.objects.send.Archetypes;
 import edu.acm.uiuc.mm20.objects.send.ConnectionData;
 import edu.acm.uiuc.mm20.objects.send.NewPerson;
+import edu.acm.uiuc.mm20.objects.send.actions.Move;
 
 public class MM20AI {
 	Gson gson = new Gson();
-	GameState gameState;
 	ArrayList<String> teamMembers = new ArrayList<String>();
+	Random generator = new Random();
 
 	public ArrayList<Action> processTurn(GameState gamestate) {
-		this.gameState = gamestate;
 		ArrayList<Action> actions = new ArrayList<Action>();
 		// Begin Turn Logic
+		
+		for (String personID : teamMembers) {
+			Person person = gamestate.getPerson(personID);
+			Room location = gamestate.getRoom(person.getLocation());
+			int randomIndex = generator.nextInt(location.getConnectedRooms().size());
+			String targetName = location.getConnectedRooms().get(randomIndex);
+			Move move = new Move(person.getPersonId(), targetName);
+			actions.add(move);
+		}
+		
 		// End Turn Logic
 		return actions;
 	}
@@ -37,9 +49,19 @@ public class MM20AI {
 		ArrayList<Action> actions = new ArrayList<Action>();
 		for (Person person: connection.team.values())
 		{
-			teamMembers.add(person.getName());
+			teamMembers.add(person.getPersonId().toString());
 		}
 		// Begin First Turn Logic
+		
+		for (Person person: connection.team.values())
+		{
+			Room location = connection.map.get(person.getLocation());
+			int randomIndex = generator.nextInt(location.getConnectedRooms().size());
+			String targetName = location.getConnectedRooms().get(randomIndex);
+			Move move = new Move(person.getPersonId(), targetName);
+			actions.add(move);
+		}
+		
 		// End First Turn Logic
 		return actions;
 	}
