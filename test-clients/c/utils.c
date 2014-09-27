@@ -4,6 +4,9 @@
 ** The purpose of this file is to hold utility functions.
 */
 
+#ifndef UTILS_T
+#define UTILS_T
+
 //Credit to Beej's Guide
 int sendall(int sockfd, char * buf, int * len) {
     int total = 0; // how many bytes we've sent
@@ -71,3 +74,11 @@ char * load_file(char * filename) {
     content[size] = '\0';
     return content;
 }
+
+char * str_clone(const char * s) {
+    char * s2 = (char *) malloc(strlen(s) + 1);
+    strcpy(s2, s);
+    return s2;
+}
+
+#endif

@@ -16,7 +16,8 @@ typedef enum {
     THEORIZE,
     VIEW,
     WAKE_UP,
-    SPY
+    SPY,
+    DISTRACTED
 } action_enum_t;
 
 typedef enum {
@@ -100,7 +101,7 @@ typedef struct {
 } event_t;
 
 typedef struct {
-    ai_stats_t stats;
+    ai_stats_t ai_stats;
     char ** errors;
     int num_errors;
     person_t * people;

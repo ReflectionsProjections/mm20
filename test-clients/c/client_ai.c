@@ -18,6 +18,8 @@ char * get_initial_message(char * name){
 }
 
 sent_turn_t * get_turn(received_turn_t * received_turn) {
-    sent_turn_t * send_turn = (sent_turn_t *) calloc(1, sizeof(sent_turn_t));
+    sent_turn_t * send_turn = (sent_turn_t *) malloc(sizeof(sent_turn_t));
+    send_turn->actions = NULL;
+    send_turn->num_actions = 0;
     return send_turn;
 }
