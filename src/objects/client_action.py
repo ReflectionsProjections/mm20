@@ -259,7 +259,7 @@ class Action:
             try:
                 game.people[parameters['person_id']].view()
                 message = {}
-                for key, value in game.teams:
+                for key, value in game.teams.iteritems():
                     message[key] = game.calc_score(key)
                 response['message'] = message
             except ActionError as e:
