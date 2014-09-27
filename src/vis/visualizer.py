@@ -387,17 +387,23 @@ class Visualizer(object):
     def update_state(self, turn):
 
         # Check to see if the game has ended
-        if "winner" in turn[0]:
+        firstTurn = next(t for t in turn if t)
+        if "winner" in firstTurn:
             self.game_done = True
             self.game_result = turn
             return not self.quitWhenDone
-        if "team_name" in turn[0]:
+        if "team_name" in firstTurn:
             self.add_teams(turn)
             return False
 
         movePeople = list()
         # Reshape data
         for i, player in enumerate(turn):
+
+            # Skip bad teams
+            if not player or player.get("status") == "Failure":
+                continue
+
             self.ai[i] = player["aiStats"]
             for person in player["people"].values():
                 if person["team"] == i:
@@ -448,17 +454,27 @@ class Visualizer(object):
         """
         set up the visualizer to view the teams
         """
+
+        # Remove null teams (due to bad clients)
         self.ai = [None] * len(teams)
         self.team_names = list(self.ai)
         number_of_people = 0
 
         for i, player in enumerate(teams):
-            self.team_names[i] = player["team_name"]
-            number_of_people += len(player["team"])
+            if player and player.get("status", "Failure") != "Failure":
+                self.team_names[i] = player["team_name"]
+                number_of_people += len(player["team"])
+            else:
+                self.team_names[i] = ""
+
         self.people = [VisPerson() for _ in xrange(number_of_people)]
 
         for i, player in enumerate(teams):
-            self.Animations[i] = {}
+            self.Animations[i] = None
+
+            # Skip bad teams
+            if not (player and player.get("status", "Failure") != "Failure"):
+                continue
 
             # teamImage = self.personImage.copy()
             # for animation_type in ANIMATION_TYPES: #these don't exist yet, modify config/constants to make these
