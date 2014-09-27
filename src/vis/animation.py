@@ -7,6 +7,7 @@ class Animation(object):
         self.color = color
         self.animations = {}
         self.ScreenSurface = visualizer.ScreenSurface
+        self.
         self.scale = visualizer.scale
         
         self.constants = visualizer.constants
@@ -39,7 +40,10 @@ class Animation(object):
             rot_image = self.rot_center(self.animations["WALK"][(frame / 4) % 4], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         elif person.action == "spy":
-            rot_image = self.rot_center(self.animations["SPY"][2], person.rotation + frame)
+            if frame % 30 < 15:
+                rot_image = self.rot_center(self.animations["SPY"][2], person.rotation + frame)
+            if frame % 30 >= 15:
+                rot_image = self.rot_center(self.animations["SPY"][2], person.rotation + (30 - frame))
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         elif person.action == "eat":
             rot_image = self.rot_center(self.animations["EAT"][(frame / 4) % 3], person.rotation)
