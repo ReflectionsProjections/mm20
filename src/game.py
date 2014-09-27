@@ -158,7 +158,11 @@ class Game(object):
                 action_handler.bufferAction(
                     self.action_buffer, action["action"], action, client_id)
             except KeyError:
-                error_list.append({"error": "invalid action",
+                if "action" not in action:
+                    error_list.append({"error": "invalid action: No action field!",
+                                   "action": "None"})
+                else:
+                    error_list.append({"error": "invalid action",
                                    "action": action["action"]})
         return error_list
 

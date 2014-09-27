@@ -287,7 +287,7 @@ class TeamMember(object):
         return bonus
 
     def _can_move(self):
-        if self.acted:
+        if self.acted != None:
             if self.acted == "distracted":
                 raise client_action.ActionError(
                     "DISTRACTED",
