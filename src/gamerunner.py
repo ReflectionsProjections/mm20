@@ -8,7 +8,7 @@ import sys
 import os
 import pickle
 import vis.visualizer
-
+from urllib2 import urlopen
 
 
 FNULL = open(os.devnull, 'w')
@@ -191,9 +191,14 @@ def main():
 
 
 class Scoreboard(object):
-    
-    def turn(turn):
-        pass    
+    def __init__(self, url="http://localhost:7000"):
+        self.url = url
+
+    def turn(self, turn):
+        r = urlopen(self.url, turn)
+        if(r.getcode() != 200):
+            raise Exception("Scoreboard update failed!")
+        
 
 
 class Client_program(object):

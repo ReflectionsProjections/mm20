@@ -14,7 +14,7 @@ class mmVisRequstHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         content_len = int(self.headers.getheader('content-length', 0))
         post_body = self.rfile.read(content_len)
         try: 
-            my_scoreboard.turn(json.loads(post_body))
+            my_scoreboard.turn(post_body)
             self.send_response(200)
             self.end_headers()
         except ValueError, TypeError:
@@ -31,7 +31,7 @@ def start_web_server():
     if sys.argv[1:]:
         port = int(sys.argv[1])
     else:
-        port = 8000
+        port = 7000
     server_address = ('127.0.0.1', port)
 
     HandlerClass.protocol_version = Protocol
