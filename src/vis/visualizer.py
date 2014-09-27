@@ -376,7 +376,7 @@ class Visualizer(object):
         # If game is over, show winner
         if self.game_done:
             for i in range(len(self.game_result)):
-                if self.game_result[i]["winner"]:
+                if self.game_result[i] and self.game_result[i]["winner"]:
                     gameoverfont = pygame.font.SysFont("monospace", 100)
                     label = gameoverfont.render(self.team_names[i] + " WINS!", 35, (12, 12, 12))
                     self.ScreenSurface.blit(label, (0, 0))
