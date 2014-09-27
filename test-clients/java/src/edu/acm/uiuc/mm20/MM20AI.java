@@ -13,18 +13,12 @@ public class MM20AI {
 	Gson gson = new Gson();
 	GameState gameState;
 
-	public void receivedMessage(String message, NetCommunicator netCommunicator) {
-		System.out.print(message);
-		gameState = gson.fromJson(message, GameState.class);
+	public ArrayList<Action> processTurn(GameState gamestate) {
+		this.gameState = gamestate;
 		ArrayList<Action> actions = new ArrayList<Action>();
-
-		// ToDo: add some actions to the arraylist
-		
-		netCommunicator.sendMessage(gson.toJson(actions));
-	}
-
-	public String connect() {
-		return gson.toJson(this.makeTeam());
+		// Begin Turn Logic
+		// End Turn Logic
+		return actions;
 	}
 
 	public ConnectionData makeTeam() {

@@ -6,6 +6,12 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+
+import com.google.gson.Gson;
+
+import edu.acm.uiuc.mm20.objects.receive.GameState;
+import edu.acm.uiuc.mm20.objects.send.Action;
 
 public class NetCommunicator extends Thread {
 
@@ -17,6 +23,7 @@ public class NetCommunicator extends Thread {
 	int port;
 	private String IP;
 	private MM20AI ai;
+	Gson gson = new Gson();
 
 	public NetCommunicator(String IP, int port, MM20AI ai) {
 		// this.master = master;
@@ -33,27 +40,27 @@ public class NetCommunicator extends Thread {
 			System.out.println("Connecting to " + IP);
 			// 1. creating a socket to connect to the server
 			requestSocket = new Socket(IP, port);
-			System.out.println("Connected to localhost in port 6969");
+			System.out.println("Connected to localhost in port" + port);
 			// 2. get Input and Output streams
 			out = new PrintWriter(requestSocket.getOutputStream());
 			out.flush();
 			in = new BufferedReader(new InputStreamReader(
 					requestSocket.getInputStream()));
 			// 3: set up the game
-			this.sendMessage(ai.connect());
+			this.sendMessage(this.initialConnection());
 			message = in.readLine();
 			if (message != null)
 			{
 				ai.joinedGameMessage(message, this);
 			}
-			// 4: "gameloop" communicating with the server
+			// 4: Main Game Loop communicating with the server
 			do {
 				message = in.readLine();
 				if (message == null) {
 					break;
 				}
 				System.out.println(message);
-				ai.receivedMessage(message, this);
+				receiveTurn(message);
 			} while (this.alive);
 			in.close();
 			out.close();
@@ -80,6 +87,16 @@ public class NetCommunicator extends Thread {
 			out.flush();
 			System.out.println("client>" + msg);
 		}
+	}
+	
+	public void receiveTurn(String message) {
+		System.out.print(message);
+		ArrayList<Action> actions = ai.processTurn(gson.fromJson(message, GameState.class));
+		this.sendMessage(gson.toJson(actions));
+	}
+	
+	private String initialConnection() {
+		return gson.toJson(ai.makeTeam());
 	}
 
 	/*
