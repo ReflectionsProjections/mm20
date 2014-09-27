@@ -395,6 +395,7 @@ class Visualizer(object):
             self.add_teams(turn)
             return False
 
+        movePeople = list()
         # Reshape data
         for i, player in enumerate(turn):
             self.ai[i] = player["aiStats"]
@@ -408,19 +409,18 @@ class Visualizer(object):
                     currentRoom = self.rooms[visPlayer.room]
                     newRoom = self.rooms[person["location"]]
 
-                    # TODO: Don't assume success
-                    # TODO: if asleep, they stand on snack table. Catc more possible actions
+                    if currentRoom != newRoom or person["sitting"] != (visPlayer in currentRoom.sitting) or (acted != "eat" and len(currentRoom.snacktable) > 0 and visPlayer.pos == currentRoom.snacktable[0]):
+                        movePeople.append(person)
+                        if visPlayer in currentRoom.sitting:
+                            currentRoom.sitting.remove(visPlayer)
+                        currentRoom.people.remove(visPlayer)
+                    else:
+                        visPlayer.targetPos = visPlayer.pos
+
+                    # TODO: if asleep after eating, they stand on snack table.
                     # Determine player position
                     if acted == "eat":
                         visPlayer.targetPos = currentRoom.snacktable[0]
-                        if visPlayer in currentRoom.sitting:
-                            currentRoom.sitting.remove(visPlayer)
-                    elif acted in ["code", "theorize"]:
-                        visPlayer.sit_in_room(newRoom, currentRoom)
-                        if visPlayer not in newRoom.sitting:
-                            visPlayer.stand_in_room(newRoom, currentRoom)
-                    elif acted in ["move"]:
-                        visPlayer.stand_in_room(newRoom, currentRoom)
 
                     visPlayer.asleep = person["asleep"]
 
@@ -431,9 +431,15 @@ class Visualizer(object):
                         acted,
                         person["team"], person["name"], self)
                     # visPlayer
-            # for message in player["messages"]:
-            #     if message["success"] == False:
-            #         self.people[message["person_id"]].isDistracted = True
+            for person in movePeople:
+                visPlayer = self.people[person["person_id"]]
+                newRoom = self.rooms[person["location"]]
+                if person["sitting"] == True:
+                    visPlayer.sit_in_room(newRoom)
+                else:
+                    visPlayer.stand_in_room(newRoom)
+
+
 
         return True
     
@@ -460,7 +466,7 @@ class Visualizer(object):
                 visPlayer = self.people[person["person_id"]]
                 room = self.rooms[person["location"]]
 
-                visPlayer.stand_in_room(room, None)
+                visPlayer.stand_in_room(room)
                 visPlayer.pos = visPlayer.targetPos
                 visPlayer.set_data(
                     person["location"],
@@ -500,10 +506,8 @@ class VisPerson(object):
 
         self.rotation = rotation
 
-    def stand_in_room(self, newRoom, currentRoom):
+    def stand_in_room(self, newRoom):
         # No-op case
-        if self in newRoom.people and self not in newRoom.sitting and self.pos in newRoom.stand:
-            return
 
         # Loop through all standing positions, find an unoccupied one and take it.
         # To find unoccupied, we first compile a list of positions NOT to take.
@@ -514,14 +518,11 @@ class VisPerson(object):
             if person.pos != None:
                 if person.targetPos != None:
                     badpos.add(person.targetPos)
-                else:
-                    badpos.add(person.pos)
         for position in newRoom.stand:
             if position not in badpos:
                 self.targetPos = position
                 found = True
                 break
-        # TODO: Sniping seats is possible, so if we're standing on a chair one turn we may not be the next!
         if not found:
             for position in newRoom.chairs:
                 if position not in badpos:
@@ -529,43 +530,38 @@ class VisPerson(object):
                     found = True
                     break
         if found:
-            if currentRoom != None:
-                if self in currentRoom.sitting:
-                    currentRoom.sitting.remove(self)
-                currentRoom.people.remove(self)
             newRoom.people.add(self)
-            self.room = newRoom.name
+        else:
+            print "STAND NOT FOUND"
         return
 
-    def sit_in_room(self, newRoom, currentRoom):
-        # No-op case
-        if self in newRoom.sitting:
-            return
-
+    def sit_in_room(self, newRoom):
         # Loop through all sitting positions, find an unoccupied one and take it.
         # To find unoccupied, we first compile a list of positions NOT to take.
-        badpos = set()
+        badpos = dict()
         found = False
         for person in newRoom.people:
             if person.pos != None:
                 if person.targetPos != None:
-                    badpos.add(person.targetPos)
-                else:
-                    badpos.add(person.pos)
+                    badpos[person.targetPos] = person
         for position in newRoom.chairs:
             if position not in badpos:
                 self.targetPos = position
                 found = True
                 break
+        if not found:
+            for position in newRoom.chairs:
+                if badpos[position] not in newRoom.sitting:
+                    self.targetPos = position
+                    found = True
+                    newRoom.people.remove(badpos[position])
+                    badpos[position].stand_in_room(newRoom)
         # Add person to room if they aren't there already
         if found:
-            if currentRoom != None:
-                if self in currentRoom.sitting:
-                    currentRoom.sitting.remove(self)
-                currentRoom.people.remove(self)
             newRoom.people.add(self)
             newRoom.sitting.add(self)
-            self.room = newRoom.name
+        else:
+            print "SIT NOT FOUND"
         return
 
     def set_data(self, room, act, team, name, visualizer):
