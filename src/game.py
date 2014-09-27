@@ -180,6 +180,7 @@ class Game(object):
                 win = True
             return {"winner": win, "score": self.calc_score(client_id)}
         response = {"aiStats": self.teams[client_id].ai.output_dict(),
+                    "score": self.calc_score(client_id),
                     "events": self.get_events(),
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.result_buffer[client_id],
