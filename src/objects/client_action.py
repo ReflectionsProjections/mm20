@@ -237,7 +237,7 @@ class Action:
                                         "spying")
         if response['success'] is True:
             try:
-                game.people[parameters['person_id']].theorize()
+                game.people[parameters['person_id']].spy()
             except ActionError as e:
                 response['success'] = False
                 response['reason'] = e.reason
