@@ -89,7 +89,8 @@
           "CODE" : ["../img/Assets/BubbleAnimations/Code.png"],
           "DISTRACT" : ["../img/Assets/BubbleAnimations/Distract.png"],
           "DISTRACTED" : ["../img/Assets/BubbleAnimations/Distracted.png"],
-          "THEORIZE" : ["../img/Assets/BubbleAnimations/Theorize.png"]
+          "THEORIZE" : ["../img/Assets/BubbleAnimations/Theorize.png"],
+          "PROFESSOR" : ["../img/Assets/professor.png"]
       }
 
   },
