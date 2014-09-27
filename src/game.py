@@ -42,7 +42,6 @@ class Game(object):
         self.professorroom = ""
         self.professortime = 0
         self.professorhours = defaults["PROFESSORHOURS"]
-        self.snackrefill = defaults["SNACKREFILL"]
 
     ##  Adds a new team and returns success / failure message
     # @param data
@@ -71,8 +70,13 @@ class Game(object):
         # TODO: Make all error objects uniform
         self.result_buffer[client_id] = []
         self.teams[client_id] = newTeam
-        response = {"status": "Success", "team": newTeam.get_team_members(),
-                    "team_name": newTeam.name, "map": self.teams[client_id].get_visible_map()}
+        response = {
+            "status": "Success", 
+            "team": newTeam.get_team_members(),
+            "team_id": newTeam.my_id,
+            "team_name": newTeam.name,
+            "map": self.teams[client_id].get_visible_map()
+        }
 
         return (True, response)
 
@@ -116,12 +120,6 @@ class Game(object):
             self.professortime = self.professorhours * self.turn_limit / 24
             self.rooms[self.professorroom].addResource("PROFESSOR")
             self.event_notification("PROFESSOR", self.professorroom)
-        for r in self.rooms.values():
-            if self.turn % (self.turn_limit / 24) == 0:
-                if "FOOD" in r.resources:
-                    r.snacksupply = self.snackrefill
-            if "FOOD" in r.resources and r.snacksupply < 1:
-                self.event_notification("DEPLETEDSNACKTABLE", r.name)
         self.turn += 1
         sys.stderr.write('\rTurn: \033[92m{}\033[0m/{}'.format(
             self.turn,
@@ -244,14 +242,6 @@ class TestGame(unittest.TestCase):
 
     @unittest.skip("Not yet implemented")
     def testPractice(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testSnackdeplete(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testSnackrefill(self):
         self.assertTrue(False)
 
     @unittest.skip("Not yet implemented")

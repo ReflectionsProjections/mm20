@@ -8,8 +8,7 @@ import sys
 import os
 import pickle
 import vis.visualizer
-import vis.Scoreboard
-import time
+from urllib2 import urlopen
 
 
 FNULL = open(os.devnull, 'w')
@@ -184,11 +183,22 @@ def main():
     if parameters.show:
         fileLog.vis = vis.visualizer.Visualizer(rooms, parameters.mapOverlay, debug=parameters.debug_view)
     if parameters.scoreboard:
-        fileLog.score = vis.Scoreboard.Scoreboard(debug=parameters.debug_view)
+        fileLog.score = Scoreboard()
     serv = MMServer(parameters.teams,
                     my_game,
                     logger=fileLog)
     serv.run(parameters.port, launch_clients)
+
+
+class Scoreboard(object):
+    def __init__(self, url="http://localhost:7000"):
+        self.url = url
+
+    def turn(self, turn):
+        r = urlopen(self.url, turn)
+        if(r.getcode() != 200):
+            raise Exception("Scoreboard update failed!")
+        
 
 
 class Client_program(object):
