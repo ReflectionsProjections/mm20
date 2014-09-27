@@ -7,7 +7,6 @@ class Animation(object):
         self.color = color
         self.animations = {}
         self.ScreenSurface = visualizer.ScreenSurface
-        self.
         self.scale = visualizer.scale
         
         self.constants = visualizer.constants
