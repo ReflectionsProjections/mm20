@@ -70,8 +70,13 @@ class Game(object):
         # TODO: Make all error objects uniform
         self.result_buffer[client_id] = []
         self.teams[client_id] = newTeam
-        response = {"status": "Success", "team": newTeam.get_team_members(),
-                    "team_name": newTeam.name, "map": self.teams[client_id].get_visible_map()}
+        response = {
+            "status": "Success", 
+            "team": newTeam.get_team_members(),
+            "team_id": newTeam.my_id,
+            "team_name": newTeam.name,
+            "map": self.teams[client_id].get_visible_map()
+        }
 
         return (True, response)
 
