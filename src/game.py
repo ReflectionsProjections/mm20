@@ -4,6 +4,7 @@ import action_handler
 import config.handle_constants
 import random
 import unittest
+import sys
 
 ## Holds the gamestate and represents the game to the server
 class Game(object):
@@ -41,7 +42,6 @@ class Game(object):
         self.professorroom = ""
         self.professortime = 0
         self.professorhours = defaults["PROFESSORHOURS"]
-        self.snackrefill = defaults["SNACKREFILL"]
 
     ##  Adds a new team and returns success / failure message
     # @param data
@@ -120,13 +120,10 @@ class Game(object):
             self.professortime = self.professorhours * self.turn_limit / 24
             self.rooms[self.professorroom].addResource("PROFESSOR")
             self.event_notification("PROFESSOR", self.professorroom)
-        for r in self.rooms.values():
-            if self.turn % (self.turn_limit / 24) == 0:
-                if "FOOD" in r.resources:
-                    r.snacksupply = self.snackrefill
-            if "FOOD" in r.resources and r.snacksupply < 1:
-                self.event_notification("DEPLETEDSNACKTABLE", r.name)
         self.turn += 1
+        sys.stderr.write('\rTurn: \033[92m{}\033[0m/{}'.format(
+            self.turn,
+            self.turn_limit))
         if self.turn >= self.turn_limit:
             return False
         return True
@@ -246,14 +243,6 @@ class TestGame(unittest.TestCase):
 
     @unittest.skip("Not yet implemented")
     def testPractice(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testSnackdeplete(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testSnackrefill(self):
         self.assertTrue(False)
 
     @unittest.skip("Not yet implemented")

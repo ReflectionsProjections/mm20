@@ -8,8 +8,7 @@
     "OPTWEIGHT": 0.8,
     "STARTROOM": "72 0 255 255",
     "SPAWNCHANCE": 0.05,
-    "PROFESSORHOURS": 1,
-    "SNACKREFILL": 120
+    "PROFESSORHOURS": 1
   },
   "memberConstants": {
     "effectiveness_drops": 60.0,
@@ -39,7 +38,7 @@
     "SCREEN_HEIGHT": 768,
     "MAX_FPS": 60,
     "WALK_SPEED": 20,
-    "TURN_FRAMES": 40,
+    "FRAMES_PER_TURN": 10,
     "ROTATION_LOOKAHEAD": 5,
     "TITLE": "Visualizer",
     "STATSBARWIDTH": 200,
@@ -90,7 +89,8 @@
           "CODE" : ["../img/Assets/BubbleAnimations/Code.png"],
           "DISTRACT" : ["../img/Assets/BubbleAnimations/Distract.png"],
           "DISTRACTED" : ["../img/Assets/BubbleAnimations/Distracted.png"],
-          "THEORIZE" : ["../img/Assets/BubbleAnimations/Theorize.png"]
+          "THEORIZE" : ["../img/Assets/BubbleAnimations/Theorize.png"],
+          "PROFESSOR" : ["../img/Assets/professor.png"]
       }
 
   },

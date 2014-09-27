@@ -32,6 +32,11 @@ class Visualizer(object):
         for i in range(len(self.colors)):
             self.colors[i] = tuple(self.colors[i])
         self.people = list()
+        self.professor = VisPerson()
+        self.professor.pos = (-300, -300)
+        self.professor.set_data(
+            None,
+            None, "PROFESSOR", self)
         self.ai = list()
         self.team_names = list()
         self.messages = list()
@@ -73,9 +78,11 @@ class Visualizer(object):
         self.MAP_WIDTH = image.get_width()
         image = image.convert()
         self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
+        profimage = self.constants["animations"]["PROFESSOR"]
+        image = pygame.image.load(profimage[0]).convert_alpha()
+        self.professor_image = pygame.transform.scale(image, (32,32))
 
-        image = pygame.image.load("person.bmp").convert_alpha()
-        self.personImage = pygame.transform.scale(image, (32, 32))
+        # self.personImage = pygame.transform.scale(image, (32, 32))
         # self.teamPersonImages = []
 
         # [Pathfinding] Get waypoints --> rooms mapping
@@ -212,25 +219,25 @@ class Visualizer(object):
                     p.pathLength = len(p.path)
 
             # Smooth moving
-            turns = float(self.constants["TURN_FRAMES"])
+            framesLeft = float(self.constants["FRAMES_PER_TURN"])
             movementFinalized = False
-            while turns >= 0 or not movementFinalized:
+            while framesLeft >= 0 or not movementFinalized:
                 movementFinalized = self.movementIsComplete()
 
                 self.draw()
                 self.update()
                 self.GameClock.tick(self.MAX_FPS)
 
-                turns -= 1.0
+                framesLeft -= 1.0
 
                 for p in self.people:
 
                     # --- Calculate path length ---
                     # Initial float
-                    iterSteps = float(p.pathLength) / float(self.constants["TURN_FRAMES"])
+                    iterSteps = float(p.pathLength) / float(self.constants["FRAMES_PER_TURN"])
 
-                    # Smooth float part out over turns
-                    iterSteps = math.ceil(turns * iterSteps) - math.floor((turns - 1) * iterSteps)
+                    # Smooth float part out over frames
+                    iterSteps = math.ceil(framesLeft * iterSteps) - math.floor((framesLeft - 1) * iterSteps)
 
                     # Keep people moving at a minimum pace
                     iterSteps = min(iterSteps, int(self.constants["MIN_STEPS_PER_FRAME"]))
@@ -277,6 +284,9 @@ class Visualizer(object):
         # Draw background
         self.ScreenSurface.fill((0, 0, 0))
         self.ScreenSurface.blit(self.background, (0, 0))
+
+        #TODO: Draw professor
+        self.ScreenSurface.blit(self.professor_image, [p - 16 for p in self.professor.pos])
 
         # Draw people in rooms
         for p in self.people:
@@ -400,6 +410,19 @@ class Visualizer(object):
 
         movePeople = list()
 
+        for e in firstTurn["events"]:
+            if e["name"] == "PROFESSOR":
+                print "PROFESSOR SPAWN"
+                self.professor.stand_in_room(self.rooms[e["message"]])
+                self.professor.room = e["message"]
+                self.professor.pos = self.professor.targetPos
+                print self.professor.pos
+            elif e["name"] == "NOPROFESSOR":
+                if self.professor in self.rooms[self.professor.room].people:
+                    self.rooms[self.professor.room].people.remove(self.professor)
+                self.professor.pos = (-300, -300)
+                self.professor.targetPos = (-300, -300)
+
         # Reshape data
         for i, player in enumerate(turn):
 
@@ -430,10 +453,10 @@ class Visualizer(object):
                         self.people[message["person_id"]].asleep = True
                         self.people[message["person_id"]].sentNoAction = False
                         self.people[message["person_id"]].isDistracted = False
-                    elif message["reason"] == "INVALID":
-                        self.people[message["person_id"]].isBlocked = True
-                        self.people[message["person_id"]].isDistracted = False
-                        self.people[message["person_id"]].sentNoAction = False
+                    # elif message["reason"] == "INVALID":
+                        # self.people[message["person_id"]].isBlocked = True
+                        # self.people[message["person_id"]].isDistracted = False
+                        # self.people[message["person_id"]].sentNoAction = False
                     elif message["reason"] == "DISTRACTED":
                         self.people[message["person_id"]].isDistracted = True
                         self.people[message["person_id"]].sentNoAction = False
