@@ -1,4 +1,8 @@
-
+/*
+** Part of the testclient for mechmania 20
+**
+** The purpose of this file is to contain data formats for communicating with the server.
+*/
 
 #ifndef AI_OBJECTS_T
 #define AI_OBJECTS_T
@@ -114,6 +118,7 @@ typedef struct {
     int person_id;
     int victim;
     code_enum_t type;
+    // while optional, make sure this is NULL if you don't use it so it gets freed correctly
     char * room_id;
 } action_t;
 

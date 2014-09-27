@@ -1,7 +1,7 @@
 /*
 ** Part of the testclient for mechmania 20
 **
-** The purpose of this class is to do the communications with the server, and parse the json into a form that we can use.
+** The purpose of this file is to do the communications with the server.
 */
 
 #include <stdio.h>
@@ -26,6 +26,10 @@
 
 int main() {
     char * name = load_file("name.txt");
+    if (name == NULL) {
+        fprintf(stderr, "could not load team name file\n");
+        return -1;
+    }
     int sockfd;
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -58,11 +62,10 @@ int main() {
 
     if (p == NULL) {
         fprintf(stderr, "client: failed to connect\n");
-        return 2;
+        return -1;
     }
 
-    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr),
-    s, sizeof s);
+    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
 
     freeaddrinfo(servinfo); // all done with this structure
 
