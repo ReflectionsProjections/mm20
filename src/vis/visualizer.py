@@ -233,6 +233,8 @@ class Visualizer(object):
                     # Calculate path length
                     iterSteps = float(p.pathLength) / float(self.constants["TURN_FRAMES"]) # Initial float
                     iterSteps = math.ceil(turns * iterSteps) - math.floor((turns - 1) * iterSteps) # Smooth float part out over turns
+                    iterSteps = min(iterSteps, int(self.constants["MIN_STEPS_PER_FRAME"])) # Keep people moving at a minimum pace
+
                     if p.path and len(p.path) > iterSteps:
 
                         for i in range(0, int(iterSteps)):
@@ -248,6 +250,7 @@ class Visualizer(object):
 
                     else:
                         p.pos = p.targetPos
+                        p.path = []
 
                         # Check for direction marker, otherwise just keep current rotation
                         rotated = False
