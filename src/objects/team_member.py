@@ -318,7 +318,7 @@ class TeamMember(object):
         else:
             self.hunger += 100.0 / (16.0 * TeamMember.ticks_in_hour)
             timetoremovefatigue = 5.5 + .5 * len(self.location.people)
-            if not sitting:
+            if not self.sitting:
                 timetoremovefatigue *= 2
             if "PROFESSOR" in self.location.resources:
                 timetoremovefatigue = timetoremovefatigue/2
