@@ -8,11 +8,11 @@ import math
 from animation import Animation
 from map_functions import map_reader
 from vector import vecLen, angleBetween
-import sys
 
 NO_CHAIR = (-100, -100)
 
 lastCachedPos = dict({"atest1": (-1, -1), "atest2": (-1, -1), "atest3": (-1, -1)})
+
 
 class Visualizer(object):
 
@@ -47,7 +47,7 @@ class Visualizer(object):
             )
         self.Animations = {}
         self.frameNumber = 0
-        
+
         # shuffle seat assignment
         if self.rooms:
             for r in self.rooms.values():
@@ -58,13 +58,11 @@ class Visualizer(object):
         self.availableConnections = dict()
         self.waypointRooms = dict()
 
-
         pygame.init()
         self.setup()
 
     def scale(self, pos):
         return (int(pos[0] * self.scaleMod[0]), int(pos[1] * self.scaleMod[1]))
-
 
     def setup(self):
         pygame.display.set_caption(self.TITLE)
@@ -85,7 +83,6 @@ class Visualizer(object):
             for o in r.snacktable + r.stand + r.chairs + r.doors:
                 if o not in self.waypointRooms:
                     self.waypointRooms[o] = set()
-                #print r.name
                 self.waypointRooms[o].update((r.name,))
 
         # [Pathfinding] Get all paths
@@ -95,8 +92,6 @@ class Visualizer(object):
                     self.allPaths[p1] = dict()
                 for p2 in r.paths[p1]:
                     self.allPaths[p1][p2] = r.paths[p1][p2]
-
-        #print self.allPaths[(867, 144)]
 
         # [Pathfinding] Get connected paths
         for startPt in self.allPaths.keys():
@@ -123,7 +118,6 @@ class Visualizer(object):
         # Run the game
         for turn_str in json_file:
             self.test(turn_str)
-            turn_count += 1
 
         # If game is done and we're supposed to quit on exit, wait a while then exit
         if self.quitWhenDone:
@@ -136,6 +130,7 @@ class Visualizer(object):
             if p.targetPos != p.pos:
                 return False
         return True
+
     def update(self):
         self.frameNumber += 1
         if self.frameNumber > self.constants["MAX_FRAMES_PER_TURN"]:
@@ -144,7 +139,7 @@ class Visualizer(object):
     # Determine which points a player moves through to reach a certain position
     # (using A*, since performance here matters unlike in the map reader)
     def construct_path(self, start, end):
-        #print "construct paths " + str(start) + " --> " + str(end)
+
         # Rooms the path can go through
         allowedRooms = list(self.waypointRooms[start] | self.waypointRooms[end])
 
@@ -160,7 +155,7 @@ class Visualizer(object):
 
             currentNode = frontierPaths.get()
             currentPath = currentNode[1]  # A list of waypoints
-            
+
             # Check if we've reached the goal - if so, terminate pathfinding
             currentWaypoint = currentPath[-1]
             if currentWaypoint == end:
@@ -175,7 +170,6 @@ class Visualizer(object):
                     fullPath = self.allPaths[a][b]
                     currentSteps.extend(fullPath)
 
-                #print '-- Done --'
                 return (currentSteps, currentPath)
 
             # Expand it
@@ -198,14 +192,15 @@ class Visualizer(object):
                 visited[nextWaypoint] = True
 
                 # Add path to frontier
-                travelled = currentNode[2] + len(self.allPaths[nextWaypoint][currentWaypoint]) * self.mapConstants["path_step_size"]
+                nextPath = self.allPaths[nextWaypoint][currentWaypoint]
+                travelled = currentNode[2] + len(nextPath) * self.mapConstants["path_step_size"]
                 dist = vecLen(end, nextWaypoint)
                 frontierPaths.put([travelled + dist, currentPath + [nextWaypoint], travelled])
 
         # No paths found
-        #print '\033[91mERROR at construct_path: no path found between ' + str(start) + ' --> ' + str(end) + '\033[0m'
+        print '\033[91mERROR: no path found between ' + str(start) + ' --> ' + str(end) + '\033[0m'
         return ([], [])
-    
+
     def turn(self, turn=None):
         while self.running and self.update_state(json.loads(turn)):
 
@@ -230,9 +225,17 @@ class Visualizer(object):
 
                 for p in self.people:
 
-                    # Calculate path length
-                    iterSteps = float(p.pathLength) / float(self.constants["TURN_FRAMES"]) # Initial float
-                    iterSteps = math.ceil(turns * iterSteps) - math.floor((turns - 1) * iterSteps) # Smooth float part out over turns
+                    # --- Calculate path length ---
+                    # Initial float
+                    iterSteps = float(p.pathLength) / float(self.constants["TURN_FRAMES"])
+
+                    # Smooth float part out over turns
+                    iterSteps = math.ceil(turns * iterSteps) - math.floor((turns - 1) * iterSteps)
+
+                    # Keep people moving at a minimum pace
+                    iterSteps = min(iterSteps, int(self.constants["MIN_STEPS_PER_FRAME"]))
+                    # ------ End path length ------
+
                     if p.path and len(p.path) > iterSteps:
 
                         for i in range(0, int(iterSteps)):
@@ -248,14 +251,13 @@ class Visualizer(object):
 
                     else:
                         p.pos = p.targetPos
+                        p.path = []
 
                         # Check for direction marker, otherwise just keep current rotation
-                        rotated = False
                         for d in self.rooms[p.room].dirmarkers:
-                            if not rotated and vecLen(d, p.pos) < self.constants["DIR_MARKER_RADIUS"]:
+                            if vecLen(d, p.pos) < self.constants["DIR_MARKER_RADIUS"]:
                                 p.set_rotation(angleBetween(p.pos, d) - 90)
-                                rotated = True
-
+                                break
 
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -271,6 +273,7 @@ class Visualizer(object):
                 break
 
     def draw(self):
+
         # Draw background
         self.ScreenSurface.fill((0, 0, 0))
         self.ScreenSurface.blit(self.background, (0, 0))
@@ -303,14 +306,16 @@ class Visualizer(object):
             # Debug
             if self.debug and p.targetPos != p.pos and p.path:
 
+                # Draw line to target
                 pygame.draw.line(
-                        self.ScreenSurface,
-                        (0, 255, 0),
-                        self.scale(p.targetPos),
-                        self.scale(p.pos),
-                        3
-                    )
+                    self.ScreenSurface,
+                    (0, 255, 0),
+                    self.scale(p.targetPos),
+                    self.scale(p.pos),
+                    3
+                )
 
+                # Draw remaining path
                 for q in range(0, len(p.path) - 1):
                     pygame.draw.line(
                         self.ScreenSurface,
@@ -320,7 +325,7 @@ class Visualizer(object):
                         1
                     )
 
-                
+                # Draw waypoints
                 for q in p.waypoints:
                     pygame.draw.circle(
                         self.ScreenSurface,
@@ -328,31 +333,29 @@ class Visualizer(object):
                         self.scale(q),
                         5
                     )
-                
 
-                # DBG
-                if self.debug:
-                    for c in self.availableConnections:
-                        for c2 in self.availableConnections[c]:
+                # Draw paths from current waypoint
+                for c in self.availableConnections:
+                    for c2 in self.availableConnections[c]:
 
-                            drawLine = False
-                            for p in self.people:
-                                if p.name in lastCachedPos and c == lastCachedPos[p.name]:
-                                    drawLine = True
-                                    break
-                                if p.name in lastCachedPos and c == p.pos:
-                                    lastCachedPos[p.name] = c
+                        drawLine = False
+                        for p in self.people:
+                            if p.name in lastCachedPos and c == lastCachedPos[p.name]:
+                                drawLine = True
+                                break
+                            if p.name in lastCachedPos and c == p.pos:
+                                lastCachedPos[p.name] = c
 
-                            if drawLine:
-                                qpath = self.allPaths[c][c2]
-                                for q in range(0, len(qpath) - 1):
-                                    pygame.draw.line(
-                                        self.ScreenSurface,
-                                        (0, 0, 255),
-                                        self.scale(qpath[q]),
-                                        self.scale(qpath[q+1]),
-                                        1
-                                    )
+                        if drawLine:
+                            qpath = self.allPaths[c][c2]
+                            for q in range(0, len(qpath) - 1):
+                                pygame.draw.line(
+                                    self.ScreenSurface,
+                                    (0, 0, 255),
+                                    self.scale(qpath[q]),
+                                    self.scale(qpath[q+1]),
+                                    1
+                                )
 
         # Draw AI info
         # namefont = pygame.font.SysFont("monospace", 40)
@@ -396,6 +399,7 @@ class Visualizer(object):
             return False
 
         movePeople = list()
+
         # Reshape data
         for i, player in enumerate(turn):
 
@@ -415,9 +419,9 @@ class Visualizer(object):
                         visPerson.asleep = True
                     if visPerson.toWake:
                         visPerson.asleep = False
-            
+
             for message in player["messages"]:
-                if message["success"] == True:
+                if message["success"]:
                     self.people[message["person_id"]].action = message["action"]
                     self.people[message["person_id"]].sentNoAction = False
                 else:
@@ -431,7 +435,6 @@ class Visualizer(object):
                     elif message["reason"] == "DISTRACTED":
                         self.people[message["person_id"]].isDistracted = True
                         self.people[message["person_id"]].sentNoAction = False
-
 
             for person in player["people"].values():
                 if person["team"] == i:
@@ -457,6 +460,7 @@ class Visualizer(object):
                         currentRoom.people.remove(visPlayer)
                     else:
                         visPlayer.targetPos = visPlayer.pos
+
                     # Determine player position
                     if acted == "eat":
                         visPlayer.targetPos = currentRoom.snacktable[0]
@@ -464,18 +468,18 @@ class Visualizer(object):
                     visPlayer.set_data(
                         person["location"],
                         person["team"], person["name"], self)
-                    # visPlayer
+
+            # Update sitting/standing
             for person in movePeople:
                 visPlayer = self.people[person["person_id"]]
                 newRoom = self.rooms[person["location"]]
-                if person["sitting"] == True:
+                if person["sitting"]:
                     visPlayer.sit_in_room(newRoom)
                 else:
                     visPlayer.stand_in_room(newRoom)
 
-
         return True
-    
+
     # Initialization of the teams
     def add_teams(self, teams):
         """
@@ -504,7 +508,7 @@ class Visualizer(object):
                 continue
 
             # teamImage = self.personImage.copy()
-            # for animation_type in ANIMATION_TYPES: #these don't exist yet, modify config/constants to make these
+            # for animation_type in ANIMATION_TYPES: dont exist yet; modify constants to make these
             for person in player["team"].values():
                 visPlayer = self.people[person["person_id"]]
                 room = self.rooms[person["location"]]
@@ -514,17 +518,13 @@ class Visualizer(object):
                 visPlayer.set_data(
                     person["location"],
                     person["team"], person["name"], self)
-                
+
             team_color = self.colors[-1]
             if visPlayer.team < len(self.colors):
                 team_color = self.colors[visPlayer.team]
 
             self.Animations[i] = Animation(team_color, self)
 
-
-
-
-        
 
 class VisPerson(object):
     """
@@ -561,8 +561,8 @@ class VisPerson(object):
         badpos = set()
         found = False
         for person in newRoom.people:
-            if person.pos != None:
-                if person.targetPos != None:
+            if person.pos:
+                if person.targetPos:
                     badpos.add(person.targetPos)
         for position in newRoom.stand:
             if position not in badpos:
@@ -577,18 +577,17 @@ class VisPerson(object):
                     break
         if found:
             newRoom.people.add(self)
-        else:
-            print "STAND NOT FOUND"
         return
 
     def sit_in_room(self, newRoom):
+
         # Loop through all sitting positions, find an unoccupied one and take it.
         # To find unoccupied, we first compile a list of positions NOT to take.
         badpos = dict()
         found = False
         for person in newRoom.people:
-            if person.pos != None:
-                if person.targetPos != None:
+            if person.pos:
+                if person.targetPos:
                     badpos[person.targetPos] = person
         for position in newRoom.chairs:
             if position not in badpos:
@@ -602,12 +601,11 @@ class VisPerson(object):
                     found = True
                     newRoom.people.remove(badpos[position])
                     badpos[position].stand_in_room(newRoom)
+
         # Add person to room if they aren't there already
         if found:
             newRoom.people.add(self)
             newRoom.sitting.add(self)
-        else:
-            print "SIT NOT FOUND"
         return
 
     def set_data(self, room, team, name, visualizer):
