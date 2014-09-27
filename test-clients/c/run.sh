@@ -1,4 +1,4 @@
 #!/bin/bash
 make clean
 make
-./client
+valgrind ./client

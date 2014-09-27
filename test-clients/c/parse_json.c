@@ -21,82 +21,105 @@ char ** json_to_string_array(json_t * json) {
     return strings;
 }
 
-person_t * json_to_people(json_t * json) {
-    person_t * people = (person_t *) malloc(json_array_size(json) * sizeof(person_t));
-    int i;
-    for (i = 0; i < json_array_size(json); i++) {
-        json_t * person_json = json_array_get(json, i);
-        people[i].asleep = json_is_true(json_object_get(person_json, "asleep"));
-        people[i].fatigue = json_number_value(json_object_get(person_json, "fatigue"));
-        people[i].hunger = json_number_value(json_object_get(person_json, "hunger"));
-        people[i].sitting = json_is_true(json_object_get(person_json, "sitting"));
-        people[i].room_id = str_clone(json_string_value(json_object_get(person_json, "room_id")));
-        people[i].name = str_clone(json_string_value(json_object_get(person_json, "name")));
-        people[i].team = json_integer_value(json_object_get(person_json, "team"));
-        people[i].person_id = json_integer_value(json_object_get(person_json, "person_id"));
+void json_to_person(json_t * person_json, person_t * person) {
+    person->person_id = json_integer_value(json_object_get(person_json, "person_id"));
+    person->team = json_integer_value(json_object_get(person_json, "team"));
+    person->name = str_clone(json_string_value(json_object_get(person_json, "name")));
 
-        json_t * stats_json = json_object_get(person_json, "stats");
-        people[i].stats.coding = json_integer_value(json_object_get(stats_json, "coding"));
-        people[i].stats.optimize = json_integer_value(json_object_get(stats_json, "optimize"));
-        people[i].stats.refactor = json_integer_value(json_object_get(stats_json, "refactor"));
-        people[i].stats.spy = json_integer_value(json_object_get(stats_json, "spy"));
-        people[i].stats.test = json_integer_value(json_object_get(stats_json, "test"));
-        people[i].stats.theorize = json_integer_value(json_object_get(stats_json, "theorize"));
+    if (!json_object_get(person_json, "sitting")) {
+        person->room_id = NULL;
+        return;
+    }
 
-        const char * arch_s = json_string_value(json_object_get(person_json, "archetype"));
-        if (!strcmp(arch_s, "coder")) {
-            people[i].archetype = CODER;
-        } else if (!strcmp(arch_s, "theorist")) {
-            people[i].archetype = THEORIST;
-        } else if (!strcmp(arch_s, "architect")) {
-            people[i].archetype = ARCHITECT;
-        } else if (!strcmp(arch_s, "informant")) {
-            people[i].archetype = INFORMANT;
+    person->sitting = json_is_true(json_object_get(person_json, "sitting"));
+    person->asleep = json_is_true(json_object_get(person_json, "asleep"));
+    person->room_id = str_clone(json_string_value(json_object_get(person_json, "location")));
+
+    json_t * acted_json = json_object_get(person_json, "acted");
+    if (json_is_null(acted_json)) {
+        person->acted = NO_ACTION;
+    } else {
+        const char * acted_s = json_string_value(acted_json);
+        if (!strcmp(acted_s, "move")) {
+            person->acted = MOVE;
+        } else if (!strcmp(acted_s, "eat")) {
+            person->acted = EAT;
+        } else if (!strcmp(acted_s, "distract")) {
+            person->acted = DISTRACT;
+        } else if (!strcmp(acted_s, "sleep")) {
+            person->acted = SLEEP;
+        } else if (!strcmp(acted_s, "code")) {
+            person->acted = CODE;
+        } else if (!strcmp(acted_s, "theorizer")) {
+            person->acted = THEORIZE;
+        } else if (!strcmp(acted_s, "view")) {
+            person->acted = VIEW;
+        } else if (!strcmp(acted_s, "wake")) {
+            person->acted = WAKE_UP;
+        } else if (!strcmp(acted_s, "spy")) {
+            person->acted = SPY;
+        } else if (!strcmp(acted_s, "distracted")) {
+            person->acted = DISTRACTED;
         }
+    }
 
-        json_t * acted_json = json_object_get(person_json, "acted");
-        if (json_is_null(acted_json)) {
-            people[i].acted = NO_ACTION;
-        } else {
-            const char * acted_s = json_string_value(acted_json);
-            if (!strcmp(acted_s, "move")) {
-                people[i].acted = MOVE;
-            } else if (!strcmp(acted_s, "eat")) {
-                people[i].acted = EAT;
-            } else if (!strcmp(acted_s, "distract")) {
-                people[i].acted = DISTRACT;
-            } else if (!strcmp(acted_s, "sleep")) {
-                people[i].acted = SLEEP;
-            } else if (!strcmp(acted_s, "code")) {
-                people[i].acted = CODE;
-            } else if (!strcmp(acted_s, "theorizer")) {
-                people[i].acted = THEORIZE;
-            } else if (!strcmp(acted_s, "view")) {
-                people[i].acted = VIEW;
-            } else if (!strcmp(acted_s, "wake")) {
-                people[i].acted = WAKE_UP;
-            } else if (!strcmp(acted_s, "spy")) {
-                people[i].acted = SPY;
-            } else if (!strcmp(acted_s, "distracted")) {
-                people[i].acted = DISTRACTED;
-            }
-        }
+    if (!json_object_get(person_json, "fatigue")) {
+        return;
+    }
+
+    person->fatigue = json_number_value(json_object_get(person_json, "fatigue"));
+    person->hunger = json_number_value(json_object_get(person_json, "hunger"));
+
+    json_t * stats_json = json_object_get(person_json, "stats");
+    person->stats.coding = json_integer_value(json_object_get(stats_json, "coding"));
+    person->stats.optimize = json_integer_value(json_object_get(stats_json, "optimize"));
+    person->stats.refactor = json_integer_value(json_object_get(stats_json, "refactor"));
+    person->stats.spy = json_integer_value(json_object_get(stats_json, "spy"));
+    person->stats.test = json_integer_value(json_object_get(stats_json, "test"));
+    person->stats.theorize = json_integer_value(json_object_get(stats_json, "theorize"));
+
+    const char * arch_s = json_string_value(json_object_get(person_json, "archetype"));
+    if (!strcmp(arch_s, "coder")) {
+        person->archetype = CODER;
+    } else if (!strcmp(arch_s, "theorist")) {
+        person->archetype = THEORIST;
+    } else if (!strcmp(arch_s, "architect")) {
+        person->archetype = ARCHITECT;
+    } else if (!strcmp(arch_s, "informant")) {
+        person->archetype = INFORMANT;
+    }
+}
+
+person_t * json_object_to_people(json_t * json) {
+    person_t * people = (person_t *) malloc(json_object_size(json) * sizeof(person_t));
+    const char * key;
+    json_t * person_json;
+    int i = 0;
+    json_object_foreach(json, key, person_json) {
+        json_to_person(person_json, people + i);
+        i++;
     }
     return people;
 }
 
 room_t * json_to_rooms(json_t * json) {
-    room_t * rooms = (room_t *) malloc(json_array_size(json) * sizeof(room_t));
-    int i, j;
-    for (i = 0; i < json_array_size(json); i++) {
-        json_t * room_json = json_array_get(json, i);
+    room_t * rooms = (room_t *) malloc(json_object_size(json) * sizeof(room_t));
+    const char * key;
+    json_t * room_json;
 
+    int i = 0;
+    int j;
+    json_object_foreach(json, key, room_json) {
         rooms[i].room_id = str_clone(json_string_value(json_object_get(room_json, "room")));
-        rooms[i].connected_rooms = json_to_string_array(json_object_get(room_json, "connected_rooms"));
-        rooms[i].num_connected_rooms = json_array_size(json_object_get(room_json, "connected_rooms"));
+        rooms[i].connected_rooms = json_to_string_array(json_object_get(room_json, "connectedRooms"));
+        rooms[i].num_connected_rooms = json_array_size(json_object_get(room_json, "connectedRooms"));
 
-        rooms[i].people = json_to_people(json_object_get(room_json, "people"));
-        rooms[i].num_people = json_array_size(json_object_get(room_json, "people"));
+        json_t * people_ids_json = json_object_get(room_json, "peopleInRoom");
+        rooms[i].num_people = json_array_size(people_ids_json);
+        rooms[i].people_ids = (int *) malloc(rooms[i].num_people * sizeof(int));
+        for (j = 0; j < rooms[i].num_people; j++) {
+            rooms[i].people_ids[j] = json_integer_value(json_array_get(people_ids_json, j));
+        }
 
         rooms[i].num_resources = json_array_size(json_object_get(room_json, "resources"));
         rooms[i].resources = (resource_enum_t *) malloc(rooms[i].num_resources * sizeof(resource_enum_t));
@@ -112,6 +135,7 @@ room_t * json_to_rooms(json_t * json) {
                 rooms[i].resources[j] = PROJECTOR;
             }
         }
+        i++;
     }
     return rooms;
 }
@@ -165,12 +189,12 @@ received_turn_t * json_to_received_turn(json_t * root) {
     turn->num_errors = json_array_size(errors_json);
 
     json_t * people_json = json_object_get(root, "people");
-    turn->people = json_to_people(people_json);
-    turn->num_people = json_array_size(people_json);
+    turn->people = json_object_to_people(people_json);
+    turn->num_people = json_object_size(people_json);
 
-    json_t * rooms_json = json_object_get(root, "rooms");
+    json_t * rooms_json = json_object_get(root, "map");
     turn->rooms = json_to_rooms(rooms_json);
-    turn->num_rooms = json_array_size(rooms_json);
+    turn->num_rooms = json_object_size(rooms_json);
 
     json_t * messages_json = json_object_get(root, "messages");
     turn->messages = json_to_messages(messages_json);
@@ -179,6 +203,23 @@ received_turn_t * json_to_received_turn(json_t * root) {
     json_t * events_json = json_object_get(root, "events");
     turn->events = json_to_events(events_json);
     turn->num_events = json_array_size(events_json);
+
+    return turn;
+}
+
+initial_received_t * json_to_initial_received(json_t * root) {
+    initial_received_t * turn = (initial_received_t *) malloc(sizeof(initial_received_t));
+
+    turn->success = !strcmp("Success", json_string_value(json_object_get(root, "status")));
+
+    turn->errors = json_to_string_array(json_object_get(root, "errors"));
+    turn->num_errors = json_array_size(json_object_get(root, "errors"));
+
+    turn->team_members = json_object_to_people(json_object_get(root, "team"));
+    turn->num_team_members = json_object_size(json_object_get(root, "team"));
+
+    turn->team_name = str_clone(json_string_value(json_object_get(root, "team_name")));
+    turn->team_id = json_integer_value(json_object_get(root, "team_id"));
 
     return turn;
 }

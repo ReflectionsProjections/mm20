@@ -66,15 +66,17 @@ typedef struct {
 } stats_t;
 
 typedef struct {
+    int person_id;
+    int team;
+    char * name;
+
+    // optional fields
+    char * room_id;
     action_enum_t acted;
-    int /*bool*/ asleep;
     float fatigue;
     float hunger;
+    int /*bool*/ asleep;
     int /*bool*/ sitting;
-    char * room_id;
-    char * name;
-    int team;
-    int person_id;
     archetype_enum_t archetype;
     stats_t stats;
 } person_t;
@@ -83,7 +85,7 @@ typedef struct {
     char * room_id;
     char ** connected_rooms;
     int num_connected_rooms;
-    person_t * people;
+    int * people_ids;
     int num_people;
     resource_enum_t * resources;
     int num_resources;
@@ -129,6 +131,25 @@ typedef struct {
     int num_actions;
 } sent_turn_t;
 
+typedef struct {
+    int /*bool*/ success;
+    char ** errors;
+    int num_errors;
+    person_t * team_members;
+    int num_team_members;
+    char * team_name;
+    int team_id;
+} initial_received_t;
+
+void free_initial_received(initial_received_t * received) {
+    int i;
+    for (i = 0; i < received->num_errors; i++) {
+        free(received->errors[i]);
+    }
+    free(received->errors);
+    free(received->team_name);
+}
+
 
 void free_sent_turn(sent_turn_t * sent_turn) {
     int i;
@@ -160,7 +181,7 @@ void free_received_turn(received_turn_t * received_turn) {
     for (i = 0; i < received_turn->num_rooms; i++) {
         int j;
         free(received_turn->rooms[i].room_id);
-        free_people(received_turn->rooms[i].people, received_turn->rooms[i].num_people);
+        free(received_turn->rooms[i].people_ids);
         free(received_turn->rooms[i].resources);
         for (j = 0; j < received_turn->rooms[i].num_connected_rooms; j++) {
             received_turn->rooms[i].connected_rooms[j];
