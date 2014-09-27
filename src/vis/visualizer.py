@@ -212,25 +212,25 @@ class Visualizer(object):
                     p.pathLength = len(p.path)
 
             # Smooth moving
-            turns = float(self.constants["TURN_FRAMES"])
+            framesLeft = float(self.constants["FRAMES_PER_TURN"])
             movementFinalized = False
-            while turns >= 0 or not movementFinalized:
+            while framesLeft >= 0 or not movementFinalized:
                 movementFinalized = self.movementIsComplete()
 
                 self.draw()
                 self.update()
                 self.GameClock.tick(self.MAX_FPS)
 
-                turns -= 1.0
+                framesLeft -= 1.0
 
                 for p in self.people:
 
                     # --- Calculate path length ---
                     # Initial float
-                    iterSteps = float(p.pathLength) / float(self.constants["TURN_FRAMES"])
+                    iterSteps = float(p.pathLength) / float(self.constants["FRAMES_PER_TURN"])
 
-                    # Smooth float part out over turns
-                    iterSteps = math.ceil(turns * iterSteps) - math.floor((turns - 1) * iterSteps)
+                    # Smooth float part out over frames
+                    iterSteps = math.ceil(framesLeft * iterSteps) - math.floor((framesLeft - 1) * iterSteps)
 
                     # Keep people moving at a minimum pace
                     iterSteps = min(iterSteps, int(self.constants["MIN_STEPS_PER_FRAME"]))

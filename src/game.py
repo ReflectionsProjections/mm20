@@ -4,6 +4,7 @@ import action_handler
 import config.handle_constants
 import random
 import unittest
+import sys
 
 ## Holds the gamestate and represents the game to the server
 class Game(object):
@@ -122,6 +123,9 @@ class Game(object):
             if "FOOD" in r.resources and r.snacksupply < 1:
                 self.event_notification("DEPLETEDSNACKTABLE", r.name)
         self.turn += 1
+        sys.stderr.write('\rTurn: \033[92m{}\033[0m/{}'.format(
+            self.turn,
+            self.turn_limit))
         if self.turn >= self.turn_limit:
             return False
         return True
