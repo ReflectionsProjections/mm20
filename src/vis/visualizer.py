@@ -21,7 +21,7 @@ class Visualizer(object):
         self.constants = retrieveConstants("visualizerDefaults")
         self.mapConstants = retrieveConstants("map_reader_constants")
         self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
-        self.SCREEN_MAP_WIDTH = self.SCREEN_WIDTH - self.constants["STATSBARWIDTH"]
+        self.SCREEN_MAP_WIDTH = self.SCREEN_WIDTH
         self.MAP_WIDTH = self.serverDefaults["mapWidth"]
         self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
         self.MAP_HEIGHT = self.serverDefaults["mapHeight"]

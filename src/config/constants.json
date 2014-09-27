@@ -34,7 +34,7 @@
   },
   "visualizerDefaults": {
     "map_overlay": "rooms_overlay.png",
-    "SCREEN_WIDTH": 1224,
+    "SCREEN_WIDTH": 1024,
     "SCREEN_HEIGHT": 768,
     "MAX_FPS": 20,
     "WALK_SPEED": 20,
