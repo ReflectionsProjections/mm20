@@ -43,8 +43,21 @@ class Team(object):
         return {k: m.output_dict() for k, m in self.members.items()}
 
     def get_info_on_people(self, people_list):
-        return {p.person_id: p.output_dict() if p.team.my_id == self.my_id
-                else p.output_dict_limited() for p in people_list}
+        output = {}
+        for p in people_list:
+            if p.team == self:
+                output[p.person_id]=p.output_dict()
+            else:
+                same_room = False
+                for person in p.location.people:
+                    if person.team == self:
+                        same_room = True
+                        break
+                if same_room:
+                    output[p.person_id]=p.output_dict_same_room()
+                else:
+                    output[p.person_id]=p.output_dict_limited()
+        return output
 
 import room
 
