@@ -1,7 +1,7 @@
 /*
 ** Part of the testclient for mechmania 20
 **
-** The purpose of this class is to handle the decision-making for each turn of the game
+** The purpose of this file is to handle the decision-making for each turn of the game
 */
 
 #include <stdio.h>
@@ -18,5 +18,6 @@ char * get_initial_message(char * name){
 }
 
 sent_turn_t * get_turn(received_turn_t * received_turn) {
-    return NULL;
+    sent_turn_t * send_turn = (sent_turn_t *) calloc(1, sizeof(sent_turn_t));
+    return send_turn;
 }
