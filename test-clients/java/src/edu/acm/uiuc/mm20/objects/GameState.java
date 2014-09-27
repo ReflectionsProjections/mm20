@@ -2,9 +2,14 @@
 package edu.acm.uiuc.mm20.objects;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
 import javax.annotation.Generated;
+
 import com.google.gson.annotations.Expose;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -15,11 +20,11 @@ public class GameState {
     @Expose
     private AiStats aiStats;
     @Expose
-    private Map map;
+    private Map<String, Room> map;
     @Expose
     private List<Object> errors = new ArrayList<Object>();
     @Expose
-    private People people;
+    private Map<String, Person> people;
     @Expose
     private List<Message> messages = new ArrayList<Message>();
     @Expose
@@ -38,44 +43,25 @@ public class GameState {
         return this;
     }
 
-    public Map getMap() {
-        return map;
+    public Room getRoom(String name) {
+        return map.get(name);
     }
-
-    public void setMap(Map map) {
-        this.map = map;
-    }
-
-    public GameState withMap(Map map) {
-        this.map = map;
-        return this;
+    public Collection<Room> getRooms(){
+    	return this.map.values();
     }
 
     public List<Object> getErrors() {
         return errors;
     }
 
-    public void setErrors(List<Object> errors) {
-        this.errors = errors;
+    public Collection<Person> getPeople() {
+        return people.values();
+    }
+    
+    public Person getPerson(String key){
+    	return people.get(key);
     }
 
-    public GameState withErrors(List<Object> errors) {
-        this.errors = errors;
-        return this;
-    }
-
-    public People getPeople() {
-        return people;
-    }
-
-    public void setPeople(People people) {
-        this.people = people;
-    }
-
-    public GameState withPeople(People people) {
-        this.people = people;
-        return this;
-    }
 
     public List<Message> getMessages() {
         return messages;
