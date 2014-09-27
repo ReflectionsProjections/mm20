@@ -37,7 +37,7 @@ class Game(object):
         self.teams = {}
         self.people = []
         self.practice_games = False
-        self.events = {}
+        self.events = list()
         self.professorroom = ""
         self.professortime = 0
         self.professorhours = defaults["PROFESSORHOURS"]
@@ -58,7 +58,7 @@ class Game(object):
                 return (False, {"status": "Failure", "errors": [
                     "Number of team members exceeds team size"]})
             start_room = random.choice(self.rooms.values())
-            try_limit = 10
+            try_limit = 1000
             while(try_limit > 0 and not start_room.canAdd(len(data["members"]))):
                 start_room = self.rooms[random.choice(self.rooms.keys())]
                 try_limit = try_limit-1
@@ -80,6 +80,7 @@ class Game(object):
     # @return
     #   True if the game is running, False if the game ended
     def execute_turn(self):
+        #print self.turn
         if len(self.people) == 0:
             return False
         for person in self.people:
@@ -88,7 +89,6 @@ class Game(object):
         self.action_buffer = []
         for person in self.people:
             person.update()
-        self.turn += 1
         if not self.practice_games and self.turn >= self.turn_limit / 2:
             self.practice_games = True
             for r in self.rooms.values():
@@ -121,18 +121,19 @@ class Game(object):
                     r.snacksupply = self.snackrefill
             if "FOOD" in r.resources and r.snacksupply < 1:
                 self.event_notification("DEPLETEDSNACKTABLE", r.name)
+        self.turn += 1
         if self.turn >= self.turn_limit:
             return False
         return True
 
     ## Notify all teams of an event that just occurred
     def event_notification(self, code, message):
-        self.events[code] = message
+        self.events.append({"name":code, "message":message})
 
     ## called by server to receive events for that turn
     def get_events(self):
         newevents = self.events
-        self.events = {}
+        self.events = list()
         return newevents
 
     ## Queues all of the actions one client is attempting to execute this turn
@@ -170,6 +171,7 @@ class Game(object):
                 win = True
             return {"winner": win, "score": self.calc_score(client_id)}
         response = {"aiStats": self.teams[client_id].ai.output_dict(),
+                    "events": self.get_events(),
                     "map": self.teams[client_id].get_visible_map(),
                     "messages": self.result_buffer[client_id],
                     "people": self.teams[client_id].get_info_on_people(self.people)}

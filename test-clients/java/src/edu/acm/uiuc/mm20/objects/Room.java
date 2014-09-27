@@ -10,7 +10,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @Generated("org.jsonschema2pojo")
-public class _7 {
+public class Room {
 
     @Expose
     private List<Long> peopleInRoom = new ArrayList<Long>();
@@ -29,7 +29,7 @@ public class _7 {
         this.peopleInRoom = peopleInRoom;
     }
 
-    public _7 withPeopleInRoom(List<Long> peopleInRoom) {
+    public Room withPeopleInRoom(List<Long> peopleInRoom) {
         this.peopleInRoom = peopleInRoom;
         return this;
     }
@@ -42,7 +42,7 @@ public class _7 {
         this.room = room;
     }
 
-    public _7 withRoom(String room) {
+    public Room withRoom(String room) {
         this.room = room;
         return this;
     }
@@ -55,7 +55,7 @@ public class _7 {
         this.resources = resources;
     }
 
-    public _7 withResources(List<String> resources) {
+    public Room withResources(List<String> resources) {
         this.resources = resources;
         return this;
     }
@@ -68,7 +68,7 @@ public class _7 {
         this.connectedRooms = connectedRooms;
     }
 
-    public _7 withConnectedRooms(List<String> connectedRooms) {
+    public Room withConnectedRooms(List<String> connectedRooms) {
         this.connectedRooms = connectedRooms;
         return this;
     }
