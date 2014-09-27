@@ -110,7 +110,9 @@ int main() {
             break;
         }
 
-        send(sockfd, sent_str, strlen(sent_str) + 1, 0);
+        int sent_length = strlen(sent_str);
+        sent_str[sent_length] = '\n';
+        send(sockfd, sent_str, sent_length + 1, 0);
         free(sent_str);
     }
 
