@@ -398,12 +398,48 @@ class Visualizer(object):
         # Reshape data
         for i, player in enumerate(turn):
             self.ai[i] = player["aiStats"]
+
+            for person in player["people"].values():
+                if person["team"] == i:
+                    visPerson = self.people[person["person_id"]]
+                    visPerson.isBlocked = False
+                    visPerson.action = None
+                    visPerson.sentNoAction = True
+                    if visPerson.toSleep:
+                        visPerson.asleep = True
+                    if visPerson.toWake:
+                        visPerson.asleep = False
+            
+            for message in player["messages"]:
+                if message["success"] == True:
+                    self.people[message["person_id"]].action = message["action"]
+                    self.people[message["person_id"]].sentNoAction = False
+                else:
+                    # make sure these are right reasons
+                    if message["reason"] == "ASLEEP":
+                        self.people[message["person_id"]].asleep = True
+                        self.people[message["person_id"]].sentNoAction = False
+                    elif message["reason"] == "INVALID":
+                        self.people[message["person_id"]].isBlocked = True
+                        self.people[message["person_id"]].sentNoAction = False
+                    elif message["reason"] == "DISTRACTED":
+                        self.people[message["person_id"]].isDistracted = True
+                        self.people[message["person_id"]].sentNoAction = False
+
+
             for person in player["people"].values():
                 if person["team"] == i:
 
                     # Get existing data
+                    # Disregard the name, visPlayer is actually a person
                     visPlayer = self.people[person["person_id"]]
-                    acted = person.get("acted", "asleep" if person["asleep"] else None)
+                    acted = person.get("acted")
+                    visPlayer.toSleep = False
+                    visPlayer.toWake = False
+                    if person["asleep"]:
+                        visPlayer.toSleep = True
+                    else:
+                        visPlayer.toWake = True
 
                     currentRoom = self.rooms[visPlayer.room]
                     newRoom = self.rooms[person["location"]]
@@ -422,18 +458,10 @@ class Visualizer(object):
                     elif acted in ["move"]:
                         visPlayer.stand_in_room(newRoom, currentRoom)
 
-                    visPlayer.asleep = person["asleep"]
-
-                    # Update visPlayer
-                    # Disregard the name, visPlayer is actually a person
                     visPlayer.set_data(
                         person["location"],
-                        acted,
                         person["team"], person["name"], self)
                     # visPlayer
-            # for message in player["messages"]:
-            #     if message["success"] == False:
-            #         self.people[message["person_id"]].isDistracted = True
 
         return True
     
@@ -464,7 +492,6 @@ class Visualizer(object):
                 visPlayer.pos = visPlayer.targetPos
                 visPlayer.set_data(
                     person["location"],
-                    None,
                     person["team"], person["name"], self)
                 
             team_color = self.colors[-1]
@@ -494,7 +521,11 @@ class VisPerson(object):
         self.pathLength = 0
         self.waypoints = []
         self.isDistracted = False
-        self.asleep = None
+        self.sentNoAction = True
+        self.isBlocked = False
+        self.asleep = False
+        self.toSleep = False
+        self.toWake = False
 
     def set_rotation(self, rotation):
 
@@ -568,12 +599,11 @@ class VisPerson(object):
             self.room = newRoom.name
         return
 
-    def set_data(self, room, act, team, name, visualizer):
+    def set_data(self, room, team, name, visualizer):
         """
         Fields to be used
         """
         self.room = room
-        self.action = act
         self.team = team
         self.name = name
 
