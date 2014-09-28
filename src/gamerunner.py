@@ -9,7 +9,7 @@ import os
 import pickle
 import vis.visualizer
 from urllib2 import urlopen
-
+import time
 
 FNULL = open(os.devnull, 'w')
 constants = config.handle_constants.retrieveConstants("serverDefaults")
@@ -32,6 +32,7 @@ def launch_clients():
 
 def launch_client(client):
         c = Client_program(client)
+        client_list.append(c)
         c.run()
 
 
@@ -188,17 +189,38 @@ def main():
                     my_game,
                     logger=fileLog)
     serv.run(parameters.port, launch_clients)
+    if parameters.scoreboard:
+        fileLog.score.stop()
+        
 
+    
 
 class Scoreboard(object):
-    def __init__(self, url="http://localhost:7000"):
+    def __init__(self, url=None):
+        self.lunched = False
         self.url = url
-
+        if url is None:
+            self.url = "http://localhost:7000"
+            self.lunched = True
+            self.board = self.bot = Popen([sys.executable, "scoreServer.py"],
+                                          stdout=FNULL, )
+        
     def turn(self, turn):
         r = urlopen(self.url, turn)
         if(r.getcode() != 200):
             raise Exception("Scoreboard update failed!")
-        
+
+    def kill(self):
+        if not self.board.poll():
+            try:
+                self.board.kill()
+            except OSError:
+                pass
+
+    def stop(self):
+        """
+        """
+        self.board.terminate()
 
 
 class Client_program(object):
