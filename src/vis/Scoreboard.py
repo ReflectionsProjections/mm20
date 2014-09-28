@@ -21,6 +21,7 @@ class Scoreboard(object):
         self.running = True
         self.team_names = list()
         self.ai = list()
+        self.score = list()
         self.messages = list()
         self.game_done = False
         self.game_result = None
@@ -93,6 +94,7 @@ class Scoreboard(object):
                 label = aifont.render(trunc(val, 5), 1, (255, 255, 255))
                 self.ScreenSurface.blit(label, (x_pos2, y_pos))
                 x_pos2 += 120
+            label = aifont.render(trunc(self., 5), 1, (255, 255, 255))
         label = namefont.render("TEAM NAME", 2, (255, 255, 255))
         x_pos = 20
         y_pos = 10
@@ -124,6 +126,7 @@ class Scoreboard(object):
                 continue
 
             self.ai[i] = player["aiStats"]
+            self.score[i] = player["score"]
 
         return True
 
@@ -136,6 +139,7 @@ class Scoreboard(object):
 
         # Remove null teams (due to bad clients)
         self.ai = [None] * len(teams)
+        self.score = [None] * len(teams)
         self.team_names = list(self.ai)
         number_of_people = 0
 
