@@ -23,16 +23,40 @@ def updateMembers(members, value):
 #@param value The dictionary with turn info sent by the server
 def setActions(members, value, map_dict):
 
+    # Find coding room if possible
+    if not coding_room:
+      for r_name, r in global_map.iteritems:
+
+        # Coding room must have adjacent food
+        if "FOOD" not in r.get("connectedRooms", dict()).get("resources", []):
+          continue
+
+
+    # Determine actions
     aiStats = value.get("aiStats")
     actions = []
     for m_id, m in members.iteritems():
         act = {}
         act["person_id"] = m["person_id"]
 
-        # Move into room with a snacktable
-        if "FOOD" not in global_map[m["location"]]["resources"]:
+        # Get data
+        room = global_map[m["location"]]
+        friendsInRoom = sum(int(m["location"] == m2["location"]) for m2 in members) - 1
+
+        actionSet = False
+
+        # Get food
+        if m["hunger"] > 75:
+
+          # Eat if possible
+          if "FOOD" in room["resources"]:
+            actionSet = True
+            act["action"] = "eat"
+
+          # Move to snacktable room
+          else:
             act["action"] = "move"
-            connected_rooms = global_map[m["location"]]["connectedRooms"]
+            connected_rooms = room["connectedRooms"]
             
             # Find room with food
             acmOffice = None
@@ -41,43 +65,39 @@ def setActions(members, value, map_dict):
                 acmOffice = r
                 break
 
-            # Go to room with food if one is visible
+            # Go to other room
             if acmOffice:
+                actionSet = True
                 act["room"] = acmOffice
-
-            # Randomly explore
-            else:
-                act["room"] = random.choice(connected_rooms)
 
             #sys.stderr.write("%s: %s --> %s \n" % (m["name"], debugRoomNames[m["location"]], debugRoomNames[act["room"]]));
             
-        # Standard actions
-        else:
-            if "messages" in value:
-                for message in value["messages"]:
-                    if message["success"] is False and\
-                            message["reason"] == "HUNGRY":
-                        act["action"] = "eat"
-            if "action" not in act:
+        # Move to coding room
+        elif coding_room and room != coding_room:
+          if coding_room in room["connectedRooms"]:
+            act["action"] = "move"
+            act["room"] = coding_room
+            actionSet = True
 
-                # Basic needs
-                if m["hunger"] > 75:
-                    act["action"] = "eat"
-                elif m["fatigue"] + m["hunger"] > 100:
-                    act["action"] = "sleep"
+        # Code if in coding room
+        elif coding_room and room == coding_room:
 
-                # AI work
-                elif m["stats"]["theorize"] == 10:
-                    act["action"] = "theorize"
-                elif m["stats"]["test"] == 10:
-                    act["action"] = "code"
-                    if aiStats and aiStats["optimization"] < aiStats["implementation"]:
-                      act["type"] = "refactor"
-                    else:
-                      act["type"] = "test"
-                else:
-                    act["action"] = "code"
-                    act["type"] = "implement"
+          # Basic needs
+          if m["fatigue"] + m["hunger"] > 100:
+              act["action"] = "sleep"
+
+          # AI work
+          elif m["stats"]["theorize"] == 10:
+              act["action"] = "theorize"
+          elif m["stats"]["test"] == 10:
+              act["action"] = "code"
+              if aiStats and aiStats["optimization"] < aiStats["implementation"]:
+                act["type"] = "refactor"
+              else:
+                act["type"] = "test"
+          else:
+              act["action"] = "code"
+              act["type"] = "implement"
         actions.append(act)
     return actions
 
@@ -95,6 +115,7 @@ if __name__ == "__main__":
 
     # Start game
     global_map = dict()
+    coding_room = None
     game_running = True
     members = None
     map_dict = None
