@@ -94,17 +94,20 @@ class Scoreboard(object):
                 label = aifont.render(trunc(val, 5), 1, (255, 255, 255))
                 self.ScreenSurface.blit(label, (x_pos2, y_pos))
                 x_pos2 += 120
-            label = aifont.render(trunc(self., 5), 1, (255, 255, 255))
+            label = aifont.render(str(self.score[i]), 1, (255, 255, 255))
+            self.ScreenSurface.blit(label, (x_pos2, y_pos))
         label = namefont.render("TEAM NAME", 2, (255, 255, 255))
         x_pos = 20
         y_pos = 10
         x_pos2 = x_pos + 120
         self.ScreenSurface.blit(label, (x_pos, y_pos))
         for key, val in self.ai[-1].iteritems():
-                # print "Should be drawing"
-                label = aifont.render(key, 1, (255, 255, 255))
-                self.ScreenSurface.blit(label, (x_pos2, y_pos))
-                x_pos2 += 120
+            # print "Should be drawing"
+            label = aifont.render(key, 1, (255, 255, 255))
+            self.ScreenSurface.blit(label, (x_pos2, y_pos))
+            x_pos2 += 120
+        label = aifont.render("Final Score", 1, (255, 255, 255))
+        self.ScreenSurface.blit(label, (x_pos2, y_pos))
 
         pygame.display.flip()
 
