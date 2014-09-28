@@ -8,12 +8,13 @@ import sys
 import os
 import pickle
 import vis.visualizer
-from urllib2 import urlopen
+from urllib2 import urlopen, URLError
 import time
 
 FNULL = open(os.devnull, 'w')
 constants = config.handle_constants.retrieveConstants("serverDefaults")
 vis_constants = config.handle_constants.retrieveConstants("visualizerDefaults")
+
 
 parameters = None
 client_list = list()
@@ -82,12 +83,12 @@ def parse_args():
         "The gamerunner will run a number of test clients (which can be " +
         "specified with -d) equal to players - specified clients",
         action="append")
-
     parser.add_argument(
         "-d", "--defaultClient",
         help="The default client to launch when no specific clients " +
         "are given. Defaults to {0}".format(constants["defaultClient"]),
         default=os.path.join(*constants["defaultClient"].split("/")))
+
     parser.add_argument(
         "-v", "--verbose",
         help="When present prints player one's standard output.",
@@ -108,6 +109,11 @@ def parse_args():
         const=True,
         default=False,
         action="store_const")
+    parser.add_argument(
+        "--scoreboard-url",
+        help="Connect to a running scoreboard server",
+        default=None)
+
     parser.add_argument(
         "-s", "--show",
         help="Set this to make the game be visualized in a window." +
@@ -184,7 +190,7 @@ def main():
     if parameters.show:
         fileLog.vis = vis.visualizer.Visualizer(rooms, parameters.mapOverlay, debug=parameters.debug_view)
     if parameters.scoreboard:
-        fileLog.score = Scoreboard()
+        fileLog.score = Scoreboard(parameters.scoreboard_url)
     serv = MMServer(parameters.teams,
                     my_game,
                     logger=fileLog)
@@ -203,15 +209,22 @@ class Scoreboard(object):
             self.url = "http://localhost:7000"
             self.lunched = True
             self.board = self.bot = Popen([sys.executable, "scoreServer.py"],
-                                          stdout=FNULL, )
+                                          stdout=FNULL, stderr=FNULL)
+            time.sleep(1)
         
     def turn(self, turn):
-        r = urlopen(self.url, turn)
-        if(r.getcode() != 200):
-            raise Exception("Scoreboard update failed!")
+        try:
+            r = urlopen(self.url, turn)
+            if(r.getcode() != 200):
+                raise Exception("Scoreboard update failed!")
+
+        except URLError:
+            if not self.lunched:
+                self.stop()
+                raise  # Exception("Scoreboard update failed!")
 
     def kill(self):
-        if not self.board.poll():
+        if (self.lunched and not self.board.poll()):
             try:
                 self.board.kill()
             except OSError:
@@ -220,8 +233,11 @@ class Scoreboard(object):
     def stop(self):
         """
         """
-        self.board.terminate()
+        if self.lunched:
+            self.board.terminate()
 
+    def __del__(self):
+        self.kill()
 
 class Client_program(object):
     """
