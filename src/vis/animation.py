@@ -39,15 +39,18 @@ class Animation(object):
             rot_image = self.rot_center(self.animations["WALK"][(frame / 4) % 4], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         elif person.action == "spy":
-            if frame % 30 < 15:
+            if frame % 40 < 20:
                 rot_image = self.rot_center(self.animations["SPY"][2], person.rotation + frame)
-            if frame % 30 >= 15:
-                rot_image = self.rot_center(self.animations["SPY"][2], person.rotation + (30 - frame))
+            if frame % 40 >= 20:
+                rot_image = self.rot_center(self.animations["SPY"][2], person.rotation + (40 - frame))
+            self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
+        elif person.action == "view":
+            rot_image = self.rot_center(self.animations["SPY"][2], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         elif person.action == "eat":
             rot_image = self.rot_center(self.animations["EAT"][(frame / 4) % 3], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
-        elif person.action == "sleep":
+        elif person.action == "sleep" or person.asleep:
             rot_image = self.rot_center(self.animations["SLEEP"][0], person.rotation)
             self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
         else:
@@ -57,7 +60,7 @@ class Animation(object):
             self.ScreenSurface.blit(self.animations["CODE"][0], [scale_pos[0] - 8, scale_pos[1] - 48])
         elif person.action == "theorize":
             self.ScreenSurface.blit(self.animations["THEORIZE"][0], [scale_pos[0] - 8, scale_pos[1] - 48])
-        elif person.asleep:
+        elif person.action == "sleep" or person.asleep:
             self.ScreenSurface.blit(self.animations["SLEEP"][1], [scale_pos[0] - 8, scale_pos[1] - 48])
         elif person.action == "distract":
             self.ScreenSurface.blit(self.animations["DISTRACT"][0], [scale_pos[0] - 8, scale_pos[1] - 48])
