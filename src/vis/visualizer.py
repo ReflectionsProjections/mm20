@@ -240,7 +240,7 @@ class Visualizer(object):
                     iterSteps = math.ceil(framesLeft * iterSteps) - math.floor((framesLeft - 1) * iterSteps)
 
                     # Keep people moving at a minimum pace
-                    iterSteps = min(iterSteps, int(self.constants["MIN_STEPS_PER_FRAME"]))
+                    iterSteps = min(iterSteps, self.constants["MIN_STEPS_PER_FRAME"])
                     # ------ End path length ------
 
                     if p.path and len(p.path) > iterSteps:
@@ -250,7 +250,7 @@ class Visualizer(object):
                             p.path.pop(0)
 
                         # Adjust rotation
-                        rotationLookahead = int(self.constants["ROTATION_LOOKAHEAD"])
+                        rotationLookahead = self.constants["ROTATION_LOOKAHEAD"]
                         if len(p.path) > rotationLookahead:
                             p.set_rotation(angleBetween(p.pos, p.path[rotationLookahead]) - 90)
                         else:
