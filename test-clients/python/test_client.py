@@ -1,6 +1,8 @@
 #!/usr/bin/python2
 import socket
 import json
+import random
+import sys
 
 def updateMembers(members, value):
     if members is None:
@@ -24,18 +26,28 @@ def setActions(members, value):
     actions = []
     for m_id, m in members.iteritems():
         act = {}
+        myroom = value["map"][m["location"]]
         act["person_id"] = m["person_id"]
-        if "messages" in value:
-            for message in value["messages"]:
-                if message["success"] is False and\
-                        message["reason"] == "HUNGRY":
-                    act["action"] = "eat"
         if "action" not in act:
-            if value["map"][m["location"]]:
-                if m["hunger"] > 75:
+            if m["hunger"] > 75:
+                if "FOOD" in myroom["resources"]:
                     act["action"] = "eat"
-            if m["stats"]["theorize"] == 10:
+                else:
+                    act["action"] = "move"
+                    act["room"] = random.choice(myroom["connectedRooms"])
+            elif m["stats"]["spy"] == 10:
+                canspy = False
+                for person in myroom["peopleInRoom"]:
+                    if person not in members:
+                        canspy = True
+                        break
+                if canspy:
+                    act["action"] = "spy"
+                else:
+                   act["action"] = "theorize"
+            elif m["stats"]["theorize"] == 10:
                 act["action"] = "theorize"
+                act["type"] = "test"
             elif m["stats"]["test"] == 10:
                 act["action"] = "code"
                 act["type"] = "test"
@@ -46,11 +58,15 @@ def setActions(members, value):
     return actions
 
 if __name__ == "__main__":
-    HOST = 'localhost'
-    PORT = 8080
+    if len(sys.argv) > 2:
+        HOST = sys.argv[1]
+        PORT = int(sys.argv[2])
+    else:
+        HOST = 'localhost'
+        PORT = 8080
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
-    s.sendall('{"team":"test", "members":[{"name":"test1", "archetype":"Coder"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Theorist"}]}\n')
+    s.sendall('{"team":"test", "members":[{"name":"test1", "archetype":"Coder"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Informant"}]}\n')
     data = s.recv(1024)
     game_running = True
     members = None

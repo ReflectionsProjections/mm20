@@ -132,6 +132,17 @@ typedef struct {
 } sent_turn_t;
 
 typedef struct {
+    archetype_enum_t archetype;
+    char * name;
+} member_t;
+
+typedef struct {
+    char * team_name;
+    member_t * members;
+    int num_members;
+} initial_sent_t;
+
+typedef struct {
     int /*bool*/ success;
     char ** errors;
     int num_errors;
@@ -161,6 +172,16 @@ void free_people(person_t * people, int num_people) {
         free(people[i].name);
     }
     free(people);
+}
+
+void free_initial_sent(initial_sent_t * sent) {
+    int i;
+    for (i = 0; i < sent->num_members; i++) {
+        free(sent->members[i].name);
+    }
+    free(sent->members);
+    free(sent->team_name);
+    free(sent);
 }
 
 void free_initial_received(initial_received_t * received) {
