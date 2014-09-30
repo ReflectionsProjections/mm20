@@ -20,49 +20,15 @@
 #include "parse_json.c"
 #include "utils.c"
 
-#define HOST "localhost"
-#define PORT "8080"
 #define MAXDATASIZE 32768
 
 int main() {
-    int sockfd;
-    struct addrinfo hints, *servinfo, *p;
-    int rv;
-    char s[INET6_ADDRSTRLEN];
+    int sockfd = connect_to_server();
 
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-
-    if ((rv = getaddrinfo(HOST, PORT, &hints, &servinfo)) != 0) {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
-    }
-
-    // loop through all the results and connect to the first we can
-    for (p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
-            perror("client: socket");
-            continue;
-        }
-
-        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-            close(sockfd);
-            perror("client: connect");
-            continue;
-        }
-
-        break;
-    }
-
-    if (p == NULL) {
-        fprintf(stderr, "client: failed to connect\n");
+    if (sockfd == -1) {
+        fprintf(stderr, "failed to connect\n");
         return -1;
     }
-
-    inet_ntop(p->ai_family, get_in_addr((struct sockaddr *)p->ai_addr), s, sizeof s);
-
-    freeaddrinfo(servinfo); // all done with this structure
 
     initial_sent_t * initial_sent = get_initial_message();
     json_t * initial_sent_json = initial_sent_to_json(initial_sent);
@@ -78,9 +44,17 @@ int main() {
     free(initial_sent_str);
 
     char received_str[MAXDATASIZE];
-    recv(sockfd, received_str, MAXDATASIZE - 1, 0);
+    int num_bytes = recv(sockfd, received_str, MAXDATASIZE - 1, 0);
+    if (num_bytes == -1) {
+        fprintf(stderr, "failed to recv\n");
+        close(sockfd);
+        return -1;
+    }
+    received_str[num_bytes] = '\0';
+
     json_error_t json_error;
     json_t * initial_json_root = json_loads(received_str, 0, &json_error);
+
     initial_received_t * initial_received = json_to_initial_received(initial_json_root);
     int team_id = initial_received->team_id;
     int num_team_members = initial_received->num_team_members;
@@ -95,7 +69,7 @@ int main() {
     char * first_turn_str = json_dumps(first_turn_json, JSON_ENSURE_ASCII);
     json_decref(first_turn_json);
     if (!first_turn_str) {
-        fprintf(stderr, "error converting json to string");
+        fprintf(stderr, "error converting json to string\n");
         close(sockfd);
         return -1;
     }
@@ -106,16 +80,16 @@ int main() {
     free(first_turn_str);
 
     while (1) {
-        int numbytes = recv(sockfd, received_str, MAXDATASIZE - 1, 0);
-        if (numbytes == -1) {
-            fprintf(stderr, "failed to recv");
+        num_bytes = recv(sockfd, received_str, MAXDATASIZE - 1, 0);
+        if (num_bytes == -1) {
+            fprintf(stderr, "failed to recv\n");
             break;
         }
-        if (numbytes == 0){
-            fprintf(stderr, "server closed connection");
+        if (num_bytes == 0){
+            fprintf(stderr, "server closed connection\n");
             break;
         }
-        received_str[numbytes] = '\0';
+        received_str[num_bytes] = '\0';
 
         json_t * received_json_root = json_loads(received_str, 0, &json_error);
         if (!received_json_root) {
@@ -139,7 +113,7 @@ int main() {
         char * sent_str = json_dumps(sent_turn_json, JSON_ENSURE_ASCII);
         json_decref(sent_turn_json);
         if (!sent_str) {
-            fprintf(stderr, "error converting json to string");
+            fprintf(stderr, "error converting json to string\n");
             break;
         }
 
