@@ -22,14 +22,9 @@
 
 #define HOST "localhost"
 #define PORT "8080"
-#define MAXDATASIZE 4096
+#define MAXDATASIZE 32768
 
 int main() {
-    char * name = load_file("name.txt");
-    if (name == NULL) {
-        fprintf(stderr, "could not load team name file\n");
-        return -1;
-    }
     int sockfd;
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -69,9 +64,18 @@ int main() {
 
     freeaddrinfo(servinfo); // all done with this structure
 
-    char * buf = get_initial_message(name);
-    free(name);
-    send(sockfd, buf, strlen(buf), 0);
+    initial_sent_t * initial_sent = get_initial_message();
+    json_t * initial_sent_json = initial_sent_to_json(initial_sent);
+    free_initial_sent(initial_sent);
+
+    char * initial_sent_str = json_dumps(initial_sent_json, JSON_ENSURE_ASCII);
+    json_decref(initial_sent_json);
+
+    int initial_sent_str_len = strlen(initial_sent_str);
+    initial_sent_str[initial_sent_str_len] = '\n';
+
+    send(sockfd, initial_sent_str, initial_sent_str_len + 1, 0);
+    free(initial_sent_str);
 
     char received_str[MAXDATASIZE];
     recv(sockfd, received_str, MAXDATASIZE - 1, 0);
@@ -80,7 +84,6 @@ int main() {
     initial_received_t * initial_received = json_to_initial_received(initial_json_root);
     int team_id = initial_received->team_id;
     int num_team_members = initial_received->num_team_members;
-    printf("Team %i with %i members\n", team_id, num_team_members);
     json_decref(initial_json_root);
 
     sent_turn_t * first_turn = get_first_turn(initial_received);
@@ -89,18 +92,18 @@ int main() {
     json_t * first_turn_json = sent_turn_to_json(first_turn);
     free_sent_turn(first_turn);
 
-    char * initial_sent_str = json_dumps(first_turn_json, JSON_ENSURE_ASCII);
+    char * first_turn_str = json_dumps(first_turn_json, JSON_ENSURE_ASCII);
     json_decref(first_turn_json);
-    if (!initial_sent_str) {
+    if (!first_turn_str) {
         fprintf(stderr, "error converting json to string");
         close(sockfd);
         return -1;
     }
 
-    int first_sent_length = strlen(initial_sent_str);
-    initial_sent_str[first_sent_length] = '\n';
-    send(sockfd, initial_sent_str, first_sent_length + 1, 0);
-    free(initial_sent_str);
+    int first_sent_length = strlen(first_turn_str);
+    first_turn_str[first_sent_length] = '\n';
+    send(sockfd, first_turn_str, first_sent_length + 1, 0);
+    free(first_turn_str);
 
     while (1) {
         int numbytes = recv(sockfd, received_str, MAXDATASIZE - 1, 0);
@@ -117,6 +120,10 @@ int main() {
         json_t * received_json_root = json_loads(received_str, 0, &json_error);
         if (!received_json_root) {
             fprintf(stderr, "failed to load json from server\n");
+            break;
+        }
+        if (has_game_ended(received_json_root)) {
+            json_decref(received_json_root);
             break;
         }
 
