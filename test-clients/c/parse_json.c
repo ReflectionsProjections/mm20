@@ -215,6 +215,10 @@ initial_received_t * json_to_initial_received(json_t * root) {
     turn->errors = json_to_string_array(json_object_get(root, "errors"));
     turn->num_errors = json_array_size(json_object_get(root, "errors"));
 
+    if (!turn->success) {
+        return turn;
+    }
+
     turn->team_members = json_object_to_people(json_object_get(root, "team"));
     turn->num_team_members = json_object_size(json_object_get(root, "team"));
 
@@ -222,6 +226,45 @@ initial_received_t * json_to_initial_received(json_t * root) {
     turn->team_id = json_integer_value(json_object_get(root, "team_id"));
 
     return turn;
+}
+
+int has_game_ended(json_t * root) {
+    return json_object_get(root, "winner") != NULL;
+}
+
+json_t * initial_sent_to_json(initial_sent_t * sent_turn) {
+    json_t * sent = json_object();
+    json_object_set_new_nocheck(sent, "team", json_string(sent_turn->team_name));
+    json_t * members = json_array();
+
+    int i;
+    for (i = 0; i < sent_turn->num_members; i++) {
+        json_t * member = json_object();
+        json_object_set_new_nocheck(member, "name", json_string(sent_turn->members[i].name));
+
+        json_t * archetype_json;
+        switch (sent_turn->members[i].archetype) {
+            case CODER:
+                archetype_json = json_string("Coder");
+                break;
+            case ARCHITECT:
+                archetype_json = json_string("Architect");
+                break;
+            case THEORIST:
+                archetype_json = json_string("Theorist");
+                break;
+            case INFORMANT:
+                archetype_json = json_string("Informant");
+                break;
+        }
+        json_object_set_new_nocheck(member, "archetype", archetype_json);
+
+        json_array_append_new(members, member);
+    }
+
+    json_object_set_new_nocheck(sent, "members", members);
+
+    return sent;
 }
 
 json_t * sent_turn_to_json(sent_turn_t * sent_turn) {

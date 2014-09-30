@@ -12,10 +12,19 @@
 #include "ai_objects.c"
 #include "utils.c"
 
-//Given name, set up initial message
-char * get_initial_message(char * name){
-    char * str = malloc(200);
-    return strcpy(str, "{\"team\":\"blarrgh!\", \"members\":[{\"name\":\"MastaCode\", \"archetype\":\"Coder\"},{\"name\":\"Builda\", \"archetype\":\"Architect\"},{\"name\":\"TheSage\", \"archetype\":\"Theorist\"}]}\n");
+initial_sent_t * get_initial_message() {
+    initial_sent_t * send_turn = (initial_sent_t *) malloc(sizeof(initial_sent_t));
+    send_turn->team_name = str_clone("Close2DaMetal");
+    send_turn->num_members = 3;
+    send_turn->members = (member_t *) malloc(send_turn->num_members * sizeof(member_t));
+    send_turn->members[0].name = str_clone("MastaCode");
+    send_turn->members[0].archetype = CODER;
+    send_turn->members[1].name = str_clone("Builda");
+    send_turn->members[1].archetype = ARCHITECT;
+    send_turn->members[2].name = str_clone("TheSage");
+    send_turn->members[2].archetype = THEORIST;
+
+    return send_turn;
 }
 
 sent_turn_t * get_first_turn(initial_received_t * initial_received) {
