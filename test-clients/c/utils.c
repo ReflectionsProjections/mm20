@@ -7,6 +7,9 @@
 #ifndef UTILS_T
 #define UTILS_T
 
+#define HOST "localhost"
+#define PORT "8080"
+
 //Credit to Beej's Guide
 int sendall(int sockfd, char * buf, int * len) {
     int total = 0; // how many bytes we've sent
@@ -37,6 +40,42 @@ void * get_in_addr(struct sockaddr * sa) {
     }
 
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+int connect_to_server() {
+    int sockfd;
+    struct addrinfo hints, *servinfo, *p;
+    int rv;
+
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    if ((rv = getaddrinfo(HOST, PORT, &hints, &servinfo)) != 0) {
+        return -1;
+    }
+
+    // loop through all the results and connect to the first we can
+    for (p = servinfo; p != NULL; p = p->ai_next) {
+        if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+            continue;
+        }
+
+        if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+            close(sockfd);
+            continue;
+        }
+
+        break;
+    }
+
+    if (p == NULL) {
+        return -1;
+    }
+
+    freeaddrinfo(servinfo);
+
+    return sockfd;
 }
 
 /**
