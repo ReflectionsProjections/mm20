@@ -225,6 +225,8 @@ initial_received_t * json_to_initial_received(json_t * root) {
     turn->team_name = str_clone(json_string_value(json_object_get(root, "team_name")));
     turn->team_id = json_integer_value(json_object_get(root, "team_id"));
 
+    turn->turns_per_hour = json_integer_value(json_object_get(root, "turns_per_hour"));
+
     return turn;
 }
 
