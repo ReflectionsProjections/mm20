@@ -20,8 +20,6 @@
   "serverDefaults": {
     "players": 2,
     "map": "rooms_full.png",
-    "mapWidth": 1024,
-    "mapHeight": 768,
     "mapParseStartPos": [147, 139],
     "log": "log.txt",
     "port": 8080,
