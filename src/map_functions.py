@@ -212,7 +212,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
                     # Add pixel to queue
                     travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
-                    dist = float(travelled) + abs(nextCoord[0] - end[0]) + abs(nextCoord[1] - end[1])
+                    dist = float(travelled) + _heuristic(nextCoord, end)
                     nodeQueue.put((dist, travelled, px, py))
 
     # Backtrack to start (if possible)
