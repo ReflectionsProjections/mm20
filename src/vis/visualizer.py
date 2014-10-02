@@ -20,11 +20,7 @@ class Visualizer(object):
         self.serverDefaults = retrieveConstants("serverDefaults")
         self.constants = retrieveConstants("visualizerDefaults")
         self.mapConstants = retrieveConstants("map_reader_constants")
-        self.SCREEN_WIDTH = self.constants["SCREEN_WIDTH"]
-        self.SCREEN_MAP_WIDTH = self.SCREEN_WIDTH
-        self.MAP_WIDTH = self.serverDefaults["mapWidth"]
-        self.SCREEN_HEIGHT = self.constants["SCREEN_HEIGHT"]
-        self.MAP_HEIGHT = self.serverDefaults["mapHeight"]
+        self.map_overlay = map_overlay or self.constants["map_overlay"]
         self.MAX_FPS = self.constants["MAX_FPS"]
         self.TITLE = self.constants["TITLE"]
         self.running = True
@@ -44,12 +40,8 @@ class Visualizer(object):
         self.game_result = None
         self.debug = kwargs.get("debug", False)
         self.rooms = rooms
-        self.map_overlay = map_overlay or self.constants["map_overlay"]
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
-        self.scaleMod = (
-            float(self.SCREEN_MAP_WIDTH) / self.MAP_WIDTH,
-            float(self.SCREEN_HEIGHT) / self.MAP_HEIGHT
-            )
+        self.scaleMod = (1,1)
         self.Animations = {}
         self.frameNumber = 0
 
@@ -71,13 +63,13 @@ class Visualizer(object):
 
     def setup(self):
         pygame.display.set_caption(self.TITLE)
-        self.ScreenSurface = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
-        self.GameClock = pygame.time.Clock()
         image = pygame.image.load(self.map_overlay)
         self.MAP_HEIGHT = image.get_height()
         self.MAP_WIDTH = image.get_width()
+        self.ScreenSurface = pygame.display.set_mode((self.MAP_WIDTH, self.MAP_HEIGHT))
+        self.GameClock = pygame.time.Clock()
         image = image.convert()
-        self.background = pygame.transform.scale(image, (self.SCREEN_MAP_WIDTH, self.SCREEN_HEIGHT))
+        self.background = pygame.transform.scale(image, (self.MAP_WIDTH, self.MAP_HEIGHT))
         profimage = self.constants["animations"]["PROFESSOR"]
         image = pygame.image.load(profimage[0]).convert_alpha()
         self.professor_image = pygame.transform.scale(image, (32,32))

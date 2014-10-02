@@ -75,7 +75,8 @@ class Game(object):
             "team": newTeam.get_team_members(),
             "team_id": newTeam.my_id,
             "team_name": newTeam.name,
-            "map": self.teams[client_id].get_visible_map()
+            "map": self.teams[client_id].get_visible_map(),
+            "turns_per_hour": self.turn_limit / 24
         }
 
         return (True, response)

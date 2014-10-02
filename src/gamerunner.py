@@ -256,7 +256,8 @@ class Client_program(object):
         """
         """
         try:
-            self.bot = Popen(["sh", os.path.join(self.client_path, "run.sh")],
+            self.bot = Popen(["sh", os.path.join(self.client_path, "run.sh"),
+                              "localhost", str(parameters.port)],
                              stdout=self.chose_output(), cwd=self.client_path)
         except OSError as e:
             msg = "the player {} failed to start with error {}".format(
