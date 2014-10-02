@@ -36,7 +36,7 @@ class Animation(object):
     def draw(self, person, frame, ):
         scale_pos = self.scale((person.pos[0], person.pos[1]))
         if person.action == "move":
-            if person.pos == person.targetPos:
+            if person.pos[0] - person.targetPos[0] > 1.0 or person.pos[1] - person.targetPos[1] > 1.0:
                 rot_image = self.rot_center(self.animations["WALK"][(frame / 4) % 4], person.rotation)
                 self.ScreenSurface.blit(rot_image, [p - 16 for p in scale_pos])
             else:
