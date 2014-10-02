@@ -150,6 +150,7 @@ typedef struct {
     int num_team_members;
     char * team_name;
     int team_id;
+    int turns_per_hour;
 } initial_received_t;
 
 

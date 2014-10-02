@@ -7,9 +7,6 @@
 #ifndef UTILS_T
 #define UTILS_T
 
-#define HOST "localhost"
-#define PORT "8080"
-
 //Credit to Beej's Guide
 int sendall(int sockfd, char * buf, int * len) {
     int total = 0; // how many bytes we've sent
@@ -42,7 +39,7 @@ void * get_in_addr(struct sockaddr * sa) {
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-int connect_to_server() {
+int connect_to_server(char * host, char * port) {
     int sockfd;
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -51,7 +48,7 @@ int connect_to_server() {
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    if ((rv = getaddrinfo(HOST, PORT, &hints, &servinfo)) != 0) {
+    if ((rv = getaddrinfo(host, port, &hints, &servinfo)) != 0) {
         return -1;
     }
 

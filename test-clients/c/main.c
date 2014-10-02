@@ -22,8 +22,19 @@
 
 #define MAXDATASIZE 32768
 
-int main() {
-    int sockfd = connect_to_server();
+#define DEFAULT_HOST "localhost"
+#define DEFAULT_PORT "8080"
+
+int main(int argc, char * argv []) {
+    char * ip, * port;
+    if (argc == 3) {
+        ip = argv[1];
+        port = argv[2];
+    } else {
+        ip = DEFAULT_HOST;
+        port = DEFAULT_PORT;
+    }
+    int sockfd = connect_to_server(ip, port);
 
     if (sockfd == -1) {
         fprintf(stderr, "failed to connect\n");
