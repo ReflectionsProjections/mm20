@@ -2,7 +2,7 @@
   "generalInfo": {
     "VERSION": 0.0,
     "NAME": "MetaMania",
-    "TICKSINHOUR": 60,
+    "TICKSINHOUR": 4,
     "TEAMSIZE": 3,
     "UNOPTWEIGHT": 0.2,
     "OPTWEIGHT": 0.8,
