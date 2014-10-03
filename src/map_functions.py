@@ -135,9 +135,9 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
     playerSize = 4  # Should be 12, use 4 for testing
     playerStep = 4
 
-    # Visited
-    visited = dict()
-    visited[(start[0], start[1])] = (-1, -1)
+    # seen
+    seen = dict()
+    seen[(start[0], start[1])] = ((-1, -1), 0, False)
 
     # Queues
     nodeQueue = Queue.PriorityQueue()
@@ -153,6 +153,8 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
         node = nodeQueue.get()
         coord = node[2:]
+        seenval = seen[coord]
+        seen[coord] = (seenval[0], seenval[1], True)
 
         x = coord[0]
         y = coord[1]
@@ -207,11 +209,14 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
                 # Skip visited pixels
                 nextCoord = (px, py)
-                if not visited.get(nextCoord, None):
-                    visited[nextCoord] = coord
-
+                travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
+                if not seen.get(nextCoord, None):
                     # Add pixel to queue
-                    travelled = float(node[1]) + vecLen((0,0), (stepSize*mx, stepSize*my))
+                    seen[nextCoord] = (coord, travelled, False)
+                    dist = float(travelled) + _heuristic(nextCoord, end)
+                    nodeQueue.put((dist, travelled, px, py))
+                elif not seen[nextCoord][2] and seen[nextCoord][1] > travelled:
+                    seen[nextCoord] = (coord, travelled, False)
                     dist = float(travelled) + _heuristic(nextCoord, end)
                     nodeQueue.put((dist, travelled, px, py))
 
@@ -225,7 +230,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
         path.append(end)
     while coord != start:
         path.append(coord)
-        coord = visited[coord]
+        coord = seen[coord][0]
 
     return path
 
