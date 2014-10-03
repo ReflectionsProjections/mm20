@@ -188,7 +188,7 @@ def main():
         with open(map_cache_str, 'r') as f:
             rooms = pickle.load(f)
     else:
-        my_game = game.Game(parameters.map)
+        my_game = game.Game(parameters.map, parameters.turnsinhour)
         rooms_str = pickle.dumps(my_game.rooms)
         with open(map_cache_str, 'w') as f:
             f.write(rooms_str)
