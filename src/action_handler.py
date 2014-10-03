@@ -3,6 +3,7 @@
 import config.handle_constants
 import objects.client_action
 import unittest
+import random
 
 
 ## Executes all of the actions queued up by the clients
@@ -21,6 +22,7 @@ def handleTurn(game, action_buffer):
 # @param actionBuffer
 #   A buffer (list) of actions
 def sortActions(actionBuffer, game):
+    random.shuffle(actionBuffer)
     actionBuffer.sort(lambda a, b: sortFunction(game, a, b), reverse=True)
     return
 
