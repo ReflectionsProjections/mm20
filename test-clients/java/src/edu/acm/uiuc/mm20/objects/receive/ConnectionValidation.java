@@ -7,4 +7,5 @@ public class ConnectionValidation {
 	public Map<String, Person> team;
 	public String team_name;
 	public Map<String, Room> map;
+	public int turns_per_hour;
 }

@@ -1,3 +1,3 @@
 #!/bin/bash
-
-java -jar run.jar
+#ant
+java -jar run.jar $1 $2
