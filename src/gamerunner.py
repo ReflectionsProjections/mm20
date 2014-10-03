@@ -104,7 +104,7 @@ def parse_args():
 
     parser.add_argument(
         "-b", "--scoreboard",
-        help="Set this to have the scoreboard pop up in a window." +
+        help="Set this to have the scoreboard pop up in a window. " +
         "Fun to watch and helpful for debugging!",
         const=True,
         default=False,
@@ -116,7 +116,7 @@ def parse_args():
 
     parser.add_argument(
         "-s", "--show",
-        help="Set this to make the game be visualized in a window." +
+        help="Set this to make the game be visualized in a window. " +
         "Fun to watch and helpful for debugging!",
         const=True,
         default=False,
@@ -128,6 +128,12 @@ def parse_args():
         const=True,
         default=False,
         action="store_const")
+    parser.add_argument(
+        "-th", "--turnsinhour",
+        help="Use this to set the length of the game. " + 
+        "The game is 24 hours, total # of turns is turnsinhour * 24",
+        default=0,
+        type=int)
     
     args = parser.parse_args()
     if args.teams < 2:
@@ -178,7 +184,7 @@ def main():
     if os.path.isfile(map_cache_str) and parameters.cached_map:
         with open(map_cache_str, 'r') as f:
             rooms = pickle.load(f)
-        my_game = game.Game(parameters.map, rooms)
+        my_game = game.Game(parameters.map, parameters.turnsinhour, rooms)
         with open(map_cache_str, 'r') as f:
             rooms = pickle.load(f)
     else:
