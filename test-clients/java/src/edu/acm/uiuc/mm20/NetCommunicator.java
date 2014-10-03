@@ -108,7 +108,12 @@ public class NetCommunicator extends Thread {
 	public void receiveTurn(String message) {
         // System.out.print(message);
 		ArrayList<Action> actions = ai.processTurn(gson.fromJson(message, GameState.class));
-		sendMessage(gson.toJson(actions));
+		Object toSend = actions;
+		if (toSend != null){
+			sendMessage(gson.toJson(toSend));
+		} else {
+			this.kill();
+		}
 	}
 	
 	private String initialConnection() {

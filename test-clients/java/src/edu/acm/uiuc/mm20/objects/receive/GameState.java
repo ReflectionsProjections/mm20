@@ -28,6 +28,8 @@ public class GameState {
 	private List<Message> messages = new ArrayList<Message>();
 	@Expose
 	private List<Events> events;
+	@Expose
+	private Boolean winner;
 
 	public AiStats getAiStats() {
 		return aiStats;
@@ -62,6 +64,13 @@ public class GameState {
 	}
 
 
+
+	/**
+	 * @return the winner
+	 */
+	public Boolean getWinner() {
+		return winner;
+	}
 
 	@Override
 	public String toString() {

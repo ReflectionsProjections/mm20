@@ -21,6 +21,14 @@ public class MM20AI {
 	Random generator = new Random();
 
 	public ArrayList<Action> processTurn(GameState gamestate) {
+		//if the game has ended quit cleanly
+		if (gamestate.getWinner() != null){
+			if(gamestate.getWinner()){
+				System.out.println("You win :)");
+			}
+			System.out.println("Game over");;
+			return null;
+		}
 		ArrayList<Action> actions = new ArrayList<Action>();
 		// Begin Turn Logic
 		
