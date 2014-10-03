@@ -39,6 +39,7 @@ sent_turn_t * get_turn(received_turn_t * received_turn, int team_id, int num_tea
     int i;
     int team_ind = 0;
     for (i = 0; i < received_turn->num_people; i++) {
+        // make sure theyre on our team
         if (received_turn->people[i].team != team_id) {
             continue;
         }
