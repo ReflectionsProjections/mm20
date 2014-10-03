@@ -66,7 +66,7 @@ class Game(object):
                 start_room = self.rooms[random.choice(self.rooms.keys())]
                 try_limit = try_limit-1
             newTeam = Team(data["team"], data["members"],
-                           start_room, self.people, client_id)
+                           start_room, self.people, client_id, self.turn_limit / 24)
         except KeyError as e:
             return (False, {"status": "Failure", "errors": [{"KeyError": e.message}]})
             

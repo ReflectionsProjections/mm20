@@ -6,8 +6,6 @@ import unittest
 ## Holds information and functions for individual team members
 class TeamMember(object):
     Archetypes = config.handle_constants.retrieveConstants("archetypes")
-    ticks_in_hour = config.handle_constants.retrieveConstants("generalInfo")[
-        "TICKSINHOUR"]
     constants = config.handle_constants.retrieveConstants(
             "memberConstants")
     effectiveness_drops = constants["effectiveness_drops"]
@@ -21,7 +19,7 @@ class TeamMember(object):
     #   The archetype of the TeamMember.
     # @param location
     #   The location (a Room object) that the TeamMember will start in.
-    def __init__(self, name, archetype, location, team, person_id):
+    def __init__(self, name, archetype, location, team, person_id, ticks):
         self.person_id = person_id
         self.name = name
         self.stats = TeamMember.Archetypes[archetype]
@@ -33,6 +31,7 @@ class TeamMember(object):
         self.turns_coding = 0
         self.hunger = TeamMember.constants["hunger"]
         self.fatigue = TeamMember.constants["fatigue"]  # Start at 8 hours awake
+        self.ticks_in_hour = ticks
             # (halfway to passed out)
         self.asleep = False
         self.acted = None  # acted is the string of the action performed.
@@ -191,7 +190,7 @@ class TeamMember(object):
         if not self.location.isAvailable('FOOD'):
             raise client_action.ActionError('NOFOODHERE',
                                             "This room does not contain food")
-        self.hunger -= 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))
+        self.hunger -= 10.0 * (100.0 / (8.0 * self.ticks_in_hour))
         if self.hunger < 0.0:
             self.hunger = 0.0
         self.acted = "eat"
@@ -306,14 +305,14 @@ class TeamMember(object):
         if self.acted != "code":
             self.turns_coding = 0
         if not self.asleep:
-            self.hunger += 100.0 / (8.0 * TeamMember.ticks_in_hour)
-            self.fatigue += 100.0 / (16.0 * TeamMember.ticks_in_hour)
+            self.hunger += 100.0 / (8.0 * self.ticks_in_hour)
+            self.fatigue += 100.0 / (16.0 * self.ticks_in_hour)
             if self.hunger > 100:
                 self.hunger = 100.0
             if self.fatigue > 100:
                 self.asleep = True
         else:
-            self.hunger += 100.0 / (16.0 * TeamMember.ticks_in_hour)
+            self.hunger += 100.0 / (16.0 * self.ticks_in_hour)
             timetoremovefatigue = 5.5 + .5 * len(self.location.people)
             if not self.sitting:
                 timetoremovefatigue *= 2
@@ -321,7 +320,7 @@ class TeamMember(object):
                 timetoremovefatigue = timetoremovefatigue/2
             if timetoremovefatigue > 12.0:
                 timetoremovefatigue = 12.0
-            self.fatigue -= 100.0 / (timetoremovefatigue * TeamMember.ticks_in_hour)
+            self.fatigue -= 100.0 / (timetoremovefatigue * self.ticks_in_hour)
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
@@ -400,7 +399,7 @@ class TestTeamMember(unittest.TestCase):
         self.testMember.eat()
         self.assertEqual(self.testMember.hunger,
                         (100.0 - 10.0 *
-                            (100.0 / (8.0 * TeamMember.ticks_in_hour))))
+                            (100.0 / (8.0 * self.ticks_in_hour))))
 
     def testEatNoFood(self):
         with self.assertRaises(client_action.ActionError):

@@ -15,7 +15,7 @@ class Team(object):
     # @param people
     #   A global list of people that the game stores and the team initializer
     #   appends all members to
-    def __init__(self, name, members, startingLocation, people, my_id):
+    def __init__(self, name, members, startingLocation, people, my_id, ticks):
         self.name = name
         self.my_id = my_id
         self.members = dict()
@@ -23,7 +23,7 @@ class Team(object):
             newMember = team_member.TeamMember(member["name"],
                                                member["archetype"],
                                                startingLocation, self,
-                                               len(people))
+                                               len(people), ticks)
             self.members[member["name"]] = newMember
             people.append(newMember)
         self.numMembers = len(members)
