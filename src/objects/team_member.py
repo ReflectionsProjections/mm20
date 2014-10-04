@@ -265,10 +265,10 @@ class TeamMember(object):
     def getEffectiveness(self):
         effective = 1.0
         if self.hunger > TeamMember.effectiveness_drops:
-            effective -= 0.5 * (100 - self.hunger) /\
+            effective += -0.5 + 0.5 * (100 - self.hunger) /\
                 (100 - TeamMember.effectiveness_drops)
         if self.fatigue > TeamMember.effectiveness_drops:
-            effective -= 0.5 * (100 - self.fatigue) /\
+            effective += -0.5 + 0.5 * (100 - self.fatigue) /\
                 (100 - TeamMember.effectiveness_drops)
         return effective
 
