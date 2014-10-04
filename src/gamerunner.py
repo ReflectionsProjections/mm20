@@ -10,6 +10,7 @@ import pickle
 import vis.visualizer
 from urllib2 import urlopen, URLError
 import time
+from functools import partial
 
 FNULL = open(os.devnull, 'w')
 constants = config.handle_constants.retrieveConstants("serverDefaults")
@@ -31,11 +32,14 @@ def launch_clients():
         launch_client(os.path.join(os.getcwd(), parameters.defaultClient))
 
 
-def launch_client(client):
-        c = Client_program(client)
+def launch_client(client, port=None):
+        c = Client_program(client, port)
         client_list.append(c)
         c.run()
 
+def launch_client_test_game(client, port):
+    launch_client(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, client), port)
+    launch_client(os.path.join(os.getcwd(), parameters.defaultClient), port)
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -168,6 +172,23 @@ class FileLogger(object):
         if self.score:
             self.score.turn(stuff)
             
+def test_game(team,team_dir, port):
+    client_list = list()
+    global parameters
+    parameters = parse_args()
+    map_cache_str = "map.cache"
+    fileLog = FileLogger(team+parameters.log)
+    with open(team+parameters.log, 'w'):
+        pass
+    with open(map_cache_str, 'r') as f:
+        rooms = pickle.load(f)
+    my_game = game.Game(parameters.map, 2, rooms)
+    serv = MMServer(parameters.teams,
+                    my_game,
+                    logger=fileLog) 
+    serv.run(port, partial(launch_client_test_game, team_dir, port), time_out=60)
+    return True
+    
 
 def main():
     global parameters
@@ -240,8 +261,11 @@ class Scoreboard(object):
         """
         """
         if self.lunched:
-            self.board.terminate()
-
+            try:
+                self.board.terminate()
+            except OSError:
+                pass
+                
     def __del__(self):
         self.kill()
 
@@ -252,18 +276,19 @@ class Client_program(object):
     """
     first = True
 
-    def __init__(self, client_path):
+    def __init__(self, client_path, port=None):
         """
         path of the client to run
         """
         self.client_path = client_path
+        self.port = port
 
     def run(self):
         """
         """
         try:
             self.bot = Popen(["sh", os.path.join(self.client_path, "run.sh"),
-                              "localhost", str(parameters.port)],
+                              "localhost", str(self.port or parameters.port)],
                              stdout=self.chose_output(), cwd=self.client_path)
         except OSError as e:
             msg = "the player {} failed to start with error {}".format(
@@ -281,8 +306,10 @@ class Client_program(object):
     def stop(self):
         """
         """
-        self.bot.terminate()
-
+        try:
+            self.bot.terminate()
+        except OSError:
+            pass
     @classmethod
     def chose_output(cls):
         output = parameters.veryVerbose
