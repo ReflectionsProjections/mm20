@@ -132,7 +132,7 @@ class Scoreboard(object):
             self.ai[i]["Final Score"] = self.score[i]
             self.ai[i]["TEAM NAME"] = self.team_names[i]
 
-        self.ai = sorted(self.ai, key=lambda k: k["Final Score"])
+        self.ai = sorted(self.ai, key=lambda k: -1*k["Final Score"])
             # self.ai = sorted(self.ai, key=itemgetter('Final Score')) 
 
 
