@@ -157,7 +157,7 @@ class TeamMember(object):
         elif code_type == "optimize":
             amount = effective * self.stats["optimize"] /\
                 (ai.complexity / 10.0)
-            ai.complexity += amount
+            ai.complexity = min(amount + ai.complexity, ai.implementation)
             ai.optimization += amount
         self.acted = "code"
 
