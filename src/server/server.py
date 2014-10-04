@@ -57,7 +57,7 @@ class MMServer( object ):
     ##
     #   Runs the game
     #   @param port the port number to wait on
-    def run(self, port, run_when_ready=None, run_for_each=None):
+    def run(self, port, run_when_ready=None, run_for_each=None, time_out=None):
         #create an INET, STREAMing socket
         serversocket = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
@@ -65,6 +65,7 @@ class MMServer( object ):
         serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         #bind the socket to localhost and the port
         serversocket.bind(('localhost', port))
+        serversocket.settimeout(time_out)
         #become a server socket
         serversocket.listen(self.maxPlayers)
         playerConnections = [None for i in range(0, self.maxPlayers)]

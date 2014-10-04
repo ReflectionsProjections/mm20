@@ -90,6 +90,7 @@ class Game(object):
     #   True if the game is running, False if the game ended
     def execute_turn(self):
         #print self.turn
+        self.events = list()
         if len(self.people) == 0:
             return False
         for person in self.people:
@@ -139,7 +140,7 @@ class Game(object):
     ## called by server to receive events for that turn
     def get_events(self):
         newevents = self.events
-        self.events = list()
+        #self.events = list()
         return newevents
 
     ## Queues all of the actions one client is attempting to execute this turn

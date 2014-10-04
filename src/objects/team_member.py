@@ -141,12 +141,12 @@ class TeamMember(object):
             ai.complexity = max(ai.complexity, 1.0)
         elif code_type == "test":
             amount = effective * self.stats["test"] /\
-                (ai.complexity / 10.0)
+                ((ai.complexity +1 ) / 10.0)
             ai.stability += amount / 100.0
             ai.stability = min(ai.stability, 1.0)
         elif code_type == "implement":
             amount = effective * self.stats["codingProwess"] /\
-                (ai.complexity / 10.0)
+                ((ai.complexity + 1) / 10.0)
             ai.implementation += amount
             ai.implementation = min(ai.implementation, ai.theory)
             ai.complexity += amount
@@ -156,9 +156,10 @@ class TeamMember(object):
             ai.stability = max(ai.stability, 0.0)
         elif code_type == "optimize":
             amount = effective * self.stats["optimize"] /\
-                (ai.complexity / 10.0)
-            ai.complexity += amount
+                ((ai.complexity +1) / 10.0)
+            ai.complexity = min(amount + ai.complexity, ai.implementation)
             ai.optimization += amount
+            ai.optimization = min(ai.optimization, ai.implementation)
         self.acted = "code"
 
     ##  Theorize!
