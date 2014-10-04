@@ -159,6 +159,7 @@ class TeamMember(object):
                 (ai.complexity / 10.0)
             ai.complexity = min(amount + ai.complexity, ai.implementation)
             ai.optimization += amount
+            ai.optimization = min(ai.optimization, ai.implementation)
         self.acted = "code"
 
     ##  Theorize!
