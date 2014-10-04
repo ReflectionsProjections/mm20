@@ -82,9 +82,7 @@ class Scoreboard(object):
         x_pos = 20
         y_pos = 10
         for i in range(len(self.ai)):
-            color = self.colors[-1]
-            if i < len(self.colors):
-                color = self.colors[i]
+            color = self.ai[i]["COLOR"]
             label = namefont.render(self.ai[i]["TEAM NAME"], 2, color)
             # print self.team_names[i]
             # print self.colors[i]
@@ -93,7 +91,7 @@ class Scoreboard(object):
             x_pos2 = x_pos + 120
             for key, val in self.ai[i].iteritems():
                 # print "Should be drawing"
-                if not key == "TEAM NAME":
+                if not (key == "TEAM NAME" or key == "COLOR"):
                     label = aifont.render(trunc(val, 5), 1, (255, 255, 255))
                     self.ScreenSurface.blit(label, (x_pos2, y_pos))
                     x_pos2 += 120
@@ -103,7 +101,7 @@ class Scoreboard(object):
         x_pos2 = x_pos + 120
         self.ScreenSurface.blit(label, (x_pos, y_pos))
         for key, val in self.ai[-1].iteritems():
-            if not key == "TEAM NAME":
+            if not (key == "TEAM NAME" or key == "COLOR"):
                 label = aifont.render(key, 1, (255, 255, 255))
                 self.ScreenSurface.blit(label, (x_pos2, y_pos))
                 x_pos2 += 120
@@ -131,6 +129,9 @@ class Scoreboard(object):
             self.score[i] = player["score"]
             self.ai[i]["Final Score"] = self.score[i]
             self.ai[i]["TEAM NAME"] = self.team_names[i]
+            self.ai[i]["COLOR"] = self.colors[-1]
+            if len(self.colors) > i:
+                self.ai[i]["COLOR"] = self.colors[i]
 
         self.ai = sorted(self.ai, key=lambda k: -1*k["Final Score"])
             # self.ai = sorted(self.ai, key=itemgetter('Final Score')) 
