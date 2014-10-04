@@ -2,6 +2,8 @@ import pygame
 import time
 from config.handle_constants import retrieveConstants
 import json
+from operator import itemgetter
+
 
 def trunc(f, n):
     '''Truncates/pads a float f to n decimal places without rounding'''
@@ -94,20 +96,15 @@ class Scoreboard(object):
                 label = aifont.render(trunc(val, 5), 1, (255, 255, 255))
                 self.ScreenSurface.blit(label, (x_pos2, y_pos))
                 x_pos2 += 120
-            label = aifont.render(str(self.score[i]), 1, (255, 255, 255))
-            self.ScreenSurface.blit(label, (x_pos2, y_pos))
         label = namefont.render("TEAM NAME", 2, (255, 255, 255))
         x_pos = 20
         y_pos = 10
         x_pos2 = x_pos + 120
         self.ScreenSurface.blit(label, (x_pos, y_pos))
         for key, val in self.ai[-1].iteritems():
-            # print "Should be drawing"
             label = aifont.render(key, 1, (255, 255, 255))
             self.ScreenSurface.blit(label, (x_pos2, y_pos))
             x_pos2 += 120
-        label = aifont.render("Final Score", 1, (255, 255, 255))
-        self.ScreenSurface.blit(label, (x_pos2, y_pos))
 
         pygame.display.flip()
 
@@ -130,6 +127,11 @@ class Scoreboard(object):
 
             self.ai[i] = player["aiStats"]
             self.score[i] = player["score"]
+            self.ai[i]["Final Score"] = self.score[i]
+
+        self.ai = sorted(self.ai, key=lambda k: k["Final Score"])
+            # self.ai = sorted(self.ai, key=itemgetter('Final Score')) 
+
 
         return True
 
