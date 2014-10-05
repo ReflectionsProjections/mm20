@@ -63,7 +63,14 @@ class Scoreboard(object):
             pygame.quit()
 
     def turn(self, turn=None):
-        while self.running and self.update_state(json.loads(turn), ):
+        turn_array = json.loads(turn)
+        if isinstance(turn_array[-1], int):
+            turn_number = turn_array.pop()
+            turn_count = turn_array.pop()
+        else:
+            turn_number = 0
+            turn_count = 0
+        while self.running and self.update_state(turn_array):
             self.draw()
             if self.running:
                 for event in pygame.event.get():
