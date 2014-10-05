@@ -321,6 +321,7 @@ class TeamMember(object):
             if timetoremovefatigue > 12.0:
                 timetoremovefatigue = 12.0
             self.fatigue -= 100.0 / (timetoremovefatigue * self.ticks_in_hour)
+            self.fatigue = max(self.fatigue, 0.0)
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
