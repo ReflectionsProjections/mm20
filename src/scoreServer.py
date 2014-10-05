@@ -32,7 +32,7 @@ def start_web_server():
         port = int(sys.argv[1])
     else:
         port = 7000
-    server_address = ('127.0.0.1', port)
+    server_address = ('', port)
 
     HandlerClass.protocol_version = Protocol
     httpd = ServerClass(server_address, HandlerClass)
