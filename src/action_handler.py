@@ -34,7 +34,7 @@ def sortActions(actionBuffer, game):
 #   The action to compare with a
 def sortFunction(game, a, b):
     if a.person_id == -1 or b.person_id == -1:
-        return a.priority - b.priority
+        return int((a.priority * 100) - (b.priority * 100))
     aval = int(100 * (a.priority + game.people[a.person_id].getEffectiveness()))
     bval = int(100 * (b.priority + game.people[b.person_id].getEffectiveness()))
     return aval - bval
