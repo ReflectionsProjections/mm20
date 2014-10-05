@@ -40,8 +40,8 @@ class Visualizer(object):
         self.game_result = None
         self.debug = kwargs.get("debug", False)
         self.rooms = rooms
-        for r in self.rooms:
-            r.people = list()
+        for r in self.rooms.itervalues():
+            r.people = set()
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
         self.scaleMod = (1,1)
         self.Animations = {}
