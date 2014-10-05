@@ -133,7 +133,7 @@ def _findShortestValidPath(start, end, roomColor, pixels, imgSize, stepSize=1):
 
     # Ace settings
     playerSize = 4  # Should be 12, use 4 for testing
-    playerStep = 4
+    playerStep = 2
 
     # seen
     seen = dict()
