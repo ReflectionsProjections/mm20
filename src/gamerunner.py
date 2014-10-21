@@ -8,10 +8,15 @@ import sys
 import os
 import pickle
 import vis.visualizer
-
+from urllib2 import urlopen, URLError
+import time
+from functools import partial
 
 FNULL = open(os.devnull, 'w')
 constants = config.handle_constants.retrieveConstants("serverDefaults")
+vis_constants = config.handle_constants.retrieveConstants("visualizerDefaults")
+
+
 parameters = None
 client_list = list()
 
@@ -20,17 +25,21 @@ def launch_clients():
     if parameters.client:
         numberOfClients = len(parameters.client)
         for client in parameters.client:
-            launch_client(os.path.join(os.getcwd(), client))
+            launch_client(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, 'test-clients/', client))
     else:
         numberOfClients = 0
     for x in xrange(numberOfClients, parameters.teams):
         launch_client(os.path.join(os.getcwd(), parameters.defaultClient))
 
 
-def launch_client(client):
-        c = client_program(client)
+def launch_client(client, port=None):
+        c = Client_program(client, port)
+        client_list.append(c)
         c.run()
 
+def launch_client_test_game(client, port):
+    launch_client(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir, client), port)
+    launch_client(os.path.join(os.getcwd(), parameters.defaultClient), port)
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -43,10 +52,22 @@ def parse_args():
         default=constants["port"],
         type=int)
     parser.add_argument(
+        "-w", "--debug-view",
+        help="Runs the debug view to help you find your problem!",
+        const=True,
+        default=False,
+        action="store_const",
+    )
+    parser.add_argument(
         "-m", "--map",
         help="Specifies the map file on which the game should run. " +
         "Defaults to {0}".format(constants["map"]),
         default=constants["map"])
+    parser.add_argument(
+        "-o", "--mapOverlay",
+        help="Specifies the overlay map file on which the game should be shown. " +
+        "Defaults to {0}".format(vis_constants["map_overlay"]),
+        default=vis_constants["map_overlay"])
     parser.add_argument(
         "-l", "--log",
         help="Specifies a log file where the game log will be written. " +
@@ -66,22 +87,41 @@ def parse_args():
         "The gamerunner will run a number of test clients (which can be " +
         "specified with -d) equal to players - specified clients",
         action="append")
-
     parser.add_argument(
         "-d", "--defaultClient",
         help="The default client to launch when no specific clients " +
         "are given. Defaults to {0}".format(constants["defaultClient"]),
         default=os.path.join(*constants["defaultClient"].split("/")))
+
     parser.add_argument(
         "-v", "--verbose",
-        help="When present prints player one's standard output to the screen.",
+        help="When present prints player one's standard output.",
         const=None,
         default=FNULL,
         action="store_const")
     parser.add_argument(
+        "-vv", "--veryVerbose",
+        help="When present prints all players standard output.",
+        const=None,
+        default=FNULL,
+        action="store_const")
+
+    parser.add_argument(
+        "-b", "--scoreboard",
+        help="Set this to have the scoreboard pop up in a window. " +
+        "Fun to watch and helpful for debugging!",
+        const=True,
+        default=False,
+        action="store_const")
+    parser.add_argument(
+        "--scoreboard-url",
+        help="Connect to a running scoreboard server",
+        default=None)
+
+    parser.add_argument(
         "-s", "--show",
-        help="Set this to make the game be visualized in a window." +
-        "Fun to watch and helpful for debuging!",
+        help="Set this to make the game be visualized in a window. " +
+        "Fun to watch and helpful for debugging!",
         const=True,
         default=False,
         action="store_const")
@@ -92,6 +132,12 @@ def parse_args():
         const=True,
         default=False,
         action="store_const")
+    parser.add_argument(
+        "-th", "--turnsinhour",
+        help="Use this to set the length of the game. " + 
+        "The game is 24 hours, total # of turns is turnsinhour * 24",
+        default=0,
+        type=int)
     
     args = parser.parse_args()
     if args.teams < 2:
@@ -107,11 +153,13 @@ def parse_args():
     return args
 
 
-## A simple logger that writes things to a file
+## A simple logger that writes things to a file and, if enabled, to the
+## visualizer
 class FileLogger(object):
     def __init__(self, fileName):
         self.file = fileName
         self.vis = False
+        self.score = False
 
     ## The function that logs will be sent to
     # @param stuff
@@ -120,8 +168,27 @@ class FileLogger(object):
         with open(self.file, 'a') as f:
             f.write(stuff + '\n')
         if self.vis:
-            self.vis.frame(stuff)
-
+            self.vis.turn(stuff)
+        if self.score:
+            self.score.turn(stuff)
+            
+def test_game(team,team_dir, port):
+    client_list = list()
+    global parameters
+    parameters = parse_args()
+    map_cache_str = "map.cache"
+    fileLog = FileLogger(team+parameters.log)
+    with open(team+parameters.log, 'w'):
+        pass
+    with open(map_cache_str, 'r') as f:
+        rooms = pickle.load(f)
+    my_game = game.Game(parameters.map, 2, rooms)
+    serv = MMServer(parameters.teams,
+                    my_game,
+                    logger=fileLog) 
+    serv.run(port, partial(launch_client_test_game, team_dir, port), time_out=60)
+    return True
+    
 
 def main():
     global parameters
@@ -138,39 +205,91 @@ def main():
     if os.path.isfile(map_cache_str) and parameters.cached_map:
         with open(map_cache_str, 'r') as f:
             rooms = pickle.load(f)
-        my_game = game.Game(parameters.map, rooms)
+        my_game = game.Game(parameters.map, parameters.turnsinhour, rooms)
+        with open(map_cache_str, 'r') as f:
+            rooms = pickle.load(f)
     else:
-        my_game = game.Game(parameters.map)
+        my_game = game.Game(parameters.map, parameters.turnsinhour)
         rooms_str = pickle.dumps(my_game.rooms)
         with open(map_cache_str, 'w') as f:
             f.write(rooms_str)
         rooms = pickle.loads(rooms_str)
     if parameters.show:
-        fileLog.vis = vis.visualizer.Visualizer(rooms)
+        fileLog.vis = vis.visualizer.Visualizer(rooms, parameters.mapOverlay, debug=parameters.debug_view)
+    if parameters.scoreboard:
+        fileLog.score = Scoreboard(parameters.scoreboard_url)
     serv = MMServer(parameters.teams,
                     my_game,
                     logger=fileLog)
     serv.run(parameters.port, launch_clients)
+    if parameters.scoreboard:
+        fileLog.score.stop()
+        
 
+    
 
-class client_program(object):
+class Scoreboard(object):
+    def __init__(self, url=None):
+        self.lunched = False
+        self.url = url
+        if url is None:
+            self.url = "http://localhost:7000"
+            self.lunched = True
+            self.board = self.bot = Popen([sys.executable, "scoreServer.py"],
+                                          stdout=FNULL, stderr=FNULL)
+            time.sleep(1)
+        
+    def turn(self, turn):
+        try:
+            r = urlopen(self.url, turn)
+            if(r.getcode() != 200):
+                raise Exception("Scoreboard update failed!")
+
+        except URLError:
+            if not self.lunched:
+                self.stop()
+                raise  # Exception("Scoreboard update failed!")
+
+    def kill(self):
+        if (self.lunched and not self.board.poll()):
+            try:
+                self.board.kill()
+            except OSError:
+                pass
+
+    def stop(self):
+        """
+        """
+        if self.lunched:
+            try:
+                self.board.terminate()
+            except OSError:
+                pass
+                
+    def __del__(self):
+        self.kill()
+
+class Client_program(object):
     """
-    This object holds and manages the prosses for the
+    This object holds and manages the processes for the
     connecting teams
     """
+    first = True
 
-    def __init__(self, client_path):
+    def __init__(self, client_path, port=None):
         """
         path of the client to run
         """
         self.client_path = client_path
+        self.port = port
 
     def run(self):
         """
         """
         try:
-            self.bot = Popen(os.path.join(self.client_path, "run.sh"),
-                             stdout=parameters.verbose, cwd=self.client_path)
+            self.bot = Popen(["sh", os.path.join(self.client_path, "run.sh"),
+                              "localhost", str(self.port or parameters.port)],
+                             stdout=self.chose_output(), cwd=self.client_path)
         except OSError as e:
             msg = "the player {} failed to start with error {}".format(
                 self.client_path, e)
@@ -187,8 +306,18 @@ class client_program(object):
     def stop(self):
         """
         """
-        self.bot.terminate()
+        try:
+            self.bot.terminate()
+        except OSError:
+            pass
+    @classmethod
+    def chose_output(cls):
+        output = parameters.veryVerbose
+        if cls.first and parameters.veryVerbose == FNULL:
+            output = parameters.verbose
 
+        cls.first = False
+        return output
 
 class ClientFailedToRun(Exception):
     def __init__(self, msg):

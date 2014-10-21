@@ -58,7 +58,7 @@ class MMServer( object ):
     ##
     #   Runs the game
     #   @param port the port number to wait on
-    def run(self, port, run_when_ready=None):
+    def run(self, port, run_when_ready=None, run_for_each=None, time_out=None):
         #create an INET, STREAMing socket
         serversocket = socket.socket(
             socket.AF_INET, socket.SOCK_STREAM)
@@ -66,6 +66,7 @@ class MMServer( object ):
         serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         #bind the socket to localhost and the port
         serversocket.bind(('localhost', port))
+        serversocket.settimeout(time_out)
         #become a server socket
         serversocket.listen(self.maxPlayers)
         playerConnections = [None for i in range(0, self.maxPlayers)]
@@ -78,6 +79,8 @@ class MMServer( object ):
             run_when_ready()
         #Accept connections from correct number of players
         for i in range(0, self.maxPlayers):
+            if run_for_each:
+                run_for_each()
             (clientsocket, address) = serversocket.accept()
             playerConnections[i] = clientsocket
         lookupPlayer = dict(zip(playerConnections, [i for i in range(0, self.maxPlayers)]))
@@ -104,7 +107,11 @@ class MMServer( object ):
                 for connection in ready[0]:
                     #Receive data
                     player = lookupPlayer[connection]
-                    recval[player] += connection.recv(self.maxDataSize)
+                    try:
+                        recval[player] += connection.recv(self.maxDataSize)
+                    except socket.error as e:
+                        forfeit[player] = True
+                        continue
                     validJson = True
                     if turnObjects[player] is None and "\n" in recval[player]:
                         data = recval[player].split("\n")[0]
@@ -159,13 +166,17 @@ class MMServer( object ):
                 for i in range(0, self.maxPlayers):
                     if turnObjects[i] is None:
                         turnObjects[i] = {}
-                        errors[player] = ["Timeout. Make sure that your message ends with '\n'"]
+                        errors[i] = ["Timeout. Make sure that your message ends with '\n'"]
                         validTurns = validTurns + 1
             else:
                 for connection in ready[0]:
                     #Receive data
                     player = lookupPlayer[connection]
-                    recval[player] += connection.recv(self.maxDataSize)
+                    try:
+                        recval[player] += connection.recv(self.maxDataSize)
+                    except socket.error as e:
+                        forfeit[player] = True
+                        continue
                     if turnObjects[player] is None and "\n" in recval[player]:
                         try:
                             turnObjects[player] = dson.loads(recval[player])

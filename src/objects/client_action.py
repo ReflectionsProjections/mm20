@@ -26,18 +26,34 @@ class Action:
     def __init__(self, action, parameters, client_id):
         actions_data = config.handle_constants.retrieveConstants('actions')
         self.action = action
+        self.reason = ""
         if not action in actions_data['validActions']:
             self.action = "INVALID"
+            self.priority = 0
+            self.reason = "Invalid action"
         else:
             self.priority = actions_data['priorities'][action]
         self.parameters = parameters
         self.owner = client_id
+        if not "person_id" in parameters:
+            self.action = "INVALID"
+            self.priority = 0
+            self.reason = "Did not specify who is performing this action"
+            self.person_id = -1
+        else:
+            self.person_id = parameters["person_id"]
 
     ## Executes this action
     # @parameter game
     #   The game state
     def execute(self, game):
-        invalid = {'success': False, 'message': 'Invalid action',
+        if self.person_id != -1 and game != None:
+            person = game.people[self.person_id]
+            try:
+                person.location.sitDown(person)
+            except client_action.ActionError:
+                pass # Should never happen
+        invalid = {'success': False, 'message': self.reason,
                    'reason': 'INVALID'}
         if self.action == 'INVALID':
             return invalid
@@ -177,7 +193,7 @@ class Action:
                                         "distracting")
         if response['success'] is True:
             try:
-                game.people[parameters['person_id']].theorize(game.people[
+                game.people[parameters['person_id']].distract(game.people[
                     parameters['victim']])
             except ActionError as e:
                 response['success'] = False
@@ -221,7 +237,31 @@ class Action:
                                         "spying")
         if response['success'] is True:
             try:
-                game.people[parameters['person_id']].theorize()
+                game.people[parameters['person_id']].spy()
+            except ActionError as e:
+                response['success'] = False
+                response['reason'] = e.reason
+                response['message'] = e.message
+        return response
+
+    ## View the practice games to gain info on other teams
+    # @param game
+    #   The game state
+    # @param parameters
+    #   The parameters necessary to have your team member view the practice games
+    #   (See the next parameter)
+    # @param person_id
+    #   The team member which will be doing the watching
+    def view(self, game, parameters):
+        response = self._build_response(game, parameters, ['person_id'],
+                                        "viewing")
+        if response['success'] is True:
+            try:
+                game.people[parameters['person_id']].view()
+                message = {}
+                for key, value in game.teams.iteritems():
+                    message[key] = game.calc_score(key)
+                response['message'] = message
             except ActionError as e:
                 response['success'] = False
                 response['reason'] = e.reason
@@ -282,10 +322,10 @@ class Action:
         return response
 
 
-class TestaClientActions(unittest.TestCase):
+class TestClientActions(unittest.TestCase):
     def testUnavailableAction(self):
         Action.actions = {}
-        test = Action('Not-An-Action', {'team_member': 'banjos'}, 0)
+        test = Action('Not-An-Action', {'team_member': 'banjos', 'person_id': 3}, 0)
         result = test.execute(None)
         self.assertFalse(result['success'])
         self.assertEqual(result['reason'], 'INVALID')

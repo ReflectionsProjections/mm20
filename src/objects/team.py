@@ -15,7 +15,7 @@ class Team(object):
     # @param people
     #   A global list of people that the game stores and the team initializer
     #   appends all members to
-    def __init__(self, name, members, startingLocation, people, my_id):
+    def __init__(self, name, members, startingLocation, people, my_id, ticks):
         self.name = name
         self.my_id = my_id
         self.members = dict()
@@ -23,7 +23,7 @@ class Team(object):
             newMember = team_member.TeamMember(member["name"],
                                                member["archetype"],
                                                startingLocation, self,
-                                               len(people))
+                                               len(people), ticks)
             self.members[member["name"]] = newMember
             people.append(newMember)
         self.numMembers = len(members)
@@ -35,16 +35,29 @@ class Team(object):
         for m in self.members.values():
             visible_room = m.location
             rooms[visible_room.name] = visible_room
-        return [r.output_dict() for r in rooms.values()]
+        return {k: r.output_dict() for k, r in rooms.items()}
 
     ## Returns a list of serializeable dictionaries of all of
     #  the team members on this team
     def get_team_members(self):
-        return [m.output_dict() for m in self.members.values()]
+        return {k: m.output_dict() for k, m in self.members.items()}
 
     def get_info_on_people(self, people_list):
-        return [p.output_dict() if p.team.my_id == self.my_id
-                else p.output_dict_limited() for p in people_list]
+        output = {}
+        for p in people_list:
+            if p.team == self:
+                output[p.person_id]=p.output_dict()
+            else:
+                same_room = False
+                for person in p.location.people:
+                    if person.team == self:
+                        same_room = True
+                        break
+                if same_room:
+                    output[p.person_id]=p.output_dict_same_room()
+                else:
+                    output[p.person_id]=p.output_dict_limited()
+        return output
 
 import room
 
@@ -52,10 +65,11 @@ import room
 class TestTeam(unittest.TestCase):
     def setUp(self):
         self.testRoom = room.Room("Narnia")
+        self.testRoom.stand = [(4,4), (5,5), (6,6)]
         self.team = Team("testTeam",
                          [
-                             {"name": "Steve", "class": "Coder"},
-                             {"name": "Bob", "class": "Theorist"}
+                             {"name": "Steve", "archetype": "Coder"},
+                             {"name": "Bob", "archetype": "Theorist"}
                          ], self.testRoom, [], 0)
 
     def testInit(self):

@@ -1,60 +1,9 @@
 import unittest
-
-
-class AlreadyConnectedError(Exception):
-    def __init__(self, roomOne, roomTwo):
-        self.msg = "Room {0} and {1} are already connected.".format(roomOne,
-                                                                    roomTwo)
-
-    def __str__(self):
-        return self.msg
-
-
-class NotConnectedError(Exception):
-    def __init__(self, roomOne, roomTwo):
-        self.msg = "Room {0} and {1} are not connected!".format(roomOne,
-                                                                roomTwo)
-
-    def __str__(self):
-        return self.msg
-
-
-class AlreadyInRoomError(Exception):
-    def __init__(self, room, member):
-        self.msg = "{0} is already in {1}.".format(member, room)
-
-    def __str__(self):
-        return self.msg
-
-
-class NotInRoomError(Exception):
-    def __init__(self, room, member):
-        self.msg = "{0} is not in {1}.".format(member, room)
-
-    def __str__(self):
-        return self.msg
-
-
-class AlreadyAvailableError(Exception):
-    def __init__(self, room, resource):
-        self.msg = "{0} is already available in {1}".format(resource, room)
-
-    def __str__(self):
-        return self.msg
-
-
-class NotAvailableError(Exception):
-    def __init__(self, room, resource):
-        self.msg = "{0} is not an available resource in {1}".format(resource,
-                                                                    room)
-
-    def __str__(self):
-        return self.msg
-
-
+import client_action
 ## Manages "rooms" which are nodes on our locations graph.
 #  Hallways are also "rooms" in this sense.
-#  Rooms contain team members and furniture (TODO)
+#  Rooms contain team members, chairs, standing spots,
+#  and possibly snack tables and projectors.
 class Room(object):
     ## Initializes a Room object.
     # @param name
@@ -67,43 +16,84 @@ class Room(object):
                 "Attempted to initialize Room with room_id of None")
         self.connectedRooms = dict()
         self.name = room_id
-        self.people = set()
+        self.people = set() # All people in the room
+        self.sitting = set() # People sitting in the room
         self.resources = set()
-        self.chairs = list()
+        self.chairs = list() # All chairs in the room
+        self.stand = list() # All standing positions in the room
         self.desks = list()
         self.doors = list()
         self.snacktable = list()
+        self.dirmarkers = list()
+        self.paths = None
 
     ## Adds a member to this room
     # @param member
     #   The member to add to this room
     def addMember(self, member):
         if member in self.people:
-            raise AlreadyInRoomError(self, member)
+            raise client_action.ActionError(
+                "ALREADYINROOM",
+                "Cannot move to destination, you are in the room already")
+        additionalpeople = 0
+        if "PROFESSOR" in self.resources:
+            additionalpeople += 1
+        if len(self.people) + 1 + additionalpeople > len(self.chairs + self.stand):
+            raise client_action.ActionError(
+                "ROOMISFULL",
+                "Cannot move to destination, it is full.")
         self.people.add(member)
-
+        member.sitting = False
+        
     ## Removes a member from this room
     # @param member
     #   The member to remove from this room
     def removeMember(self, member):
         if not member in self.people:
-            raise NotInRoomError(self, member)
+            raise client_action.ActionError(
+                "NOTINROOM",
+                "This person is not in this room")
         self.people.remove(member)
+        if member in self.sitting:
+            self.sitting.remove(member)
+            member.sitting = False
+
+    ## This person is trying to sit down
+    # @param member
+    #   The member trying to sit
+    def sitDown(self, member):
+        if not member in self.people:
+            raise client_action.ActionError(
+                "NOTINROOM",
+                "This person is not in this room")
+        elif len(self.sitting) + 1 > len(self.chairs):
+            return
+        elif not member in self.sitting:
+            self.sitting.add(member)
+            member.sitting = True
+
+    ## This person is trying to stand up
+    # @param member
+    #   The member trying to stand
+    def standUp(self, member):
+        if not member in self.people:
+            raise client_action.ActionError(
+                "NOTINROOM",
+                "This person is not in this room")
+        if member in self.sitting:
+            self.sitting.remove(member)
+            member.sitting = False
 
     ## Make a resource available in this room
     # @param resource
     #   the resource to make available as a string.
     def addResource(self, resource):
-        if resource in self.resources:
-            raise AlreadyAvailableError(self, resource)
         self.resources.add(resource)
 
     ## Remove a resource from a this room
     # @parameter resource
     #   The resource to remove from this room
     def removeResource(self, resource):
-        if not (resource in self.resources):
-            raise NotAvailableError(self, resource)
         self.resources.remove(resource)
 
     ## Returns whether or not a given resource is available in this room
@@ -117,9 +107,16 @@ class Room(object):
             self.name, self.connectedRooms.keys())
 
     def output_dict(self):
-        room_info = {"room": self.name,
-                     "connectedRooms": self.connectedRooms.keys(),
-                     "peopleInRoom": [p.person_id for p in self.people]}
+        room_info = {
+            "room": self.name,
+            "connectedRooms": self.connectedRooms.keys(),
+            "peopleInRoom": [p.person_id for p in self.people],
+            "resources": [resource for resource in self.resources],
+            "seatsTotal": len(self.chairs),
+            "standsTotal": len(self.stand),
+            "seatsAvailable": len(self.chairs) - len(self.sitting),
+            "standsAvailable": len(self.stand) - (len(self.people) - len(self.sitting))
+        }
         return room_info
 
     ## Returns connected rooms
@@ -129,22 +126,14 @@ class Room(object):
     ## Connects one room to another
     # @param room
     #   The room to connect to this room
-    # @throws ValueError
-    #   Throws a value error if this room and the passed in
-    #   room are already connected.
     def connectToRoom(self, room):
-        if self.isConnectedTo(room):
-            raise AlreadyConnectedError(self, room)
-        else:
-            self.connectedRooms[room.name] = room
-            room.connectedRooms[self.name] = self
+        self.connectedRooms[room.name] = room
+        room.connectedRooms[self.name] = self
 
     ## Disconnects two rooms
     # @param room
     #   The room to disconnect from this room
     def disconnectRoom(self, room):
-        if not self.isConnectedTo(room):
-            raise NotConnectedError(self, room)
         del self.connectedRooms[room.name]
         del room.connectedRooms[self.name]
 
@@ -157,10 +146,21 @@ class Room(object):
     def isConnectedTo(self, room):
         return room.name in self.connectedRooms
 
+    ## Reports whether there are room for the specified number of people in the room
+    # @param num_people
+    #   The number of people to add to the room
+    # @return
+    #   boolean value stating whether adding them is possible or not
+    def canAdd(self, num_people):
+        return num_people <= len(self.stand) + len(self.chairs) - len(self.people)
 
 class TestRoom(unittest.TestCase):
     def setUp(self):
+        from objects.team_member import TeamMember
         self.room = Room("testRoom")
+        self.room.chairs = [(1,1), (2,2), (3,3)]
+        self.room.stand = [(4,4), (5,5), (6,6)]
+        self.team_member = TeamMember("Joe", "Coder", self.room, None, 0)
 
     def testInitCorrect(self):
         room = Room("testRoom")
@@ -172,31 +172,23 @@ class TestRoom(unittest.TestCase):
             Room(None)
 
     def testAddMember(self):
-        self.room.addMember('Jim')
-        self.assertTrue('Jim' in self.room.people)
+        self.assertTrue(self.team_member in self.room.people)
 
     def testAddMemberAlreadyThere(self):
-        self.room.addMember('Jim')
-        with self.assertRaises(AlreadyInRoomError):
-            self.room.addMember('Jim')
+        with self.assertRaises(client_action.ActionError):
+            self.room.addMember(self.team_member)
 
     def testRemoveMember(self):
-        self.room.addMember('Jim')
-        self.room.removeMember('Jim')
-        self.assertFalse('Jim' in self.room.people)
+        self.room.removeMember(self.team_member)
+        self.assertFalse(self.team_member in self.room.people)
 
     def testRemoveMemberNotInRoom(self):
-        with self.assertRaises(NotInRoomError):
-            self.room.removeMember('Jim')
+        with self.assertRaises(client_action.ActionError):
+            self.room.removeMember("Jim")
 
     def testAddResource(self):
         self.room.addResource('food')
         self.assertTrue(self.room.isAvailable('food'))
-
-    def testAddResourceAlreadyAdded(self):
-        self.room.addResource('food')
-        with self.assertRaises(AlreadyAvailableError):
-            self.room.addResource('food')
 
     def testRemoveResource(self):
         self.room.addResource('food')
@@ -204,19 +196,13 @@ class TestRoom(unittest.TestCase):
         self.assertFalse(self.room.isAvailable('food'))
 
     def testRemoveResourceNotAvailable(self):
-        with self.assertRaises(NotAvailableError):
+        with self.assertRaises(KeyError):
             self.room.removeResource('food')
 
     def testConnectAValidRoom(self):
         roomTwo = Room("testRoom2")
         self.room.connectToRoom(roomTwo)
         self.assertListEqual(self.room.getConnectedRooms(), [roomTwo.name])
-
-    def testConnectARoomAlreadyConnected(self):
-        roomTwo = Room("testRoom2")
-        self.room.connectToRoom(roomTwo)
-        with self.assertRaises(AlreadyConnectedError):
-            self.room.connectToRoom(roomTwo)
 
     def testDisconnectRoom(self):
         roomTwo = Room("testRoom2")
@@ -226,7 +212,7 @@ class TestRoom(unittest.TestCase):
 
     def testDisconnectNotConnectedRoom(self):
         roomTwo = Room("testRoom2")
-        with self.assertRaises(NotConnectedError):
+        with self.assertRaises(KeyError):
             self.room.disconnectRoom(roomTwo)
 
     def testIsConnectedToActuallyConnected(self):
@@ -237,6 +223,31 @@ class TestRoom(unittest.TestCase):
     def testIsConnectedNotConnected(self):
         roomTwo = Room("testRoom2")
         self.assertFalse(self.room.isConnectedTo(roomTwo))
+
+    def testRoomFull(self):
+        from objects.team_member import TeamMember
+        for i in range(1, len(self.room.chairs + self.room.stand)):
+            TeamMember(str(i), "Coder", self.room, None, i)
+        with self.assertRaises(client_action.ActionError):
+            TeamMember("Jim", "Coder", self.room, None, 18)
+
+    def testSit(self):
+        self.room.sitDown(self.team_member)
+        self.assertTrue(self.team_member.sitting)
+
+    def testSitNoChairs(self):
+        from objects.team_member import TeamMember
+        for i in range(1, len(self.room.chairs + self.room.stand)):
+            newmem = TeamMember(str(i), "Coder", self.room, None, i)
+            self.room.sitDown(newmem)
+        self.room.sitDown(self.team_member)
+        self.assertFalse(self.team_member.sitting)
+
+    def testStand(self):
+        self.room.sitDown(self.team_member)
+        self.assertTrue(self.team_member.sitting)
+        self.room.standUp(self.team_member)
+        self.assertFalse(self.team_member.sitting)
 
 if __name__ == "__main__":
     unittest.main()

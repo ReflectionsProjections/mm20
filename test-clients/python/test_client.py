@@ -2,15 +2,16 @@
 import socket
 import dson
 import json
-
+import random
+import sys
 
 def updateMembers(members, value):
     if members is None:
         members = {}
-        for person in value["team"]:
+        for person in value["team"].values():
             members[person["person_id"]] = person
     if "people" in value:
-        for person in value["people"]:
+        for person in value["people"].values():
             if person["person_id"] in members:
                 members[person["person_id"]] = person
     return members
@@ -26,20 +27,29 @@ def setActions(members, value):
     actions = []
     for m_id, m in members.iteritems():
         act = {}
+        myroom = value["map"][m["location"]]
         act["person_id"] = m["person_id"]
-        if "messages" in value:
-            for message in value["messages"]:
-                if message["success"] is False and\
-                        message["reason"] == "HUNGRY":
-                    act["action"] = "eat"
         if "action" not in act:
-            if m["hunger"] > 75:
-                act["action"] = "eat"
-            if m["stats"]["theorize"] == 10:
-                act["action"] = "theorize"
-            elif m["stats"]["test"] == 10:
-                act["action"] = "code"
-                act["type"] = "test"
+            if m["fatigue"] > 50:
+                act["action"] = "sleep"
+            elif m["hunger"] > 75:
+                if "FOOD" in myroom["resources"]:
+                    act["action"] = "eat"
+                else:
+                    act["action"] = "view"
+            elif m["stats"]["spy"] == 10:
+                if random.random() > .5:
+                    act["action"] = "spy"
+                else:
+                    act["action"] = "move"
+                    act["room"] = random.choice(myroom["connectedRooms"])
+            elif m["stats"]["theorize"] == 10:
+                if random.random() > .5:
+                    act["action"] = "distract"
+                    act["victim"] = m["person_id"]
+                else:
+                    act["action"] = "move"
+                    act["room"] = random.choice(myroom["connectedRooms"])
             else:
                 act["action"] = "code"
                 act["type"] = "implement"
@@ -47,11 +57,15 @@ def setActions(members, value):
     return actions
 
 if __name__ == "__main__":
-    HOST = 'localhost'
-    PORT = 8080
+    if len(sys.argv) > 2:
+        HOST = sys.argv[1]
+        PORT = int(sys.argv[2])
+    else:
+        HOST = 'localhost'
+        PORT = 8080
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
-    s.sendall(dson.dumps(json.loads('{"team":"test", "members":[{"name":"test1", "archetype":"Coder"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Theorist"}]}'))+'\n')
+    s.sendall(dson.dumps(json.loads('{"team":"test", "members":[{"name":"test1", "archetype":"Theorist"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Informant"}]}'))+'\n')
     data = s.recv(1024)
     game_running = True
     members = None
@@ -64,7 +78,7 @@ if __name__ == "__main__":
                 data += s.recv(1024)
             else:
                 value = dson.loads(data[0])
-                print 'Received', repr(data[0])
+                #print 'Received', repr(data[0])
                 if 'winner' in value:
                     game_running = False
                 else:

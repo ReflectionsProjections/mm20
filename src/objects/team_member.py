@@ -6,10 +6,11 @@ import unittest
 ## Holds information and functions for individual team members
 class TeamMember(object):
     Archetypes = config.handle_constants.retrieveConstants("archetypes")
-    ticks_in_hour = config.handle_constants.retrieveConstants("generalInfo")[
-        "TICKSINHOUR"]
-    effectiveness_drops = config.handle_constants.retrieveConstants(
-        "memberConstants")["effectiveness_drops"]
+    constants = config.handle_constants.retrieveConstants(
+            "memberConstants")
+    effectiveness_drops = constants["effectiveness_drops"]
+    coding_bonus = constants["coding_bonus"]
+    turns_to_bonus = constants["turns_to_bonus"]
 
     ## Initializes a TeamMember with name, archetype, and team
     # @param name
@@ -18,18 +19,19 @@ class TeamMember(object):
     #   The archetype of the TeamMember.
     # @param location
     #   The location (a Room object) that the TeamMember will start in.
-    def __init__(self, name, archetype, location, team, person_id):
-        constants = config.handle_constants.retrieveConstants(
-            "memberConstants")
+    def __init__(self, name, archetype, location, team, person_id, ticks):
         self.person_id = person_id
         self.name = name
         self.stats = TeamMember.Archetypes[archetype]
         self.archetype = archetype
         self.location = location
+        self.sitting = False
         location.addMember(self)
         self.team = team
-        self.hunger = constants["hunger"]
-        self.fatigue = constants["fatigue"]  # Start at 8 hours awake
+        self.turns_coding = 0
+        self.hunger = TeamMember.constants["hunger"]
+        self.fatigue = TeamMember.constants["fatigue"]  # Start at 8 hours awake
+        self.ticks_in_hour = ticks
             # (halfway to passed out)
         self.asleep = False
         self.acted = None  # acted is the string of the action performed.
@@ -47,7 +49,7 @@ class TeamMember(object):
     def __eq__(self, other):
         return self.person_id == other.person_id
 
-    ## Make a seralible repesentaion of this team member and everything in it
+    ## Make a serializable repesentaion of this team member and everything in it
     # @return
     #    A dict that reprents the team member
     def output_dict(self):
@@ -56,7 +58,7 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         return my_info
 
-    ## Make a seralible repesentaion of this team member with limited in it
+    ## Make a serializable repesentaion of this team member with limited in it
     # @return
     #    A dict that reprents the team member
     def output_dict_limited(self):
@@ -64,7 +66,6 @@ class TeamMember(object):
         my_info["team"] = self.team.my_id
         my_info["person_id"] = self.person_id
         my_info["name"] = self.name
-        self.asleep = False
         
         return my_info
 
@@ -76,7 +77,7 @@ class TeamMember(object):
         my_info["location"] = self.location.name
         my_info["acted"] = self.acted
         my_info["asleep"] = self.asleep
-        self.asleep = False
+        my_info["sitting"] = self.sitting
         
         return my_info
 
@@ -88,11 +89,14 @@ class TeamMember(object):
             if not self.location.isConnectedTo(destination):
                 raise client_action.ActionError(
                     "NOTCONNECTED",
-                    "Cannot move to destination, \
-                    it is not connected to current location")
+                    "Cannot move to destination, it is not connected to current location")
+            elif len(destination.people) + 1 > len(destination.chairs + destination.stand):
+                raise client_action.ActionError(
+                    "ROOMISFULL",
+                    "Cannot move to destination, it is full.")
             else:
-                self.location.removeMember(self)
                 destination.addMember(self)
+                self.location.removeMember(self)
                 self.location = destination
             self.acted = "move"
         else:
@@ -103,8 +107,7 @@ class TeamMember(object):
                         "You have been distracted this turn")
                 raise client_action.ActionError(
                     "ALREADYACTED",
-                    "Cannot move to destination, \
-                    this player has already acted this turn")
+                    "Cannot move to destination, this player has already acted this turn")
             if self.asleep:
                 raise client_action.ActionError(
                     "ASLEEP",
@@ -113,7 +116,8 @@ class TeamMember(object):
     ## The team member sleeps for some time to regain energy.
     def sleep(self):
         self._can_move()
-        self.asleep = True
+        if self.sitting:
+            self.asleep = True
 
     ##  Code!
     #
@@ -124,37 +128,38 @@ class TeamMember(object):
     def code(self, code_type, turn):
         self._can_move()
         ai = self.team.ai
-        effective = self._getEffectiveness()
+        roombonus = self.getRoomBonus(self.location)
+        effectmod = 1.0
+        if self.turns_coding < TeamMember.turns_to_bonus:
+            self.turns_coding += 1
+        if not self.sitting:
+            effectmod = 0.5
+        effective = roombonus * effectmod * self.getEffectiveness() * (TeamMember.coding_bonus * self.turns_coding / TeamMember.turns_to_bonus)
         if code_type == "refactor":
             ai.complexity -= effective * self.stats["refactor"]
-            if ai.complexity < ai.implementation * .25:
-                ai.complexity = ai.implementation * .25
-            if ai.complexity < 1:
-                ai.complexity = 1.0
+            ai.complexity = max(ai.complexity, ai.implementation * .25)
+            ai.complexity = max(ai.complexity, 1.0)
         elif code_type == "test":
             amount = effective * self.stats["test"] /\
-                (ai.complexity / 10.0)
+                ((ai.complexity +1 ) / 10.0)
             ai.stability += amount / 100.0
-            if ai.stability > 1:
-                ai.stability = 1.0
+            ai.stability = min(ai.stability, 1.0)
         elif code_type == "implement":
             amount = effective * self.stats["codingProwess"] /\
-                (ai.complexity / 10.0)
+                ((ai.complexity + 1) / 10.0)
             ai.implementation += amount
+            ai.implementation = min(ai.implementation, ai.theory)
             ai.complexity += amount
             ai.optimization -= amount / 10.0
+            ai.optimization = max(ai.optimization, 0.0)
             ai.stability -= amount / 200.0
-            if ai.implementation > ai.theory:
-                ai.implementation = ai.theory
-            if ai.stability < 0.0:
-                ai.stability = 0.0
-            if ai.optimization < 0.0:
-                ai.optimization = 0.0
+            ai.stability = max(ai.stability, 0.0)
         elif code_type == "optimize":
             amount = effective * self.stats["optimize"] /\
-                (ai.complexity / 10.0)
-            ai.complexity += amount
+                ((ai.complexity +1) / 10.0)
+            ai.complexity = min(amount + ai.complexity, ai.implementation)
             ai.optimization += amount
+            ai.optimization = min(ai.optimization, ai.implementation)
         self.acted = "code"
 
     ##  Theorize!
@@ -163,7 +168,11 @@ class TeamMember(object):
     #     The turn so that the player knows how long they've been theorizing
     def theorize(self, turn):
         self._can_move()
-        effective = self._getEffectiveness()
+        roombonus = self.getRoomBonus(self.location)
+        effectmod = 1.0
+        if not self.sitting:
+            effectmod = 0.5
+        effective = effectmod * self.getEffectiveness() * roombonus
         self.team.ai.theory += self.stats["theorize"] * effective
         self.acted = "theorize"
 
@@ -182,10 +191,11 @@ class TeamMember(object):
         if not self.location.isAvailable('FOOD'):
             raise client_action.ActionError('NOFOODHERE',
                                             "This room does not contain food")
-        self.hunger -= 10.0 * (100.0 / (8.0 * TeamMember.ticks_in_hour))
+        self.hunger -= 10.0 * (100.0 / (8.0 * self.ticks_in_hour))
         if self.hunger < 0.0:
             self.hunger = 0.0
         self.acted = "eat"
+        self.location.standUp(self)
 
     ##  Distract!
     #
@@ -214,7 +224,7 @@ class TeamMember(object):
     ##  Spy!
     def spy(self):
         self._can_move()
-        effective = self._getEffectiveness() * self.stats["spy"]
+        effective = self.getEffectiveness() * self.stats["spy"]
         amount = 0
         for person in self.location.people:
             if person.team != self.team:
@@ -222,6 +232,7 @@ class TeamMember(object):
                     amount += 2 * effective
                 if person.acted == "code":
                     amount += effective
+        self.team.ai.theory += amount
         self.acted = "spy"
 
     ##  Wake up!
@@ -240,8 +251,19 @@ class TeamMember(object):
         victim.asleep = False
         self.acted = "wake"
 
+    ##  View the projection in order to gain information about other teams
+    def view(self):
+        self._can_move()
+        if not self.location.isAvailable('PROJECTOR'):
+            raise client_action.ActionError('NOPROJECTOR',
+                                            "This room does not have a projector!")
+        if not self.location.isAvailable('PRACTICE'):
+            raise client_action.ActionError('NOPRACTICE',
+                                            "The projector is not currently running practice games.")
+        self.acted = "view"
+
     ## Calculate effectiveness based on fatigue and hunger
-    def _getEffectiveness(self):
+    def getEffectiveness(self):
         effective = 1.0
         if self.hunger > TeamMember.effectiveness_drops:
             effective -= 0.5 * (100 - self.hunger) /\
@@ -251,8 +273,18 @@ class TeamMember(object):
                 (100 - TeamMember.effectiveness_drops)
         return effective
 
+    ## Look at room resources and calculate room bonus
+    def getRoomBonus(self, r):
+        bonus = 1.0
+        if "PROFESSOR" in r.resources:
+            bonus += 1.0
+        for person in r.people:
+            if person != self and person.team == self.team:
+                bonus += 0.1
+        return bonus
+
     def _can_move(self):
-        if self.acted:
+        if self.acted != None:
             if self.acted == "distracted":
                 raise client_action.ActionError(
                     "DISTRACTED",
@@ -271,21 +303,28 @@ class TeamMember(object):
 
     ##  Called every turn to reset values and make incremental changes
     def update(self):
+        if self.acted != "code":
+            self.turns_coding = 0
         if not self.asleep:
-            self.hunger += 100.0 / (8.0 * TeamMember.ticks_in_hour)
-            self.fatigue += 100.0 / (16.0 * TeamMember.ticks_in_hour)
+            self.hunger += 100.0 / (8.0 * self.ticks_in_hour)
+            self.fatigue += 100.0 / (16.0 * self.ticks_in_hour)
             if self.hunger > 100:
                 self.hunger = 100.0
             if self.fatigue > 100:
                 self.asleep = True
         else:
-            self.hunger += 100.0 / (16.0 * TeamMember.ticks_in_hour)
-            self.fatigue -= 100.0 / (8.0 * TeamMember.ticks_in_hour)
+            self.hunger += 100.0 / (16.0 * self.ticks_in_hour)
+            timetoremovefatigue = 5.5 + .5 * len(self.location.people)
+            if not self.sitting:
+                timetoremovefatigue *= 2
+            if "PROFESSOR" in self.location.resources:
+                timetoremovefatigue = timetoremovefatigue/2
+            if timetoremovefatigue > 12.0:
+                timetoremovefatigue = 12.0
+            self.fatigue -= 100.0 / (timetoremovefatigue * self.ticks_in_hour)
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
-        self.acted = None
-
 
 import team
 import room
@@ -298,12 +337,14 @@ class TestTeamMember(unittest.TestCase):
                 pass
         TestTeamMember.PseudoTeam = PseudoTeam
         self.testRoom = room.Room("testRoom")
+        self.testRoom.stand = [(4,8), (4,7), (4,6)]
         self.testTeam = TestTeamMember.PseudoTeam()
         self.testMember = TeamMember("Joe", "Coder", self.testRoom,
                                      self.testTeam, 0)
 
     def testInitCorrect(self):
         testRoom = room.Room("testRoom")
+        testRoom.stand = [(4,8), (4,7), (4,6)]
         testTeam = TestTeamMember.PseudoTeam()
         testMember = TeamMember("Joe", "Coder", testRoom, testTeam, 0)
         self.assertEqual(testMember.name, "Joe")
@@ -336,12 +377,20 @@ class TestTeamMember(unittest.TestCase):
 
     def testValidMove(self):
         roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
         self.testRoom.connectToRoom(roomTwo)
         self.testMember.move(roomTwo)
         self.assertEquals(self.testMember.location, roomTwo)
 
     def testInvalidMove(self):
         roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
+        with self.assertRaises(client_action.ActionError):
+            self.testMember.move(roomTwo)
+
+    def testRoomFull(self):
+        roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
         with self.assertRaises(client_action.ActionError):
             self.testMember.move(roomTwo)
 
@@ -351,14 +400,42 @@ class TestTeamMember(unittest.TestCase):
         self.testMember.eat()
         self.assertEqual(self.testMember.hunger,
                         (100.0 - 10.0 *
-                            (100.0 / (8.0 * TeamMember.ticks_in_hour))))
+                            (100.0 / (8.0 * self.ticks_in_hour))))
 
     def testEatNoFood(self):
         with self.assertRaises(client_action.ActionError):
             self.testMember.eat()
 
-    @unittest.skip("Not yet implemented")
     def testSleep(self):
+        self.testMember.asleep = True
+        roomTwo = room.Room("testRoomTwo")
+        roomTwo.stand.append((4,5))
+        self.testRoom.connectToRoom(roomTwo)
+        with self.assertRaises(client_action.ActionError):
+            self.testMember.move(roomTwo)
+
+    @unittest.skip("Not yet implemented")
+    def testCode(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testTheorize(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testWake(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testDistract(self):
+        # TODO
+        self.assertTrue(False)
+
+    @unittest.skip("Not yet implemented")
+    def testUpdate(self):
         # TODO
         self.assertTrue(False)
 
