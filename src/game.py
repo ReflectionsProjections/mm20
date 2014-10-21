@@ -214,45 +214,5 @@ class Game(object):
                 self.unoptimized_weight + ai.optimization *
                 self.optimized_weight) * ai.stability
 
-class TestGame(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    @unittest.skip("Not yet implemented")
-    def testInit(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testAddTeam(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testQueueTurn(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testGetInfo(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testExecuteTurn(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testProfessorSpawn(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testProfessorDespawn(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testPractice(self):
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testFindvictor(self):
-        self.assertTrue(False)
-
 if __name__ == "__main__":
     unittest.main()

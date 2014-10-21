@@ -70,7 +70,7 @@ class TestTeam(unittest.TestCase):
                          [
                              {"name": "Steve", "archetype": "Coder"},
                              {"name": "Bob", "archetype": "Theorist"}
-                         ], self.testRoom, [], 0)
+                         ], self.testRoom, [], 0, 60)
 
     def testInit(self):
         self.assertEqual(self.team.name, "testTeam")

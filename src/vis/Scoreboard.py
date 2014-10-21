@@ -63,8 +63,15 @@ class Scoreboard(object):
             pygame.quit()
 
     def turn(self, turn=None):
-        while self.running and self.update_state(json.loads(turn), ):
-            self.draw()
+        turn_array = json.loads(turn)
+        if isinstance(turn_array[-1], int):
+            turn_number = turn_array.pop()
+            turn_count = turn_array.pop()
+        else:
+            turn_number = 0
+            turn_count = 0
+        while self.running and self.update_state(turn_array):
+            self.draw(turn_number, turn_count)
             if self.running:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -73,10 +80,11 @@ class Scoreboard(object):
             if not self.game_done:
                 break
 
-    def draw(self):
+    def draw(self, turn_number, turn_count):
         self.ScreenSurface.fill((0, 0, 0))
         # self.ScreenSurface.blit(self.background, (0, 0))
-        # Draw AI info
+
+		# Draw AI info
         namefont = pygame.font.SysFont("monospace", 14)
         aifont = pygame.font.SysFont("monospace", 14)
         x_pos = 20
@@ -105,6 +113,10 @@ class Scoreboard(object):
                 label = aifont.render(key, 1, (255, 255, 255))
                 self.ScreenSurface.blit(label, (x_pos2, y_pos))
                 x_pos2 += 120
+
+        # Draw turn count
+        label = aifont.render("Turn " + str(turn_number) + " of " + str(turn_count), 1, (255, 255, 255))
+        self.ScreenSurface.blit(label, (x_pos, 20 * (2 + len(self.ai)) ))
 
         pygame.display.flip()
 
