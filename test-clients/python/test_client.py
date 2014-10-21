@@ -30,26 +30,28 @@ def setActions(members, value):
         myroom = value["map"][m["location"]]
         act["person_id"] = m["person_id"]
         if "action" not in act:
-            if m["fatigue"] > 50:
-                act["action"] = "sleep"
-            elif m["hunger"] > 75:
+            if m["hunger"] > 75:
                 if "FOOD" in myroom["resources"]:
                     act["action"] = "eat"
                 else:
-                    act["action"] = "view"
+                    act["action"] = "move"
+                    act["room"] = random.choice(myroom["connectedRooms"])
             elif m["stats"]["spy"] == 10:
-                if random.random() > .5:
+                canspy = False
+                for person in myroom["peopleInRoom"]:
+                    if person not in members:
+                        canspy = True
+                        break
+                if canspy:
                     act["action"] = "spy"
                 else:
-                    act["action"] = "move"
-                    act["room"] = random.choice(myroom["connectedRooms"])
+                   act["action"] = "theorize"
             elif m["stats"]["theorize"] == 10:
-                if random.random() > .5:
-                    act["action"] = "distract"
-                    act["victim"] = m["person_id"]
-                else:
-                    act["action"] = "move"
-                    act["room"] = random.choice(myroom["connectedRooms"])
+                act["action"] = "theorize"
+                act["type"] = "test"
+            elif m["stats"]["test"] == 10:
+                act["action"] = "code"
+                act["type"] = "test"
             else:
                 act["action"] = "code"
                 act["type"] = "implement"
@@ -65,7 +67,7 @@ if __name__ == "__main__":
         PORT = 8080
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
-    s.sendall(dson.dumps(json.loads('{"team":"test", "members":[{"name":"test1", "archetype":"Theorist"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Informant"}]}'))+'\n')
+    s.sendall(dson.dumps(json.loads('{"team":"test", "members":[{"name":"test1", "archetype":"Coder"},{"name":"test2", "archetype":"Architect"},{"name":"test3", "archetype":"Informant"}]}'))+'\n')
     data = s.recv(1024)
     game_running = True
     members = None
