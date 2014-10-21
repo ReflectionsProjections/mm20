@@ -16,24 +16,6 @@ constants = config.handle_constants.retrieveConstants("serverDefaults")
 vis_constants = config.handle_constants.retrieveConstants("visualizerDefaults")
 parameters = None
 
-## A simple logger that writes things to a file and, if enabled, to the
-## visualizer
-class FileLogger(object):
-    def __init__(self, fileName):
-        self.file = fileName
-        self.vis = False
-        self.score = False
-
-    ## The function that logs will be sent to
-    # @param stuff
-    #   The stuff to be printed
-    def print_stuff(self, stuff):
-        with open(self.file, 'a') as f:
-            f.write(stuff + '\n')
-        if self.vis:
-            self.vis.turn(stuff)
-        if self.score:
-            self.score.turn(stuff)
 
 class Scoreboard(object):
     def __init__(self, url=None):
@@ -125,23 +107,30 @@ def parse_args():
     return args
 
 
-parameters = parse_args()
-json_file = open(parameters.log)
-map_cache_str = "map.cache"
+def main():
+    parameters = parse_args()
+    json_file = open(parameters.log)
+    map_cache_str = "map.cache"
 
-if os.path.isfile(map_cache_str) and parameters.cached_map:
-        with open(map_cache_str, 'r') as f:
-            rooms = pickle.load(f)
-else: 
-    rooms = game.Game(parameters.map, 60).rooms
+    if os.path.isfile(map_cache_str) and parameters.cached_map:
+            with open(map_cache_str, 'r') as f:
+                rooms = pickle.load(f)
+    else: 
+        rooms = game.Game(parameters.map, 60).rooms
 
 
-score = Scoreboard(parameters.scoreboard_url)
-vis = vis.visualizer.Visualizer(rooms, parameters.mapOverlay, debug=parameters.debug_view)
-for i, turn_str in enumerate(json_file):
-    turn = json.loads(turn_str)
-    vis.turn(turn_str)
-    turn.append(60 * 24)
-    turn.append(i)
-    score.turn(json.dumps(turn))
-score.stop()
+    if parameters.scoreboard:
+        score = Scoreboard(parameters.scoreboard_url)
+    v = vis.visualizer.Visualizer(rooms, parameters.mapOverlay, debug=parameters.debug_view)
+    for i, turn_str in enumerate(json_file):
+        turn = json.loads(turn_str)
+        v.turn(turn_str)
+        turn.append(60 * 24)
+        turn.append(i)
+        if parameters.scoreboard:
+            score.turn(json.dumps(turn))
+    if parameters.scoreboard:
+        score.stop()
+
+if __name__ == "__main__":
+    main()

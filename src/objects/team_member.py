@@ -266,10 +266,10 @@ class TeamMember(object):
     def getEffectiveness(self):
         effective = 1.0
         if self.hunger > TeamMember.effectiveness_drops:
-            effective -= 0.5 * (100 - self.hunger) /\
+            effective += -0.5 + 0.5 * (100 - self.hunger) /\
                 (100 - TeamMember.effectiveness_drops)
         if self.fatigue > TeamMember.effectiveness_drops:
-            effective -= 0.5 * (100 - self.fatigue) /\
+            effective += -0.5 + 0.5 * (100 - self.fatigue) /\
                 (100 - TeamMember.effectiveness_drops)
         return effective
 
@@ -322,6 +322,7 @@ class TeamMember(object):
             if timetoremovefatigue > 12.0:
                 timetoremovefatigue = 12.0
             self.fatigue -= 100.0 / (timetoremovefatigue * self.ticks_in_hour)
+            self.fatigue = max(self.fatigue, 0.0)
             if self.hunger > 100:
                 self.hunger = 100.0
                 self.asleep = False
@@ -340,13 +341,13 @@ class TestTeamMember(unittest.TestCase):
         self.testRoom.stand = [(4,8), (4,7), (4,6)]
         self.testTeam = TestTeamMember.PseudoTeam()
         self.testMember = TeamMember("Joe", "Coder", self.testRoom,
-                                     self.testTeam, 0)
+                                     self.testTeam, 0, 60)
 
     def testInitCorrect(self):
         testRoom = room.Room("testRoom")
         testRoom.stand = [(4,8), (4,7), (4,6)]
         testTeam = TestTeamMember.PseudoTeam()
-        testMember = TeamMember("Joe", "Coder", testRoom, testTeam, 0)
+        testMember = TeamMember("Joe", "Coder", testRoom, testTeam, 0, 60)
         self.assertEqual(testMember.name, "Joe")
         self.assertEqual(testMember.archetype, "Coder")
         self.assertEqual(testMember.stats, TeamMember.Archetypes["Coder"])
@@ -367,13 +368,13 @@ class TestTeamMember(unittest.TestCase):
         testRoom = room.Room("testRoom")
         testTeam = TestTeamMember.PseudoTeam()
         with self.assertRaises(KeyError):
-            TeamMember("Joe", "NotAnArchetype", testRoom, testTeam, 0)
+            TeamMember("Joe", "NotAnArchetype", testRoom, testTeam, 0, 60)
 
     def testInitNotAName(self):
         testRoom = room.Room("testRoom")
         testTeam = TestTeamMember.PseudoTeam()
         with self.assertRaises(KeyError):
-            TeamMember(None, "NotAnArchetype", testRoom, testTeam, 0)
+            TeamMember(None, "NotAnArchetype", testRoom, testTeam, 0, 60)
 
     def testValidMove(self):
         roomTwo = room.Room("testRoomTwo")
@@ -400,7 +401,7 @@ class TestTeamMember(unittest.TestCase):
         self.testMember.eat()
         self.assertEqual(self.testMember.hunger,
                         (100.0 - 10.0 *
-                            (100.0 / (8.0 * self.ticks_in_hour))))
+                            (100.0 / (8.0 * 60))))
 
     def testEatNoFood(self):
         with self.assertRaises(client_action.ActionError):
@@ -413,31 +414,6 @@ class TestTeamMember(unittest.TestCase):
         self.testRoom.connectToRoom(roomTwo)
         with self.assertRaises(client_action.ActionError):
             self.testMember.move(roomTwo)
-
-    @unittest.skip("Not yet implemented")
-    def testCode(self):
-        # TODO
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testTheorize(self):
-        # TODO
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testWake(self):
-        # TODO
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testDistract(self):
-        # TODO
-        self.assertTrue(False)
-
-    @unittest.skip("Not yet implemented")
-    def testUpdate(self):
-        # TODO
-        self.assertTrue(False)
 
     def testTooHungry(self):
         self.testMember.hunger = 100

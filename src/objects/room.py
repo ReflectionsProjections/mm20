@@ -160,7 +160,7 @@ class TestRoom(unittest.TestCase):
         self.room = Room("testRoom")
         self.room.chairs = [(1,1), (2,2), (3,3)]
         self.room.stand = [(4,4), (5,5), (6,6)]
-        self.team_member = TeamMember("Joe", "Coder", self.room, None, 0)
+        self.team_member = TeamMember("Joe", "Coder", self.room, None, 0, 60)
 
     def testInitCorrect(self):
         room = Room("testRoom")
@@ -227,9 +227,9 @@ class TestRoom(unittest.TestCase):
     def testRoomFull(self):
         from objects.team_member import TeamMember
         for i in range(1, len(self.room.chairs + self.room.stand)):
-            TeamMember(str(i), "Coder", self.room, None, i)
+            TeamMember(str(i), "Coder", self.room, None, i, 60)
         with self.assertRaises(client_action.ActionError):
-            TeamMember("Jim", "Coder", self.room, None, 18)
+            TeamMember("Jim", "Coder", self.room, None, 18, 60)
 
     def testSit(self):
         self.room.sitDown(self.team_member)
@@ -238,7 +238,7 @@ class TestRoom(unittest.TestCase):
     def testSitNoChairs(self):
         from objects.team_member import TeamMember
         for i in range(1, len(self.room.chairs + self.room.stand)):
-            newmem = TeamMember(str(i), "Coder", self.room, None, i)
+            newmem = TeamMember(str(i), "Coder", self.room, None, i, 60)
             self.room.sitDown(newmem)
         self.room.sitDown(self.team_member)
         self.assertFalse(self.team_member.sitting)

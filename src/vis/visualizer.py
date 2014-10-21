@@ -40,6 +40,8 @@ class Visualizer(object):
         self.game_result = None
         self.debug = kwargs.get("debug", False)
         self.rooms = rooms
+        for r in self.rooms.itervalues():
+            r.people = set()
         self.quitWhenDone = self.constants['QUIT_WHEN_DONE']
         self.scaleMod = (1,1)
         self.Animations = {}
@@ -450,8 +452,8 @@ class Visualizer(object):
                     elif message["reason"] == "DISTRACTED":
                         self.people[message["person_id"]].isDistracted = True
                         self.people[message["person_id"]].sentNoAction = False
-                    else:
-                        self.people[message["person_id"]].isDistracted = False
+                    # else:
+                    #     self.people[message["person_id"]].isDistracted = False
 
             for person in player["people"].values():
                 if person["team"] == i:

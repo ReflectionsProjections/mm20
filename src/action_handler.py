@@ -60,21 +60,6 @@ class TestActionHandler(unittest.TestCase):
     def setUp(self):
         pass
 
-    ## Test that the sortActions() function correctly sorts the actions.
-    @unittest.skip("Needs updating")
-    def testSortAction(self):
-        act1 = objects.client_action.Action("spy", {"target": 'pseudoTarget', "person_id": 12}, 0)
-        act2 = objects.client_action.Action("wake", {"target": 'pseudoTarget', "person_id": 12}, 0)
-        act3 = objects.client_action.Action("eat", {"target": 'pseudoTarget', "person_id": 12}, 0)
-        act1.priority = 0
-        act2.priority = 50
-        act3.priority = 100
-        pseudoBuffer = [act1, act2, act3]
-        sortActions(pseudoBuffer)
-        self.assertEquals(pseudoBuffer[0], act3)
-        self.assertEquals(pseudoBuffer[1], act2)
-        self.assertEquals(pseudoBuffer[2], act1)
-
     ## Tests that the bufferAction function correctly adds
     #  an action to the buffer.
     def testBufferAction(self):
@@ -85,11 +70,6 @@ class TestActionHandler(unittest.TestCase):
         bufferAction(pseudoBuffer, pseudoAction, {"target": 'pseudoTarget', "person_id": 12}, 0)
         self.assertFalse(not pseudoBuffer)
         self.assertEquals(pseudoBuffer[0].action, validActions[0])
-
-    ## Test that handleTurn returns the correct list of responses.
-    @unittest.skip("Not yet implemented")
-    def testHandleTurn(self):
-        self.assertTrue(True)
 
 if __name__ == "__main__":
     # Run all of the test cases in this file
