@@ -1,6 +1,6 @@
 import pygame
+import dson
 from config.handle_constants import retrieveConstants
-import json
 import random
 import time
 import Queue
@@ -106,7 +106,6 @@ class Visualizer(object):
                     self.availableConnections[endPt].append(startPt)
 
     def run_from_file(self, file_name=""):
-
         # Load game log
         json_file = None
         try:
@@ -203,7 +202,7 @@ class Visualizer(object):
         return ([], [])
 
     def turn(self, turn=None):
-        while self.running and self.update_state(json.loads(turn)):
+        while self.running and self.update_state(dson.loads(turn)):
 
             # Get paths
             for p in self.people:

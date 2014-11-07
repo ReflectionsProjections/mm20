@@ -12,6 +12,7 @@ import sys
 import select
 import socket
 import time
+import dson
 import json
 import game
 
@@ -115,7 +116,7 @@ class MMServer( object ):
                     if turnObjects[player] is None and "\n" in recval[player]:
                         data = recval[player].split("\n")[0]
                         try:
-                            jsonObject = json.loads(data)
+                            jsonObject = dson.loads(data)
                         except ValueError, TypeError:
                             jsonObject = {}
                             validJson = False
@@ -126,12 +127,12 @@ class MMServer( object ):
                                 validTurns = validTurns+1
                             else:
                                 try:
-                                    connection.sendall(json.dumps(response, ensure_ascii=True)+"\n")
+                                    connection.sendall(dson.dumps(response, ensure_ascii=True)+"\n")
                                 except IOError:
                                     pass
                         else:
                             try:
-                                connection.sendall(json.dumps(json.loads('{ "status": "Failure", "errors" : ["Not valid JSON"], "team_name": false }'), ensure_ascii=True)+"\n")
+                                connection.sendall(dson.dumps(json.loads('{ "status": "Failure", "errors" : ["Not valid DSON"], "team_name": false }'), ensure_ascii=True)+"\n")
                             except IOError:
                                 pass
             if validTurns == self.maxPlayers:
@@ -141,11 +142,11 @@ class MMServer( object ):
                 #Return turn info back to the clients
                 for i in range(0, self.maxPlayers):
                     try:
-                        playerConnections[i].sendall(json.dumps(turnObjects[i], ensure_ascii=True)+"\n")
+                        playerConnections[i].sendall(dson.dumps(turnObjects[i], ensure_ascii=True)+"\n")
                     except IOError:
                         pass
             currTime = time.time()
-        self.logger.print_stuff(json.dumps(turnObjects))
+        self.logger.print_stuff(dson.dumps(turnObjects))
         validTurns = 0
         for i in range(0, self.maxPlayers):
             turnObjects[i]=None
@@ -178,11 +179,11 @@ class MMServer( object ):
                         continue
                     if turnObjects[player] is None and "\n" in recval[player]:
                         try:
-                            turnObjects[player] = json.loads(recval[player])
+                            turnObjects[player] = dson.loads(recval[player])
                             validTurns = validTurns+1
                         except ValueError, TypeError:
                             turnObjects[player] = {}
-                            errors[player] = ["Invalid JSON"]
+                            errors[player] = ["Invalid DSON"]
                             validTurns = validTurns+1
             if validTurns == self.maxPlayers:
                 #Send turns to engine
@@ -203,11 +204,11 @@ class MMServer( object ):
                                 data["errors"] = errors[i]
                             player_data_for_turn[i] = data
                             playerConnections[i].sendall(
-                                json.dumps(player_data_for_turn[i], ensure_ascii = True) + "\n")
+                                dson.dumps(player_data_for_turn[i], ensure_ascii = True) + "\n")
                         except IOError:
                             pass
                 #log what infomation is sent to the clients
-                self.logger.print_stuff(json.dumps(player_data_for_turn))
+                self.logger.print_stuff(dson.dumps(player_data_for_turn))
 
                 #clear turn objects
                 validTurns = 0
